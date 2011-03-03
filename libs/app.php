@@ -2,7 +2,7 @@
 
 class app {
 
-  private static $config = array();
+  public static $config = array();
   
   private static $conversions = array(
     // Group of one or more digits

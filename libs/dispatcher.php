@@ -43,7 +43,7 @@ class dispatcher {
     $method = array_shift($parts);
 
     $controller = ($controller !== NULL && $controller !== "") ? $controller : $config['default_controller'];
-    $method = $method !== NULL ? $method : 'index';
+    $method = ($method !== NULL && $method !== "") ? $method : 'index';
 
     // Load the $controller's $method, passing in $parts as the parameters.
     app::dispatchRequest($controller, $method, $parts);
