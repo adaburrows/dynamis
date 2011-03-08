@@ -12,7 +12,7 @@ class app {
     // Group of one or more of the following: -_a-zA-Z0-9
     '/\/:id/'   => '((\/?)[-_a-zA-Z0-9]+(\/?))',
     // Zero or more groups of one or more of the following: -_a-zA-Z0-9=
-    '/\/:opt/'  => '(((\/?)[-_a-zA-Z0-9=]+(\/?))*)'
+    '/\/:opt/'  => '(((\/?)[-_a-zA-Z0-9=:]+(\/?))*)'
   );
   
   private static $status_codes = array(
