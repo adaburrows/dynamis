@@ -16,8 +16,8 @@ class layout {
    * Accepts a key value array in the form of:
    *   array( 'slot_name' => 'view_name' )
    */
-  public static function setSlots ($views) {
-    self::$slots = array_merge(self::$slots, $views);
+  public static function setSlots ($views = array()) {
+    self::$slots = array_merge($views, self::$slots);
   }
 
   /*
