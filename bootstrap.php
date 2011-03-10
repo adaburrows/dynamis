@@ -16,7 +16,7 @@ app::setStartTime($start_time);
 $core = array('controller');
 // Load core classes that all classes extend
 foreach($core as $class) {
-  if (file_exists(APPPATH."core/$class".EXT;)) {
+  if (file_exists(APPPATH."core/$class".EXT)) {
     require_once APPPATH."core/$class".EXT;
   } else {
     require_once BASEPATH."core/$class".EXT;
