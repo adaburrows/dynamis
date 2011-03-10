@@ -372,13 +372,13 @@ class app {
          * TODO: any hooks for additional processing before calling the controller's method
          */
 
-        foreach ($args as $arg) {
+/*        foreach ($args as $arg) {
           $split = explode(':', $arg);
           if (count($split) == 2) {
             self::$named_params[$split[0]] = $split[1];
           }
         }
-
+*/
         ob_start(); // Buffer the controller output
         // We have more than enough parameters for the method, dispatch.
         self::$controller_data = call_user_func_array(array($app_controller,$method), $args);
