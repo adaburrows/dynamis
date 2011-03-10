@@ -2,6 +2,8 @@
 
 class app {
 
+  public static $named_params = array();
+
   public static $config = array();
   
   private static $conversions = array(
@@ -265,6 +267,13 @@ class app {
     $params = $params !== NULL ? $params : '';
     $params = is_array($params) ? implode('/', $params) : $params;
     $params = $params === '' ? '' : $params;
+
+    foreach ($params as $arg) {
+      $split = explode(':', $arg);
+      if (count($split) == 2) {
+        self::$named_params[$split[0]] = $split[1];
+      }
+    }
 
     // Set the default mapped route
     $mapped_route = '/';
