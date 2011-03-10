@@ -268,13 +268,6 @@ class app {
     $params = is_array($params) ? implode('/', $params) : $params;
     $params = $params === '' ? '' : $params;
 
-    foreach ($params as $arg) {
-      $split = explode(':', $arg);
-      if (count($split) == 2) {
-        self::$named_params[$split[0]] = $split[1];
-      }
-    }
-
     // Set the default mapped route
     $mapped_route = '/';
     // Get the route variable place holders
@@ -378,6 +371,13 @@ class app {
         /*
          * TODO: any hooks for additional processing before calling the controller's method
          */
+
+        foreach ($args as $arg) {
+          $split = explode(':', $arg);
+          if (count($split) == 2) {
+            self::$named_params[$split[0]] = $split[1];
+          }
+        }
 
         ob_start(); // Buffer the controller output
         // We have more than enough parameters for the method, dispatch.
