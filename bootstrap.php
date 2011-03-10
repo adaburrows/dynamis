@@ -12,6 +12,17 @@ require_once BASEPATH.'libs/layout'.EXT;
 require_once BASEPATH.'libs/app'.EXT;
 app::setStartTime($start_time);
 
+// Core libraries to load
+$core = array('controller');
+// Load core classes that all classes extend
+foreach($core as $class) {
+  if (file_exists(APPPATH."core/$class".EXT;)) {
+    require_once APPPATH."core/$class".EXT;
+  } else {
+    require_once BASEPATH."core/$class".EXT;
+  }
+}
+
 // Setup defaults for application 
 require_once APPPATH.'init'.EXT;
 require_once APPPATH.'routes'.EXT;
