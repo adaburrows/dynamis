@@ -429,15 +429,30 @@ ERROR;
       break;
 
     case E_USER_WARNING:
-      $error = "<b>WARNING</b> [$errno] $errstr<br />\n";
+      $error = <<<ERROR
+<b>WARNING</b> [$errno] $errstr<br />\n
+Fatal error on line $errline in file $errfile\n:
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
+ERROR;
+      $error .= serialize($errcontext);
       break;
 
     case E_USER_NOTICE:
-      $error = "<b>NOTICE</b> [$errno] $errstr<br />\n";
+      $error = <<<ERROR
+<b>NOTICE</b> [$errno] $errstr<br />\n
+Fatal error on line $errline in file $errfile\n:
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
+ERROR;
+      $error .= serialize($errcontext);
       break;
 
     default:
-      $error = "Unknown error type: [$errno] $errstr<br />\n";
+      $error = <<<ERROR
+<b>ERROR</b> [$errno] $errstr<br />\n
+Fatal error on line $errline in file $errfile\n:
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
+ERROR;
+      $error .= serialize($errcontext);
       break;
     }
     
@@ -555,18 +570,18 @@ ERROR;
 
     if ($num_pages > 0) {
       if ($page > 0): ?>
-        <a href="<? echo site_url(array(self::$request_controller, self::$request_method, '/'.$prev.$params)); ?>" style="clear:both;">Previous&nbsp;&lt;&lt;&nbsp;</a>
+        <a href="<? echo site_url(array(self::$request_controller, self::$request_method, $prev.$params)); ?>" style="clear:both;">Previous&nbsp;&lt;&lt;&nbsp;</a>
       <? endif;
       for ($i = 0; $i <= $num_pages; $i++) {
         $page_num = $i + 1;
         if ($i == $page) {
           echo "<span>$page_num</span>";
         } else {
-          echo '<span><a href="'.site_url(array(self::$request_controller, self::$request_method, '/'.$i.$params)).'">'.$page_num.'</a>&nbsp</span>';
+          echo '<span><a href="'.site_url(array(self::$request_controller, self::$request_method, $i.$params)).'">'.$page_num.'</a>&nbsp</span>';
         }
       }
       if ($page < $num_pages): ?>
-        <a href="<? echo site_url(array(self::$request_controller, self::$request_method, '/'.$next.$params)); ?>" style="clear:both;">&nbsp&gt;&gt;&nbsp;Next</a>
+        <a href="<? echo site_url(array(self::$request_controller, self::$request_method, $next.$params)); ?>" style="clear:both;">&nbsp&gt;&gt;&nbsp;Next</a>
       <? endif;
     }
   }
