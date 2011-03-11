@@ -285,7 +285,7 @@ class app {
       // replace placeholders with empty space
       $temp = preg_replace($placeholders, '', $map);
       // append params to the end
-      $mapped_route = $temp.$params;
+      $mapped_route = "$temp/$params";
     } else {
     // If not, just return the full path
       $mapped_route = "$controller/$method/$params";
