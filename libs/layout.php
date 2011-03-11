@@ -118,7 +118,7 @@ class layout {
   }
 
   public static function setData ($data) {
-    self::$data = $data;
+    self::$data = array_merge($data, self::$data);
   }
 
   /*
