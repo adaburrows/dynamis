@@ -17,7 +17,7 @@ class layout {
    *   array( 'slot_name' => 'view_name' )
    */
   public static function setSlots ($views = array()) {
-    self::$slots = array_merge($views, self::$slots);
+    self::$slots = array_merge(self::$slots, $views);
   }
 
   /*
@@ -118,7 +118,7 @@ class layout {
   }
 
   public static function setData ($data) {
-    self::$data = array_merge($data, self::$data);
+    self::$data = array_merge(self::$data, $data);
   }
 
   /*
