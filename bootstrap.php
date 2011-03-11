@@ -12,6 +12,13 @@ require_once BASEPATH.'libs/layout'.EXT;
 require_once BASEPATH.'libs/app'.EXT;
 app::setStartTime($start_time);
 
+// Setup defaults for application 
+require_once APPPATH.'init'.EXT;
+require_once APPPATH.'routes'.EXT;
+
+// Start the session
+session_start();
+
 // Core libraries to load
 $core = array('controller');
 // Load core classes that all classes extend
@@ -22,10 +29,6 @@ foreach($core as $class) {
     require_once BASEPATH."core/$class".EXT;
   }
 }
-
-// Setup defaults for application 
-require_once APPPATH.'init'.EXT;
-require_once APPPATH.'routes'.EXT;
 
 // Start the app by dispatching the route
 require_once BASEPATH.'libs/dispatcher'.EXT;

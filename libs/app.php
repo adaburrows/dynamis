@@ -365,9 +365,6 @@ class app {
           'content' => self::$request_controller."/".self::$request_method
         ));
 
-        // Start the session
-        session_start();
-
         /*
          * TODO: any hooks for additional processing before calling the controller's method
          */
