@@ -20,7 +20,7 @@ require_once APPPATH.'routes'.EXT;
 session_start();
 
 // Core libraries to load
-$core = array('controller');
+$core = array('controller', 'db');
 // Load core classes that all classes extend
 foreach($core as $class) {
   if (file_exists(APPPATH."core/$class".EXT)) {
