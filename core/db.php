@@ -2,11 +2,11 @@
 
 class db {
  
-  protected $aspects;
-  protected $join_on;
-  protected $default_fields;
-  protected $insert_defaults;
-  protected $update_defaults;
+  protected $aspects = array();
+  protected $join_on = array();
+  protected $default_fields = array();
+  protected $insert_defaults = array();
+  protected $update_defaults = array();
 
   public function __construct() {
     $this->default_fields = array ( 'created', 'modified' );
