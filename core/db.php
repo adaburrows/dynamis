@@ -4,6 +4,7 @@ class db {
  
   protected $aspects;
   protected $join_on;
+  protected $default_fields;
   protected $insert_defaults;
   protected $update_defaults;
 
