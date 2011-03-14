@@ -74,6 +74,8 @@ class db {
       $query_parts[] = implode(' ', $joins);
     }
     $query = implode(" ", $query_parts);
+
+    print_r($query);
     return $query;
   }
 
@@ -98,6 +100,8 @@ class db {
     }
     $query .= implode(',', $values);
     $query .= ");";
+
+    print_r($query);
     return $query;
   }
 
@@ -114,6 +118,8 @@ class db {
     }
     $query .= implode(',', $statements);
     $query .= " WHERE `id` = '{$data['id']}';";
+
+    print_r($query);
     return $query;
   }
 
