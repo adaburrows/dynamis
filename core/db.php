@@ -20,7 +20,7 @@ class db {
   }
 
   protected function build_select($aspect = NULL) {
-    $verb = 'SELECT ';
+    $verb = 'SELECT';
     $fields = array();
     $from = '';
     $joins = NULL;
@@ -33,7 +33,7 @@ class db {
         $fields[] = "`$field`";
       }
       // Set table to select from
-      $from = "`$aspect`";
+      $from = "$aspect";
 
     } else {
       // We have joins for multiple tables (all aspects)
