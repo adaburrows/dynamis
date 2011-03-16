@@ -96,7 +96,11 @@ class db {
     foreach ($data as $k => $v) {
       if (in_array($k, $field_list)){
         $value = mysql_real_escape_string($v);
-        $values[] = "'$value'";
+        if(is_integer($v) || in_array($k, $this->default_fields)) {
+          $values[] = "$value";
+        } else {
+          $values[] = "'$value'";
+        }
       }
     }
     $query .= implode(',', $values);
@@ -114,7 +118,11 @@ class db {
     foreach ($data as $k => $v) {
       if (in_array($k, $field_list)){
         $value = mysql_real_escape_string($v);
-        $statements[] = "`$k`='$value'";
+        if(is_integer($v) || in_array($k, $this->default_fields)) {
+          $statements[] = "`$k`=$value";
+        } else {
+          $statements[] = "`$k`='$value'";
+        }
       }
     }
     $query .= implode(',', $statements);
