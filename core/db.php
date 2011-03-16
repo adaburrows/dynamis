@@ -28,9 +28,9 @@ class db {
 
     // if we're selecting from only one aspect, there will be no joins
     if ($aspect != NULL) {
-
+      $fields = array_merge($this->aspects[$aspect], $this->default_fields);
       // prepare fields by wrapping them in back ticks
-      foreach ($this->aspects[$aspect] as $field) {
+      foreach ($fields as $field) {
         $fields[] = "`$field`";
       }
       // Set table to select from
@@ -39,9 +39,17 @@ class db {
     } else {
       // We have joins for multiple tables (all aspects)
 
+      // Get the primary aspect -- first item in ordered hash
+      $aspect_list = array_keys($this->aspects);
+      $primary_aspect = array_shift($aspect_list);
+
       foreach ($this->aspects as $aspect => $aspect_fields) {
+        $iter_fields = $aspect_fields;
+        // Add default fields to primary aspect
+        if ($aspect == $primary_aspect)
+          $iter_fields = array_merge($iter_fields, $this->default_fields);
         // Add aspect name to list of tables being used
-        foreach ($aspect_fields as $field) {
+        foreach ($iter_fields as $field) {
           // Prepare fields for selection in a join.
           $fields[] = "`$aspect`.`$field`";
         }
