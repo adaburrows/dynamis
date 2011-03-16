@@ -159,6 +159,10 @@ class layout {
   public static function render() {
     global $config;
     $layout_data = array();
+    foreach (array('title', 'keywords', 'description') as $data_field) {
+      if (isset(self::$data[$data_field]))
+        $layout_data[$data_field] = self::$data[$data_field];
+    }
     $layout_data['css'] = self::buildStyleTags();
     $layout_data['scripts'] = self::buildScriptTags();
     foreach (self::$slots as $slot => $view) {
