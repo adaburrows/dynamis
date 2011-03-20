@@ -420,38 +420,34 @@ class app {
 
     switch ($errno) {
     case E_USER_ERROR:
-      $error = <<<ERROR
+      $error = "
 <b>ERROR</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
-ERROR;
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
       $error .= serialize($errcontext);
       break;
 
     case E_USER_WARNING:
-      $error = <<<ERROR
+      $error = "
 <b>WARNING</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
-ERROR;
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
       $error .= serialize($errcontext);
       break;
 
     case E_USER_NOTICE:
-      $error = <<<ERROR
+      $error = "
 <b>NOTICE</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
-ERROR;
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
       $error .= serialize($errcontext);
       break;
 
     default:
-      $error = <<<ERROR
+      $error = "
 <b>ERROR</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n
-ERROR;
+\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
       $error .= serialize($errcontext);
       break;
     }
