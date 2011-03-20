@@ -570,8 +570,8 @@ ERROR;
 
     if ($num_pages > 0) {
       if ($page > 0): ?>
-        <a href="<? echo site_url(array(self::$request_controller, self::$request_method, $prev.$params)); ?>" style="clear:both;">Previous&nbsp;&lt;&lt;&nbsp;</a>
-      <? endif;
+        <a href="<?php echo site_url(array(self::$request_controller, self::$request_method, $prev.$params)); ?>" style="clear:both;">Previous&nbsp;&lt;&lt;&nbsp;</a>
+      <?php endif;
       for ($i = 0; $i <= $num_pages; $i++) {
         $page_num = $i + 1;
         if ($i == $page) {
@@ -581,8 +581,8 @@ ERROR;
         }
       }
       if ($page < $num_pages): ?>
-        <a href="<? echo site_url(array(self::$request_controller, self::$request_method, $next.$params)); ?>" style="clear:both;">&nbsp&gt;&gt;&nbsp;Next</a>
-      <? endif;
+        <a href="<?php echo site_url(array(self::$request_controller, self::$request_method, $next.$params)); ?>" style="clear:both;">&nbsp&gt;&gt;&nbsp;Next</a>
+      <?php endif;
     }
   }
 
