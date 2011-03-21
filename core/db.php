@@ -206,7 +206,7 @@ class db {
       $temp = array();
       foreach ($this->stat as $aspect => $params) {
         for ($i = 0; $i <= $total_days; $i++) {
-          $temp[$aspect][] = $stats["{$aspect}_{$i}"]
+          $temp[$aspect][] = $stats["{$aspect}_{$i}"];
         }
       }
       $data[] = $temp;
