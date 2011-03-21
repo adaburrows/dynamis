@@ -3,10 +3,14 @@
 class db {
  
   protected $aspects = array();
+  protected $aliases;
   protected $join_on = array();
   protected $default_fields = array();
   protected $insert_defaults = array();
   protected $update_defaults = array();
+  protected $stat = array();
+  protected $primary_aspect;
+  protected $primary_key;
 
   public function __construct() {
     $this->default_fields = array ( 'created', 'modified' );
@@ -138,6 +142,76 @@ class db {
 
     print_r($query);
     return $query;
+  }
+
+  /*
+   * Prepares individual statements
+   * Expects classes that derive from this implement the comparison functions
+   *   that return a SQL comparison "verb predicate" (eg. ' > NOW()').
+   */
+  protected function prepare_stat_subqueries($total_days) {
+    $statements = array();
+    foreach ($this->stat as $aspect => $params) {
+      foreach ($params as $function => $comparison_key) {
+        for ($i = 0; $i <= $total_days; $i++) {
+          $statements[$aspect][] = "SELECT `{$this->primary_key}`, COUNT(`{$this->primary_key}`) AS `{$i}` FROM `{$aspect}` WHERE `$comparison_key`" . $this->$function($i)." GROUP BY `{$this->primary_key}`";
+        }
+      }
+    }
+    return $statements;
+  }
+
+  /*
+   * Builds entire stat query and returns it.
+   */
+  public function build_stat_query($total_days) {
+    // Get the primary aspect -- first item in ordered hash
+    $aspect_list = array_keys($this->aspects);
+    $this->primary_aspect = array_shift($aspect_list);
+    $this->primary_key = $this->aspects[$this->primary_aspect][0];
+
+    $verb             = 'SELECT';
+    $stat_selections  = array("\n  `{$this->primary_aspect}`.`{$this->primary_key}` AS `{$this->primary_key}`");
+    $stat_joins       = array("`{$this->primary_aspect}`");
+    $query_parts      = array();
+    $query            = '';
+
+    $stat_statements  = $this->prepare_stat_subqueries($total_days);
+    foreach ($stat_statements as $aspect => $stat_subqueries) {
+      foreach ($stat_subqueries as $i => $stat_subquery) {
+        $stat_selections[]  = "\n  COALESCE(`{$aspect}_table_{$i}`.`{$i}`, 0) AS `{$aspect}_{$i}`";
+        $stat_join          = "\n  ( $stat_subquery ) AS `{$aspect}_table_{$i}`".
+          "\n  ON `{$aspect}_table_{$i}`.`{$this->primary_key}` = `{$this->primary_aspect}`.`{$this->primary_key}`";
+        $stat_joins[] = $stat_join;
+      }
+    }
+    $query_parts[] = $verb;
+    $query_parts[] = implode(', ', $stat_selections);
+    $query_parts[] = "\nFROM";
+    $query_parts[] = implode("\nLEFT OUTER JOIN", $stat_joins);
+    $query_parts[] = "\nORDER BY `{$this->primary_aspect}`.`{$this->primary_key}`;";
+    $query = implode(' ', $query_parts);
+    return $query;
+  }
+
+  /*
+   * Builds + executes stat queries, parses results into the following format:
+   *  $data[$aspect] = array($data_elements);
+   */
+  public function get_stats($total_days) {
+    $query = $this->build_stat_query($total_days);
+    $result = app::query_array($query);
+    $data = array();
+    foreach ($result as $i => $stats) {
+      $temp = array();
+      foreach ($this->stat as $aspect => $params) {
+        for ($i = 0; $i <= $total_days; $i++) {
+          $temp[$aspect][] = $stats["{$aspect}_{$i}"]
+        }
+      }
+      $data[] = $temp;
+    }
+    return $data;
   }
 
 }
