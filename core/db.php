@@ -203,7 +203,7 @@ class db {
     $result = app::query_array($query);
     $data = array();
     foreach ($result as $i => $stats) {
-      $temp = array();
+      $temp = array($this->primary_key => $stats[$this->primary_key]);
       foreach ($this->stat as $aspect => $params) {
         for ($i = 0; $i <= $total_days; $i++) {
           $temp[$aspect][] = $stats["{$aspect}_{$i}"];
