@@ -158,27 +158,39 @@ class layout {
 
   public static function render() {
     global $config;
-    $layout_data = array();
-    foreach (array('title', 'keywords', 'description') as $data_field) {
-      if (isset(self::$data[$data_field]))
-        $layout_data[$data_field] = self::$data[$data_field];
+
+    // Get request type
+    $request_type = app::getReqType();
+    // Render output based on request type
+    switch ($request_type) {
+      // It's a json request
+      case 'json':
+        self::$ob = json_encode(self::$data);
+        break;
+      // The default is the full layout and html
+      default:
+        $layout_data = array();
+        foreach (array('title', 'keywords', 'description') as $data_field) {
+          if (isset(self::$data[$data_field]))
+            $layout_data[$data_field] = self::$data[$data_field];
+        }
+        $layout_data['css'] = self::buildStyleTags();
+        $layout_data['scripts'] = self::buildScriptTags();
+        foreach (self::$slots as $slot => $view) {
+          $layout_data[$slot] = self::view($view, self::$data, true);
+        }
+        extract($layout_data);
+        $layout = self::$layout === NULL ? $config['default_layout'] : self::$layout;
+        if (is_file(APPPATH."layouts/$layout".EXT)) {
+          ob_start();
+          include(APPPATH."layouts/$layout".EXT);
+          self::$temp_ob = ob_get_contents();
+          ob_end_clean();
+        } else {
+          throw new Exception("Error: Could not find layout $layout in: ".APPPATH."layouts/$layout".EXT);
+        }
+        self::$ob = self::$temp_ob;
     }
-    $layout_data['css'] = self::buildStyleTags();
-    $layout_data['scripts'] = self::buildScriptTags();
-    foreach (self::$slots as $slot => $view) {
-      $layout_data[$slot] = self::view($view, self::$data, true);
-    }
-    extract($layout_data);
-    $layout = self::$layout === NULL ? $config['default_layout'] : self::$layout;
-    if (is_file(APPPATH."layouts/$layout".EXT)) {
-      ob_start();
-      include(APPPATH."layouts/$layout".EXT);
-      self::$temp_ob = ob_get_contents();
-      ob_end_clean();
-    } else {
-      throw new Exception("Error: Could not find layout $layout in: ".APPPATH."layouts/$layout".EXT);
-    }
-    self::$ob = self::$temp_ob;
     return self::$ob;
   }
 
