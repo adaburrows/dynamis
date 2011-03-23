@@ -490,8 +490,8 @@ ERROR;
     echo layout::render();
     // Output the random shit from the controller
     // **Should probably just write this to a log **
-    //echo "\n<!--\n".self::$controller_output."\n-->";
-    //echo "\n<!-- Generated in ".self::getElapsedTime()." seconds. -->";
+    echo "\n<!--\n".self::$controller_output."\n-->";
+    echo "\n<!-- Generated in ".self::getElapsedTime()." seconds. -->";
   }  
 /*
  * Methods for dealing with the database.
