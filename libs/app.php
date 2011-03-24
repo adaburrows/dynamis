@@ -464,13 +464,25 @@ Fatal error on line $errline in file $errfile\n:
    * Application wide exception handler
    */
   public static function exception_handler(Exception $e) {
-    $error = <<<ERROR
+    try {
+      $error = <<<ERROR
 <pre>
 <b>Uncaught Exception Code {$e->getCode()}:</b> {$e->getMessage()}\n
 On line {$e->getLine()} in {$e->getFile()}:\n
 {$e->getTraceAsString()}
 </pre>
 ERROR;
+
+    } catch (Exception e) {
+      $error = <<<ERROR
+<pre>
+<b>Uncaught Exception Code {$e->getCode()}:</b> {$e->getMessage()}\n
+On line {$e->getLine()} in {$e->getFile()}:\n
+{$e->getTraceAsString()}
+</pre>
+ERROR;
+      
+    }
     self::$error_messages[] = $error; 
   }
 
