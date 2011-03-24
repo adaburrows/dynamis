@@ -472,8 +472,8 @@ On line {$e->getLine()} in {$e->getFile()}:\n
 {$e->getTraceAsString()}
 </pre>
 ERROR;
-
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       $error = <<<ERROR
 <pre>
 <b>Uncaught Exception Code {$e->getCode()}:</b> {$e->getMessage()}\n
@@ -481,7 +481,6 @@ On line {$e->getLine()} in {$e->getFile()}:\n
 {$e->getTraceAsString()}
 </pre>
 ERROR;
-      
     }
     self::$error_messages[] = $error; 
   }
