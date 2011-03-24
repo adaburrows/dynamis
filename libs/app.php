@@ -465,22 +465,20 @@ Fatal error on line $errline in file $errfile\n:
    */
   public static function exception_handler(Exception $e) {
     try {
-      $error = <<<ERROR
+      $error = "
 <pre>
 <b>Uncaught Exception Code {$e->getCode()}:</b> {$e->getMessage()}\n
 On line {$e->getLine()} in {$e->getFile()}:\n
 {$e->getTraceAsString()}
-</pre>
-ERROR;
+</pre>";
     }
     catch (Exception e) {
-      $error = <<<ERROR
+      $error = "
 <pre>
 <b>Uncaught Exception Code {$e->getCode()}:</b> {$e->getMessage()}\n
 On line {$e->getLine()} in {$e->getFile()}:\n
 {$e->getTraceAsString()}
-</pre>
-ERROR;
+</pre>";
     }
     self::$error_messages[] = $error; 
   }
