@@ -165,6 +165,7 @@ class layout {
     switch ($request_type) {
       // It's a json request
       case 'json':
+	header('Content-Type: application/json');
         self::$ob = json_encode(self::$data);
         break;
       // The default is the full layout and html
