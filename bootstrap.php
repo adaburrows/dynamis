@@ -4,6 +4,9 @@ $start_time = microtime(true);
 
 // Require the application configuration file
 require_once APPPATH.'config'.EXT;
+if(!isset($config['default_request_type'])){
+  $config['default_request_type'] = 'html';
+}
 
 // Require libraries
 require_once BASEPATH.'database'.EXT;

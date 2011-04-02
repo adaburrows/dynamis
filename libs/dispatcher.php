@@ -33,7 +33,7 @@ class dispatcher {
     }
 
     // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
-    $type = isset($_GET['ext']) ? $_GET['ext'] : "html";
+    $type = isset($_GET['ext']) ? $_GET['ext'] : $config['default_request_type'];
     app::setReqType($type);
 
     $parts = app::routeMapper($route);
