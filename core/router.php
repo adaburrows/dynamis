@@ -5,6 +5,8 @@ class router {
   private static $request_type = "";
   private static $request_controller = "";
   private static $request_method = "";
+  private static $controller_data = array();
+  private static $controller_output = "";
 
   private static $conversions = array(
     // Group of one or more digits

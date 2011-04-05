@@ -98,9 +98,6 @@ class app {
 
   private static $error_messages = array();
 
-  private static $controller_data = array();
-  private static $controller_output = "";
-
   private static $start_time;
 
   // private constructor, this is a purely static class
