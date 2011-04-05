@@ -1,9 +1,7 @@
 <?php
-/* ============================================================================
- * Bootstrap file
- * --------------
- * Loads all the required files for the app to work and gives it a slight kick! 
- * ============================================================================
+/* Subquery
+ * Subquery is meant to be a database class for doing joins on virtual tables.
+ *==============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
  *
@@ -37,48 +35,6 @@
  * Use at your own peril! J/K
  * 
  */
+class subquery extends db {
 
-// Require the application configuration file
-require_once APPPATH.'config'.EXT;
-if(!isset($config['default_request_type'])){
-  $config['default_request_type'] = 'html';
 }
-if (!isset($config['timezone'])) {
-  $config['timezone'] = 'America/Los_Angeles';
-}
-
-// Set up time
-date_default_timezone_set($config['timezone']);
-$start_time = microtime(true);
-
-// Include global utility functions
-require_once BASEPATH.'utilities'.EXT;
-
-// Setup extra init tasks if file exists
-if(file_exists(APPPATH.'init'.EXT)) {
-  require_once APPPATH.'init'.EXT;
-}
-
-// Core libraries to load
-$core = array('controller', 'db', 'layout', 'app', 'router');
-// Load core classes that all classes extend
-foreach($core as $class) {
-  if (file_exists(APPPATH."core/$class".EXT)) {
-    require_once APPPATH."core/$class".EXT;
-  } else {
-    require_once BASEPATH."core/$class".EXT;
-  }
-}
-
-// Setup routes for application 
-require_once APPPATH.'routes'.EXT;
-
-// Connect to database
-if(isset($config['use_database']) && $config['use_database'] == true) {
-  db::connect();
-}
-
-app::setStartTime($start_time);
-
-// Start the app by dispatching the route
-require_once BASEPATH.'core/dispatcher'.EXT;

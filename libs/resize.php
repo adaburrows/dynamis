@@ -1,6 +1,6 @@
 <?php
 
-   # ========================================================================#
+   /* ========================================================================#
    #
    #  Author:    Jarrod Oberto
    #  Version:	 1.0
@@ -14,7 +14,13 @@
    #                     $resizeObj -> saveImage('images/cars/large/output.jpg', 100);
    #
    #
-   # ========================================================================#
+   # ========================================================================*/
+/*
+ * Modified by Jillian Ada Burrows.
+ *
+ * Altered to work within the dynamos framework.
+ * See documentation for usage.
+ */
 
 
 		Class resize

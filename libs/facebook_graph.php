@@ -27,11 +27,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *------------------------------------------------------------------------------
- * Original Author:		Jillian Ada Burrows
- * Email:			jill@adaburrows.com
- * Website:			<http://www.adaburrows.com>
- * Facebook:			<http://www.facebook.com/jillian.burrows>
- * Twitter:			@jburrows
+ * Original Author: Jillian Ada Burrows
+ * Email:           jill@adaburrows.com
+ * Website:         <http://www.adaburrows.com>
+ * Github:          <http://github.com/jburrows>
+ * Facebook:        <http://www.facebook.com/jillian.burrows>
+ * Twitter:         @jburrows
  *------------------------------------------------------------------------------
  * Use at your own peril! J/K
  * 

@@ -1,8 +1,9 @@
 <?php
 /* ============================================================================
- * Bootstrap file
- * --------------
- * Loads all the required files for the app to work and gives it a slight kick! 
+ * class dispatcher;
+ * -----------------
+ * This class kicks everything off by dispatching the url route to the right
+ * controllers. 
  * ============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
@@ -38,47 +39,48 @@
  * 
  */
 
-// Require the application configuration file
-require_once APPPATH.'config'.EXT;
-if(!isset($config['default_request_type'])){
-  $config['default_request_type'] = 'html';
-}
-if (!isset($config['timezone'])) {
-  $config['timezone'] = 'America/Los_Angeles';
-}
+class dispatcher {
 
-// Set up time
-date_default_timezone_set($config['timezone']);
-$start_time = microtime(true);
+  // Keep track of the controller class
+  private $app_controller;
 
-// Include global utility functions
-require_once BASEPATH.'utilities'.EXT;
+  // Construct the class and get the app in motion
+  public function __construct() {
+    // Set the global error handler
+    set_error_handler( array('app', 'error_handler') );
+    // Set the global exception handler
+    set_exception_handler( array('app', 'exception_handler') );
+    // Set the global shutdown handler
+    register_shutdown_function( array('app', 'shutdown_handler') );
 
-// Setup extra init tasks if file exists
-if(file_exists(APPPATH.'init'.EXT)) {
-  require_once APPPATH.'init'.EXT;
-}
+    global $config;	// We need access to the config array
+    app::setConfig($config);
 
-// Core libraries to load
-$core = array('controller', 'db', 'layout', 'app', 'router');
-// Load core classes that all classes extend
-foreach($core as $class) {
-  if (file_exists(APPPATH."core/$class".EXT)) {
-    require_once APPPATH."core/$class".EXT;
-  } else {
-    require_once BASEPATH."core/$class".EXT;
+    $route = "";	// Used to store the route
+    $parts = array();	// Used to store the parts of the route
+
+    // Check if a route is set and get its parts
+    if (isset($_GET['route'])) {
+      $route = $_GET['route'];
+    }
+
+    // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
+    $type = isset($_GET['ext']) ? $_GET['ext'] : $config['default_request_type'];
+    router::setReqType($type);
+
+    $parts = router::map($route);
+    
+    // Get the controller off the array
+    $controller = array_shift($parts);
+    $method = array_shift($parts);
+
+    $controller = ($controller !== NULL && $controller !== "") ? $controller : $config['default_controller'];
+    $method = ($method !== NULL && $method !== "") ? $method : 'index';
+
+    // Load the $controller's $method, passing in $parts as the parameters.
+    router::dispatch($controller, $method, $parts);
   }
+
 }
 
-// Setup routes for application 
-require_once APPPATH.'routes'.EXT;
-
-// Connect to database
-if(isset($config['use_database']) && $config['use_database'] == true) {
-  db::connect();
-}
-
-app::setStartTime($start_time);
-
-// Start the app by dispatching the route
-require_once BASEPATH.'core/dispatcher'.EXT;
+$δύναμις = new dispatcher();
