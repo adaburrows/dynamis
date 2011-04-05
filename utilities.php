@@ -7,7 +7,7 @@
 function site_url($url) {
 global $config;
   if (is_array($url))
-    $url = app::mapRoute($url);
+    $url = router::unmap($url);
   return($config['site_base'].$url);
 }
 
