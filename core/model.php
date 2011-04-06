@@ -1,6 +1,6 @@
 <?php
 /* Model:
- * Currently a stub, intending to create a class all 
+ * Currently a stub, intending to create a class all models derive from
  *==============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
