@@ -45,7 +45,7 @@ class layout {
   private static $js = array();
   private static $slots = array();
   private static $data = array();
-  private static $text  ='';
+  private static $text  ="";
   private static $ob = "";
   private static $temp_ob ="";
 
