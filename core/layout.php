@@ -209,7 +209,7 @@ class layout {
       // It's a text request
       case 'text':
         header('Content-Type: plain/text');
-        self::$ob = json_encode(self::$data);
+        self::$ob = self::$data;
         break;
       // The default is the full layout and html
       default:
