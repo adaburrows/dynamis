@@ -43,6 +43,7 @@ class router {
   private static $request_method = "";
   private static $controller_data = array();
   private static $controller_output = "";
+  public static $named_params = array();
 
   private static $conversions = array(
     // Group of one or more digits
