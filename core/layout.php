@@ -208,7 +208,7 @@ class layout {
         break;
       // It's a text request
       case 'text':
-        header('Content-Type: plain/text');
+        header('Content-Type: text/plain');
         self::$ob = self::$data;
         break;
       // The default is the full layout and html
