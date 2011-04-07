@@ -133,24 +133,26 @@ class db {
    * Prints paging in a paged view.
    */
   public static function paginate ($page = 0, $show = 10, $params = '') {
+    $request_controller = router::getController();
+    $request_method = router::getMethod();
     $prev = $page-1;
     $next = $page+1;
     $num_pages = intval(self::$db_num_results/$show);
 
     if ($num_pages > 0) {
       if ($page > 0): ?>
-        <a href="<?php echo site_url(array(router::$request_controller, router::$request_method, $prev.$params)); ?>" style="clear:both;">Previous&nbsp;&lt;&lt;&nbsp;</a>
+        <a href="<?php echo site_url(array($request_controller, $request_method, $prev.$params)); ?>" style="clear:both;">Previous&nbsp;&lt;&lt;&nbsp;</a>
       <?php endif;
       for ($i = 0; $i <= $num_pages; $i++) {
         $page_num = $i + 1;
         if ($i == $page) {
           echo "<span>$page_num</span>";
         } else {
-          echo '<span><a href="'.site_url(array(router::$request_controller, router::$request_method, $i.$params)).'">'.$page_num.'</a>&nbsp</span>';
+          echo '<span><a href="'.site_url(array($request_controller, $request_method, $i.$params)).'">'.$page_num.'</a>&nbsp</span>';
         }
       }
       if ($page < $num_pages): ?>
-        <a href="<?php echo site_url(array(router::$request_controller, router::$request_method, $next.$params)); ?>" style="clear:both;">&nbsp&gt;&gt;&nbsp;Next</a>
+        <a href="<?php echo site_url(array($request_controller, $request_method, $next.$params)); ?>" style="clear:both;">&nbsp&gt;&gt;&nbsp;Next</a>
       <?php endif;
     }
   }
