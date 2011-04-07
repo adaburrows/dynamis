@@ -205,6 +205,11 @@ class layout {
         header('Content-Type: application/json');
         self::$ob = json_encode(self::$data);
         break;
+      // It's a text request
+      case 'text':
+        header('Content-Type: plain/text');
+        self::$ob = json_encode(self::$data);
+        break;
       // The default is the full layout and html
       default:
         $layout_data = array();
