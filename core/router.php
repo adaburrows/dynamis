@@ -105,6 +105,7 @@ class router {
 
         // Set the data for the view.
         layout::setData(self::$controller_data);
+        layout::setText(self::$controller_output);
 
       } else {
         // Error, need more params

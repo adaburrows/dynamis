@@ -45,6 +45,7 @@ class layout {
   private static $js = array();
   private static $slots = array();
   private static $data = array();
+  private static $text  ='';
   private static $ob = "";
   private static $temp_ob ="";
 
@@ -159,6 +160,10 @@ class layout {
     self::$data = array_merge(self::$data, $data);
   }
 
+  public static function setText ($text) {
+    self::$text = $text;
+  }
+  
   /*
    * Methods for loading views.
    * ==========================================================================
@@ -208,7 +213,7 @@ class layout {
         break;
       // It's a text request
       case 'text':
-        $content = self::$data['content'];
+        $content = self::$text;
         header('Content-Type: text/plain');
         header('Content-Length: ' . strlen($content));
         self::$ob = $content;
