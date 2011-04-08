@@ -30,6 +30,7 @@ function normalize_url($url) {
  * checks to see if a number is in the right form to be phone number
  */
 function isPhoneNumber($number) {
+  $number = trim($number);
   return (preg_match('/^((\+)?[0-9]( |-)?)?(\(?[0-9]{3}\)?|[0-9]{3})( |-)?([0-9]{3}( |-)?[0-9]{4})$/', $number));
 }
 
@@ -45,7 +46,12 @@ function formatPhoneNumber($number) {
  * returns only digits of a phone number
  */
 function normalizePhoneNumber($number) {
-  return (preg_replace('/(\+| |-|\(|\))?/', '', $number));
+  $number = trim($number);
+  $number = preg_replace('/(\+| |-|\(|\))?/', '', $number);
+  if(strlen($number) == 11) {
+    $number = substr($number, 1);
+  }
+  return $number;
 }
 
 /**
