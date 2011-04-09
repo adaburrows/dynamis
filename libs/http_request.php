@@ -42,6 +42,10 @@ class http_request {
 	var $request;
 	//array representation of the response
 	var $response;
+  // number of blocks to read.
+  var $count;
+  // block size in bytes
+  var $bs;
 
 	function http_request() {$this->__construct();}
 
@@ -58,6 +62,10 @@ class http_request {
 		$this->request = '';
 		//array representation of the response
 		$this->response = array();
+    // set count to false --> read in all content
+    $this->count = false;
+    // set block size in bytes to 4096 to speed up reading in response
+    $this->bs = 4096;
 	}
 
 	/* explode_query
@@ -148,26 +156,26 @@ class http_request {
    * $bs specifies the block size to read: defaults to 4096 for faster reads.
    * $count specifies how many blocks to read in: by default all are read.
 	 */
-	function tx_request($count = false, $bs = 4096) {
+	function tx_request() {
 		$scheme = isset($this->request_params['scheme']) ? $this->request_params['scheme'] : '';
 		$port = isset($this->request_params['port']) ? $this->request_params['port'] : 80;
 		$fp = @fsockopen($scheme.$this->request_params['host'], $port);
 		//TODO: add better error handling than this!
 		if (!is_resource($fp)){
-			die('connection failed');
+			throw new Exception('connection failed');
 		}
 		$this->build_request();
 		if (!fputs($fp, $this->request, strlen($this->request))) {
 			fclose($fp);
-			die('request failed');
+			throw new Exception('request failed');
 		}
 		$response = '';
-    if (!$count) {
+    if (!$this->count) {
   		while (!feof($fp)){
-  			$response .= fread($fp, $bs);
+  			$response .= fread($fp, $this->bs);
   		}
     } else {
-      for ($i = 0; $i < $count; $i++) {
+      for ($i = 0; $i < $this->count; $i++) {
         $response .= fread($fp, $bs);
       }
     }
