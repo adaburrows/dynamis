@@ -144,8 +144,11 @@ class http_request {
 	 * ----------
 	 * Transceives the current request. Opens socket and submits request,
 	 * reads response, closes the connection, then return the response.
+   * 
+   * $bs specifies the block size to read: defaults to 4096 for faster reads.
+   * $count specifies how many blocks to read in: by default all are read.
 	 */
-	function tx_request() {
+	function tx_request($count = false, $bs = 4096) {
 		$scheme = isset($this->request_params['scheme']) ? $this->request_params['scheme'] : '';
 		$port = isset($this->request_params['port']) ? $this->request_params['port'] : 80;
 		$fp = @fsockopen($scheme.$this->request_params['host'], $port);
@@ -159,9 +162,15 @@ class http_request {
 			die('request failed');
 		}
 		$response = '';
-		while (!feof($fp)){
-			$response .= fread($fp, 4096);
-		}
+    if (!$count) {
+  		while (!feof($fp)){
+  			$response .= fread($fp, $bs);
+  		}
+    } else {
+      for ($i = 0; $i < $count; $i++) {
+        $response .= fread($fp, $bs);
+      }
+    }
 		fclose($fp);
 		return($response);
 	}
