@@ -40,8 +40,6 @@
 
 class app {
 
-  public static $named_params = array();
-
   public static $config = array();
   
   private static $status_codes = array(
