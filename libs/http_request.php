@@ -170,15 +170,15 @@ class http_request {
 			throw new Exception('request failed');
 		}
 		$response = '';
-    if (!$this->count) {
+    //if (!$this->count) {
   		while (!feof($fp)){
   			$response .= fread($fp, $this->bs);
   		}
-    } else {
+    /*} else {
       for ($i = 0; $i < $this->count; $i++) {
         $response .= fread($fp, $bs);
       }
-    }
+    }*/
 		fclose($fp);
 		return($response);
 	}
