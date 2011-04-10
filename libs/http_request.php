@@ -107,7 +107,7 @@ class http_request {
 			$datum = explode(": ", $header);
 			$k = rawurldecode(array_shift($datum));
 			$v = rawurldecode(array_shift($datum));
-			$data[$k] = $v;
+			$data[strtolower($k)] = $v;
 		}
 		return $data;
 	}
@@ -129,8 +129,12 @@ class http_request {
 	 * Takes the request array and turns it into a usable string.
 	 */
 	function build_request() {
-		$query = (isset($this->request_params['query_params'])) ? ('?'.$this->build_query()) : '';
-		$request  = "{$this->request_params['method']} {$this->request_params['path']}$query HTTP/1.1\r\n";
+		$query = (isset($this->request_params['query_params'])) ? ($this->build_query()) : '';
+    if($this->request_params['method'] == 'GET') {
+  		$request  = "{$this->request_params['method']} {$this->request_params['path']}?$query HTTP/1.1\r\n";
+    } else {
+  		$request  = "{$this->request_params['method']} {$this->request_params['path']} HTTP/1.1\r\n";
+    }
 		$request .= "Host: {$this->request_params['host']}\r\n";
 		$request .= "Connection: Close\r\n";
 		if ($this->request_params['method'] == 'POST') {
@@ -142,7 +146,7 @@ class http_request {
 		}
 		$request .= "\r\n";
 		if (isset($this->request_params['body'])) {
-			$request .= $this->request_params['body'];
+			$request .= $query."\r\n".$this->request_params['body'];
 		}
 		$request .= "\r\n";
 		$this->request = $request;
@@ -170,18 +174,30 @@ class http_request {
 			throw new Exception('request failed');
 		}
 		$response = '';
-    //if (!$this->count) {
+    if (!$this->count) {
   		while (!feof($fp)){
   			$response .= fread($fp, $this->bs);
   		}
-    /*} else {
+    } else {
       for ($i = 0; $i < $this->count; $i++) {
         $response .= fread($fp, $bs);
       }
-    }*/
-		fclose($fp);
+    }
 		return($response);
 	}
+
+	/* unchunk
+	 * -------
+	 * Takes chunky data and composes it.
+	 */
+	function unchunk($chunky_data) {
+    $data = '';
+    $chunks = explode("\r\n", $chunky_data);
+    for($i = 1; $i < count($chunks); $i = $i + 2) {
+       $data .= $chunks[$i];
+    }
+    return $data;
+  }
 
 	/* parse_response
 	 * --------------
@@ -189,19 +205,27 @@ class http_request {
 	 * it's components for easy digestion.
 	 */
 	function parse_response($response) {
-		$r = explode("\r\n", $response);
+		$parts = explode("\r\n\r\n", $response);
+    $header = $parts[0];
+    $headers = explode("\r\n", $header);
+    $headers = $this->explode_headers($headers);
+    $message = $parts[1];
 
-		$status = array_shift($r);
+		$status = array_shift($headers);
 		$status = explode(" ", $status);
 		$protocol = array_shift($status);
 		$protocol = explode('/', $protocol);
+		$this->response['headers'] = $headers;
 
 		$this->response['status'] = array_shift($status);
 		$this->response['reason'] = array_shift($status);
 		$this->response['protocol'] = array_shift($protocol);
 		$this->response['protocol_version'] = array_shift($protocol);
-		$this->response['body'] = array_pop($r);
-		$this->response['headers'] = $this->explode_headers($r);
+
+    if(isset($headers['transfer-encoding']) && $headers['transfer-encoding'] == 'chunked') {
+      $message = $this->unchunk($message);
+    }
+		$this->response['body'] = $message;
 
 		return $this->response['status'];
 	}
