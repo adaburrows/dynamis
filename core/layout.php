@@ -110,7 +110,7 @@ class layout {
     $style_tags = "";
     foreach (self::$css as $style) {
       if (isset($style['file'])) {
-        $style_tags .= '<link rel="stylesheet" type="text/css" href="'.site_url($style['file']).'" />'."\n";
+        $style_tags .= '<link rel="stylesheet" type="text/css" href="'.$style['file'].'" />'."\n";
       } else if (isset($style['css'])) {
         $style_tags .= '<style type="text/css">' . $style['css'] . '</script>'."\n";
       }
