@@ -220,13 +220,18 @@ class app {
    public static function getClassesInDir($directory) {
      self::$classes = array();
      $dir = opendir($directory);
+     print_r($dir);
      if($dir) {
        while (false !== ($file = readdir($dir))) {
+         print_r($file);
          if (is_file($file) == 'file') {
            $file_parts = explode('.', $file);
+           print_r($file_parts);
            $extension = array_pop($file_parts);
+           print_r($extension);
            if($extension == EXT) {
              $classname = array_shift($file_parts);
+             print_r($classname);
              try {
                $this->_load_class($classname, $directory, self::$classes);
              } catch (Exception $e) {
