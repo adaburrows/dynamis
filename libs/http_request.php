@@ -249,8 +249,47 @@ class http_request {
 	 * Fetches the data from the reponse
 	 */
 	function get_data() {
-		//TODO: make this return null when not set
-		return $this->response['body'];
+		return isset($this->response['body']) ? $this->response['body'] : NULL;
+	}
+
+	/* get_status
+	 * ----------
+	 * Fetches the reponse status
+	 */
+	function get_status() {
+		return isset($this->response['status']) ? $this->response['status'] : NULL;
+	}
+
+	/* get_reason
+	 * ----------
+	 * Fetches the reason for the status
+	 */
+	function get_reason() {
+		return isset($this->response['reason']) ? $this->response['reason'] : NULL;
+	}
+
+	/* get_headers
+	 * -----------
+	 * Fetches the headers from the reponse
+	 */
+	function get_headers() {
+		return isset($this->response['headers']) ? $this->response['headers'] : NULL;
+	}
+
+	/* get_protocol
+	 * ------------
+	 * Fetches the protocol given by the server
+	 */
+	function get_protocol() {
+		return isset($this->response['protocol']) ? $this->response['protocol'] : NULL;
+	}
+
+	/* get_protocol_version()
+	 * ----------------------
+	 * Fetches the data from the reponse
+	 */
+	function get_protocol_version() {
+		return isset($this->response['protocol_version']) ? $this->response['protocol_version'] : NULL;
 	}
 
 }
