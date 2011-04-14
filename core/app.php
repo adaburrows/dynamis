@@ -222,7 +222,9 @@ class app {
      $dir = opendir($directory);
      if($dir) {
        while (false !== ($file = readdir($dir))) {
-         if (is_file($directory."/$file")) {
+         $path = $directory."/$file";
+         print_r($path);
+         if (is_file($path)) {
            $file_parts = explode('.', $file);
            $extension = array_pop($file_parts);
            $classname = array_shift($file_parts);
