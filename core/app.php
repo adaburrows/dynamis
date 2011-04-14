@@ -220,11 +220,9 @@ class app {
    public static function getClassesInDir($directory) {
      self::$classes = array();
      $dir = opendir($directory);
-     print_r($dir);
      if($dir) {
        while (false !== ($file = readdir($dir))) {
-         print_r($file);
-         if (is_file($file) == 'file') {
+         if (is_file($file)) {
            $file_parts = explode('.', $file);
            print_r($file_parts);
            $extension = array_pop($file_parts);
