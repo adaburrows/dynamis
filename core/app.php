@@ -183,7 +183,7 @@ class app {
    * Returns a list of methods in the public, protected and private scopes
    */
    public static function getClassMethods($class_name) {
-     $reflector = new RefelctionClass($class_name);
+     $reflector = new ReflectionClass($class_name);
      $methods = array(
        'public'    => $reflector->getMethods(ReflectionMethod::IS_PUBLIC),
        'protected' => $reflector->getMethods(ReflectionMethod::IS_PROTECTED),
@@ -235,6 +235,7 @@ class app {
            }
          }
        }
+       closedir($dir);
      }
      return self::$classes;
    }
