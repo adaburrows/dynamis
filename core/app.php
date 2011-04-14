@@ -224,17 +224,13 @@ class app {
        while (false !== ($file = readdir($dir))) {
          if (is_file($file)) {
            $file_parts = explode('.', $file);
-           print_r($file_parts);
            $extension = array_pop($file_parts);
-           print_r($extension);
-           if($extension == EXT) {
-             $classname = array_shift($file_parts);
-             print_r($classname);
-             try {
-               $this->_load_class($classname, $directory, self::$classes);
-             } catch (Exception $e) {
-               // Do nothing, classes were not added to the array passed into the above function.
-             }
+           $classname = array_shift($file_parts);
+           print_r($classname);
+           try {
+             $this->_load_class($classname, $directory, self::$classes);
+           } catch (Exception $e) {
+             // Do nothing, classes were not added to the array passed into the above function.
            }
          }
        }
