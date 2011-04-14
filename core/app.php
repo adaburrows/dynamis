@@ -224,8 +224,8 @@ class app {
        while (false !== ($file = readdir($dir))) {
          $path = "$directory/$file";
          if (is_file($path)) {
-           print_r ($path);
            $file_parts = explode('.', $file);
+           print_r($file_parts);
            $extension = array_pop($file_parts);
            $classname = array_shift($file_parts);
            // This is the right type of file try it
