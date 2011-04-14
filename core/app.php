@@ -93,6 +93,8 @@ class app {
   private static $libs = array();
   private static $controllers = array();
   private static $models = array();
+  
+  private static $classes = array();
 
   private static $error_messages = array();
 
@@ -160,6 +162,82 @@ class app {
     }
     return $class_array[$class_name];
   }
+
+  /*
+   * app::getContollerMethods();
+   * ---------------------------
+   * Returns a list
+   */
+   public static function getControllerMethods() {
+     $controller_names = self::getControllers();
+     $controllers = array();
+     foreach ($controller_names as $controller) {
+       $controllers[$controller] = self::getClassMethods($controller);
+     }
+     return $controllers;
+   }
+
+  /*
+   * app::getClassMethods();
+   * -----------------------
+   * Returns a list of methods in the public, protected and private scopes
+   */
+   public static function getClassMethods($class_name) {
+     $reflector = new RefelctionClass($class_name);
+     $methods = array(
+       'public'    => $reflector->getMethods(ReflectionMethod::IS_PUBLIC),
+       'protected' => $reflector->getMethods(ReflectionMethod::IS_PROTECTED),
+       'private'   => $reflector->getMethods(ReflectionMethod::IS_PRIVATE)
+     );
+     return $methods;
+   }
+
+  /*
+   * app::getModels();
+   * -----------------
+   * Returns a list of models
+   */
+   public static function getModels() {
+     self::$models = self::getClassesInDir(APPPATH.'/models');
+     return array_keys(self::$models);
+   }
+
+  /*
+   * app::getControllers();
+   * ----------------------
+   * Returns a list of controllers
+   */
+   public static function getControllers() {
+     self::$controllers = self::getClassesInDir(APPPATH.'/controllers');
+     return array_keys(self::$controllers);
+   }
+
+  /*
+   * app::getClassesInDir();
+   * -----------------------
+   * Returns an array of classes, where the keys are the names of the instances 
+   */
+   public static function getClassesInDir($directory) {
+     self::$classes = array();
+     $dir = opendir($directory);
+     if($dir) {
+       while (false !== ($file = readdir($dir))) {
+         if (is_file($file) == 'file') {
+           $file_parts = expolde('.', $file);
+           $extension = array_pop($file_parts);
+           if($extension == EXT) {
+             $classname = array_shift($file_parts);
+             try {
+               $this->_load_class($classname, $directory, self::$classes);
+             } catch (Exception $e) {
+               // Do nothing, classes were not added to the array passed into the above function.
+             }
+           }
+         }
+       }
+     }
+     return self::$classes;
+   }
 
 
 /*
