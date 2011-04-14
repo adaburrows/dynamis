@@ -198,7 +198,7 @@ class app {
    * Returns a list of models
    */
    public static function getModels() {
-     self::$models = self::getClassesInDir(APPPATH.'/models');
+     self::$models = self::getClassesInDir(APPPATH.'models');
      return array_keys(self::$models);
    }
 
@@ -208,7 +208,7 @@ class app {
    * Returns a list of controllers
    */
    public static function getControllers() {
-     self::$controllers = self::getClassesInDir(APPPATH.'/controllers');
+     self::$controllers = self::getClassesInDir(APPPATH.'controllers');
      return array_keys(self::$controllers);
    }
 
