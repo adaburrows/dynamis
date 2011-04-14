@@ -228,7 +228,7 @@ class app {
            $classname = array_shift($file_parts);
            print_r($classname);
            try {
-             $this->_load_class($classname, $directory, self::$classes);
+             self::_load_class($classname, $directory, self::$classes);
            } catch (Exception $e) {
              // Do nothing, classes were not added to the array passed into the above function.
            }
