@@ -225,11 +225,11 @@ class app {
          $path = "$directory/$file";
          if (is_file($path)) {
            $file_parts = explode('.', $file);
-           print_r($file_parts);
            $extension = array_pop($file_parts);
            $classname = array_shift($file_parts);
            // This is the right type of file try it
            if ($extension == EXT) {
+             print_r($classname);
              try {
                self::_load_class($classname, $directory, self::$classes);
              } catch (Exception $e) {
