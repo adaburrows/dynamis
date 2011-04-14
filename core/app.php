@@ -200,7 +200,7 @@ class app {
    protected static function filterMethods($unfiltered) {
      $filtered = array();
      foreach ($unfiltered as $method) {
-       $filtered[] = $method['name'];
+       $filtered[] = $method->name;
      }
      return $filtered;
    }
