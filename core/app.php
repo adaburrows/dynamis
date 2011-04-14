@@ -219,19 +219,20 @@ class app {
    */
    public static function getClassesInDir($directory) {
      self::$classes = array();
-     print_r($directory);
      $dir = opendir($directory);
      if($dir) {
        while (false !== ($file = readdir($dir))) {
-         print_r($file);
-         if (is_file($file)) {
+         if (is_file($directory."/$file")) {
            $file_parts = explode('.', $file);
            $extension = array_pop($file_parts);
            $classname = array_shift($file_parts);
-           try {
-             self::_load_class($classname, $directory, self::$classes);
-           } catch (Exception $e) {
-             // Do nothing, classes were not added to the array passed into the above function.
+           // This is the right type of file try it
+           if ($extension == EXT) {
+             try {
+               self::_load_class($classname, $directory, self::$classes);
+             } catch (Exception $e) {
+               // Do nothing, classes were not added to the array passed into the above function.
+             }
            }
          }
        }
