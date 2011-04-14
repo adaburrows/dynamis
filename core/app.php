@@ -185,11 +185,24 @@ class app {
    public static function getClassMethods($class_name) {
      $reflector = new ReflectionClass($class_name);
      $methods = array(
-       'public'    => $reflector->getMethods(ReflectionMethod::IS_PUBLIC),
-       'protected' => $reflector->getMethods(ReflectionMethod::IS_PROTECTED),
-       'private'   => $reflector->getMethods(ReflectionMethod::IS_PRIVATE)
+       'public'    => self::filterMethods($reflector->getMethods(ReflectionMethod::IS_PUBLIC)),
+       'protected' => self::filterMethods($reflector->getMethods(ReflectionMethod::IS_PROTECTED)),
+       'private'   => self::filterMethods($reflector->getMethods(ReflectionMethod::IS_PRIVATE))
      );
      return $methods;
+   }
+
+   /*
+   * app::filterMethods();
+   * ---------------------
+   * Filters the list of methods so there is only an array of function names
+   */
+   protected static function filterMethods($unfiltered) {
+     $filtered = array();
+     foreach ($unfiltered as $method) {
+       $filtered[] = $method['name'];
+     }
+     return $filtered;
    }
 
   /*
