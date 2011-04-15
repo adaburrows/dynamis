@@ -133,13 +133,13 @@ class db {
    * Prints paging in a paged view.
    */
   public static function paginate ($page = 0, $show = 10, $params = '') {
-    $request_controller = router::getController();
-    $request_method = router::getMethod();
-    $prev = $page-1;
-    $next = $page+1;
-    $num_pages = intval(self::$db_num_results/$show);
-    $data = compact();
-    print_r($data);
+    $data = array(
+      'request_controller' => router::getController(),
+      'request_method'     => router::getMethod(),
+      'prev'               => $page-1,
+      'next'               => $page+1,
+      'num_pages'          => intval(self::$db_num_results/$show)
+    );
 
     $html = layout::view('pagination', $data, true);
     return $html;
