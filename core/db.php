@@ -136,9 +136,12 @@ class db {
     $data = array(
       'request_controller' => router::getController(),
       'request_method'     => router::getMethod(),
+      'page'               => $page,
+      'show'               => $show,
       'prev'               => $page-1,
       'next'               => $page+1,
-      'num_pages'          => intval(self::$db_num_results/$show)
+      'num_pages'          => intval(self::$db_num_results/$show),
+      'params'             => $params
     );
 
     $html = layout::view('pagination', $data, true);
