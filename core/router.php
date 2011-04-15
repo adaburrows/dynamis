@@ -140,7 +140,7 @@ class router {
    * ------------------
    * Returns the current controller of the request
    */
-  public static function getController($type) {
+  public static function getController() {
     return self::$request_controller;
   }
 
