@@ -139,6 +139,7 @@ class db {
     $next = $page+1;
     $num_pages = intval(self::$db_num_results/$show);
     $data = compact();
+    print_r($data);
 
     $html = layout::view('pagination', $data, true);
     return $html;
