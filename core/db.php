@@ -150,8 +150,8 @@ class db {
 
 
 /*
- * Non-static methods for classes direved from this class.
- * Provide the magic suace for building parts of queries.
+ * Non-static methods for classes derived from this class.
+ * Provide the magic sauce for building parts of queries.
  * ==========================================================================
  */
 
@@ -326,7 +326,7 @@ class db {
     $query_parts[] = implode(', ', $stat_selections);
     $query_parts[] = "\nFROM";
     $query_parts[] = implode("\nLEFT OUTER JOIN", $stat_joins);
-    $query_parts[] = "\nORDER BY `{$this->primary_aspect}`.`{$this->primary_key}`;";
+    $query_parts[] = "\nORDER BY `{$this->primary_aspect}`.`{$this->primary_key}`";
     $query = implode(' ', $query_parts);
     return $query;
   }
@@ -336,7 +336,7 @@ class db {
    *  $data[$aspect] = array($data_elements);
    */
   public function get_stats($total_days) {
-    $query = $this->build_stat_query($total_days);
+    $query = $this->build_stat_query($total_days).';';
     $result = self::query_array($query);
     $data = array();
     foreach ($result as $i => $stats) {
