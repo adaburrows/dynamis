@@ -335,8 +335,11 @@ class db {
    * Builds + executes stat queries, parses results into the following format:
    *  $data[$aspect] = array($data_elements);
    */
-  public function get_stats($total_days) {
-    $query = $this->build_stat_query($total_days).';';
+  public function get_stats($total_days, $additional_clause = '') {
+    if($additional_clause != '') {
+      $additional_clause = ' '.$additional_clause;
+    }
+    $query = $this->build_stat_query($total_days).$additional_clause.';';
     $result = self::query_array($query);
     $data = array();
     foreach ($result as $i => $stats) {
