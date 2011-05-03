@@ -215,20 +215,33 @@ class http_request {
     function parse_response($response) {
         $parts = explode("\r\n\r\n", $response);
         $header = $parts[0];
-        $headers = explode("\r\n", $header);
-        $headers = $this->explode_headers($headers);
         $message = $parts[1];
-print_r($headers);
-        $status = array_shift($headers);
-        $status = explode(" ", $status);
-        $protocol = array_shift($status);
-        $protocol = explode('/', $protocol);
-        $this->response['headers'] = $headers;
 
+        //Expand the lines in the header response into an array
+        $headers = explode("\r\n", $header);
+        //Get status line, since it doesn't follow the same format as the headers
+        $status = array_shift($headers);
+        //Explode into parts
+        $status = explode(" ", $status);
+        //Grab the protocol
+        $protocol = array_shift($status);
+        //Explode into parts
+        $protocol = explode('/', $protocol);
+        //Grab the status code
         $this->response['status'] = array_shift($status);
+        //Grab the reason/explaination for the code
         $this->response['reason'] = array_shift($status);
+        //Grab the actual protocol
         $this->response['protocol'] = array_shift($protocol);
+        //Grab the version of the protocol
         $this->response['protocol_version'] = array_shift($protocol);
+
+        //Finish processing the headers
+        $headers = $this->explode_headers($headers);
+
+print_r($headers);
+
+        $this->response['headers'] = $headers;
 
         if (isset($headers['transfer-encoding']) && $headers['transfer-encoding'] == 'chunked') {
             $message = $this->unchunk($message);
