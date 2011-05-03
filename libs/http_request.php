@@ -213,6 +213,7 @@ class http_request {
      */
 
     function parse_response($response) {
+print_r($response);
         $parts = explode("\r\n\r\n", $response);
         $header = $parts[0];
         $message = $parts[1];
@@ -221,6 +222,7 @@ class http_request {
         $headers = explode("\r\n", $header);
         //Get status line, since it doesn't follow the same format as the headers
         $status = array_shift($headers);
+print_r($status);
         //Explode into parts
         $status = explode(" ", $status);
         //Grab the protocol
