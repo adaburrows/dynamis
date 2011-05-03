@@ -213,7 +213,6 @@ class http_request {
      */
 
     function parse_response($response) {
-print_r($response);
         $parts = explode("\r\n\r\n", $response);
         $header = $parts[0];
         $message = $parts[1];
@@ -245,7 +244,6 @@ print_r($response);
             $message = $this->unchunk($message);
         }
         $this->response['body'] = $message;
-print_r($this->response);
 
         return $this->response['status'];
     }
@@ -258,11 +256,9 @@ print_r($this->response);
     function do_request() {
         $resp = $this->tx_request();
         $status = $this->parse_response($resp);
-        //TODO: parse response and generate error message
-        $r_stat = true;
         //Reset method to 'GET' for next call
         $this->request_params['method'] = 'GET';
-        return $r_stat;
+        return $status;
     }
 
     /* get_data
