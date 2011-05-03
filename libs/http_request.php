@@ -221,18 +221,17 @@ print_r($response);
         //Expand the lines in the header response into an array
         $headers = explode("\r\n", $header);
         //Get status line, since it doesn't follow the same format as the headers
-        $status = array_shift($headers);
-print_r($status);
+        $status_line = array_shift($headers);
         //Explode into parts
-        $status = explode(" ", $status);
+        $status_parts = explode(" ", $status_line);
         //Grab the protocol
-        $protocol = array_shift($status);
+        $protocol = array_shift($status_parts);
         //Explode into parts
         $protocol = explode('/', $protocol);
         //Grab the status code
-        $this->response['status'] = array_shift($status);
+        $this->response['status'] = array_shift($status_parts);
         //Grab the reason/explaination for the code
-        $this->response['reason'] = array_shift($status);
+        $this->response['reason'] = array_shift($status_parts);
         //Grab the actual protocol
         $this->response['protocol'] = array_shift($protocol);
         //Grab the version of the protocol
@@ -240,15 +239,13 @@ print_r($status);
 
         //Finish processing the headers
         $headers = $this->explode_headers($headers);
-
-print_r($headers);
-
         $this->response['headers'] = $headers;
 
         if (isset($headers['transfer-encoding']) && $headers['transfer-encoding'] == 'chunked') {
             $message = $this->unchunk($message);
         }
         $this->response['body'] = $message;
+print_r($this->response);
 
         return $this->response['status'];
     }
