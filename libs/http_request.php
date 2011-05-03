@@ -256,8 +256,6 @@ class http_request {
     function do_request() {
         $resp = $this->tx_request();
         $status = $this->parse_response($resp);
-print_r($this->response);
-print_r($this->response['status']);
         //Reset method to 'GET' for next call
         $this->request_params['method'] = 'GET';
         return $status;
