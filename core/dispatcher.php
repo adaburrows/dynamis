@@ -1,8 +1,8 @@
 <?php
 /* ============================================================================
- * class dispatcher;
+ * Dispatching code;
  * -----------------
- * This class kicks everything off by dispatching the url route to the right
+ * This kicks everything off by dispatching the url route to the right
  * controllers. 
  * ============================================================================
  * -- Version alpha 0.1 --
@@ -39,48 +39,33 @@
  * 
  */
 
-class dispatcher {
+// Set the global error handler
+set_error_handler( array('app', 'error_handler') );
+// Set the global exception handler
+set_exception_handler( array('app', 'exception_handler') );
+// Set the global shutdown handler
+register_shutdown_function( array('app', 'shutdown_handler') );
 
-  // Keep track of the controller class
-  private $app_controller;
+app::setConfig($config);
 
-  // Construct the class and get the app in motion
-  public function __construct() {
-    // Set the global error handler
-    set_error_handler( array('app', 'error_handler') );
-    // Set the global exception handler
-    set_exception_handler( array('app', 'exception_handler') );
-    // Set the global shutdown handler
-    register_shutdown_function( array('app', 'shutdown_handler') );
+$route = "";	// Used to store the route
+$parts = array();	// Used to store the parts of the route
 
-    global $config;	// We need access to the config array
-    app::setConfig($config);
-
-    $route = "";	// Used to store the route
-    $parts = array();	// Used to store the parts of the route
-
-    // Check if a route is set and get its parts
-    if (isset($_GET['route'])) {
-      $route = $_GET['route'];
-    }
-
-    // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
-    $type = isset($_GET['ext']) ? $_GET['ext'] : $config['default_request_type'];
-    router::setReqType($type);
-
-    $parts = router::map($route);
-    
-    // Get the controller off the array
-    $controller = array_shift($parts);
-    $method = array_shift($parts);
-
-    $controller = ($controller !== NULL && $controller !== "") ? $controller : $config['default_controller'];
-    $method = ($method !== NULL && $method !== "") ? $method : 'index';
-
-    // Load the $controller's $method, passing in $parts as the parameters.
-    router::dispatch($controller, $method, $parts);
-  }
-
+// Check if a route is set and get its parts
+if (isset($_GET['route'])) {
+  $route = $_GET['route'];
 }
+$parts = router::map($route);
+// Get the controller off the array
+$controller = array_shift($parts);
+$method = array_shift($parts);
+// If there is no specified $controller or $method use defaults
+$controller = ($controller !== NULL && $controller !== "") ? $controller : $config['default_controller'];
+$method = ($method !== NULL && $method !== "") ? $method : 'index';
 
-$δύναμις = new dispatcher();
+// Check if there's an extension on the end of the route. Used for XML & AJAX requests.
+$type = isset($_GET['ext']) ? $_GET['ext'] : $config['default_request_type'];
+router::setReqType($type);
+
+// Load the $controller's $method, passing in $parts as the parameters.
+router::dispatch($controller, $method, $parts);
