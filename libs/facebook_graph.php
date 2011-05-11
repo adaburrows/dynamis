@@ -40,133 +40,45 @@
  */
 
 // make sure we can access the http_request class
-app::getLib('http_request');
+app::getLib('OAuth2');
 
-class facebook_graph extends http_request {
+class facebook_graph extends OAuth2 {
 
-    //Facebook API domain
-    protected $fb_d;
-    //Facebook oAuth endpoint
-    protected $fb_oauth;
-    //Facebook app id
-    protected $fb_id;
-    //Facebook app key
-    protected $fb_key;
-    //Facebook app secret
-    protected $fb_secret;
-    //redirect URI (on your server)
-    protected $redirect_uri;
-    //store the token here
-    protected $token;
-
-    function __construct() {
-        //call parent constructor
-        parent::__construct();
-
-        //set up the specifics for connecting to facebook's api
-        $this->request_params['port'] = 443;
-        $this->request_params['scheme'] = 'tls://';
-        $this->request_params['host'] = $this->fb_d;
-
-        $this->fb_d = 'graph.facebook.com';
-        $this->fb_oauth = '/oauth/';
+    public function initialize() {
+        $this->user_auth = 'https://www.facebook.com/dialog/oauth';
+        $this->domain = 'graph.facebook.com';
+        $this->token_auth = 'oauth/token';
+        $this->permissions_delim = ',';
     }
 
-    function init($app_id, $app_key, $app_secret, $uri) {
-        //put the FB API keys here:
-        $this->fb_id = $app_id;
-        $this->fb_key = $app_key;
-        $this->fb_secret = $app_secret;
-        $this->redirect_uri = $uri;
-    }
-
-    /* set_redirect_uri
-     * ----------------
-     * Sets the URI that face will redirect the user to after authentication
-     */
-
-    function set_redirect_uri($uri) {
-        $this->redirect_uri = $uri;
-    }
-
-    /* auth_redirect
-     * -------------
-     * Redirects the user to the autication page if necessary.
-     * You can set the permissions you would like by passing in an array of permissions:
-     *     auth_redirect( array( 'publish_stream', 'create_event', 'rsvp_event' ) );
-     * See <http://developers.facebook.com/docs/authentication/permissions>
-     * for a full list of permissions.
-     */
-
-    function auth_redirect($permissions=null) {
-        if (!isset($_GET['code'])) {
-            $redirect_url = "https://{$this->fb_d}{$this->fb_oauth}authorize?";
-            $redirect_url .= "client_id={$this->fb_id}";
-            $redirect_url .= "&redirect_uri={$this->redirect_uri}";
-            $redirect_url .= $permissions != null ? '&' . implode(',', $permissions) : '';
-
-            http_redirect($redirect_url);
-        }
-    }
-
-    /* get_token
-     * ---------
-     * After authentication is requested this function will return true if 
-     * the access token was retreived successfully. The access token is stored
-     * in $this->token.
-     */
-
-    function get_token() {
-        $this->request_params['path'] = $this->fb_oauth . 'access_token';
-        $this->request_params['query_params'] = array(
-            'client_id' => $this->fb_id,
-            'redirect_uri' => $this->redirect_uri,
-            'client_secret' => $this->fb_secret,
-            'code' => $_GET['code']
+    private function _add_auth($data) {
+        $return = array_merge(
+            array('access_token' => $this->token),
+            $data
         );
-
-        $data = $this->do_request() ? $this->explode_query($this->get_data()) : null;
-        $access_token = isset($data['access_token']) ? $data['access_token'] : null;
-        $this->token = $access_token;
-        return $access_token != null;
+        return ($return);
     }
 
-    /* get_object
-     * ----------
-     * Requests an object's basic info from the FB social graph. Returns data
-     * as a hash with keys that match the expected values as specified at:
-     * <http://developers.facebook.com/docs/api>
-     */
-
-    function get_object($object) {
-        $this->request_params['path'] = $object;
-        $this->request_params['query_params'] = array(
-            'access_token' => $this->token
-        );
-        $object = $this->do_request() ? $this->get_data() : null;
+    private function _has_id($object) {
         if ($object != null) {
             $object = json_decode($object, true);
+            $object = $object['id'];
         }
         return $object;
     }
 
-    /* delete_object
-     * -------------
-     * Deletes an object's from the FB social graph if you have permissions.
-     * <http://developers.facebook.com/docs/api>
-     */
-
-    function delete_object($object_id) {
-        $this->request_params['method'] = 'DELETE';
-        $this->request_params['path'] = $object_id;
-        $this->request_params['query_params'] = array(
-            'access_token' => $this->token
-        );
-        $object = $this->do_request() ? $this->get_data() : null;
+    private function _has_data($object) {
         if ($object != null) {
             $object = json_decode($object, true);
         }
-        return $object;
+        return isset($object['data']) ? $object['data'] : null;
+    }
+
+    private function _has_meta($object) {
+        if ($object != null) {
+            $object = json_decode($object, true);
+        }
+        return isset($object['metadata']) ? $object['metadata'] : null;
     }
 
     /* get_connection_types
@@ -177,17 +89,19 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function get_relationships($object) {
+    public function get_relationships($object) {
+        $data = null;
         $this->request_params['path'] = $object;
         $this->request_params['query_params'] = array(
             'metadata' => 1,
             'access_token' => $this->token
         );
         $object = $this->do_request() ? $this->get_data() : null;
-        if ($object != null) {
-            $object = json_decode($object, true);
+        $meta = $this->_has_meta($object);
+        if (($meta != null) && isset($meta['connections'])) {
+            $data = $meta['connections'];
         }
-        return $object['metadata']['connections'];
+        return $meta;
     }
 
     /* get_connections
@@ -200,16 +114,9 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function get_connections($object, $relation) {
-        $this->request_params['path'] = "$object/$relation";
-        $this->request_params['query_params'] = array(
-            'access_token' => $this->token
-        );
-        $object = $this->do_request() ? $this->get_data() : null;
-        if ($object != null) {
-            $object = json_decode($object, true);
-        }
-        return isset($object['data']) ? $object['data'] : null;
+    public function get_connections($object, $relation) {
+        $object = $this->get("$object/$relation");
+        return $this->_has_data($object);
     }
 
     /* post_feed
@@ -223,19 +130,10 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function post_feed($profile_id, $message_params) {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "$profile_id/feed";
-        $this->request_params['query_params'] = array_merge(array(
-                    'access_token' => $this->token
-                        ), $message_params);
-        $this->request_params['body'] = $this->build_query($message_params);
-        $post_id = $this->do_request() ? $this->get_data() : null;
-        if ($post_id != null) {
-            $post_id = json_decode($post_id, true);
-            $post_id = $post_id['id'];
-        }
-        return $post_id;
+    public function post_feed($profile_id, $params) {
+        $body = $this->_add_auth($params);
+        $object = $this->post("$profile_id/feed", $body);
+        return $this->_has_id($object);
     }
 
     /* post_like
@@ -247,19 +145,10 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function post_like($post_id, $message_params) {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "$post_id/likes";
-        $this->request_params['query_params'] = array_merge(array(
-                    'access_token' => $this->token
-                        ), $message_params);
-        $this->request_params['body'] = '';
-        $like_id = $this->do_request() ? $this->get_data() : null;
-        if ($like_id != null) {
-            $like_id = json_decode($like_id, true);
-            $like_id = $like_id['id'];
-        }
-        return $like_id;
+    public function post_like($post_id, $params) {
+        $body = $this->_add_auth($params);
+        $object = $this->post("$post_id/likes", $body);
+        return $this->_has_id($object);
     }
 
     /* post_comment
@@ -271,19 +160,10 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function post_comment($post_id, $message_params) {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "$post_id/comments";
-        $this->request_params['query_params'] = array_merge(array(
-                    'access_token' => $this->token
-                        ), $message_params);
-        $this->request_params['body'] = $this->build_query($message_params);
-        $comment_id = $this->do_request() ? $this->get_data() : null;
-        if ($comment_id != null) {
-            $comment_id = json_decode($comment_id, true);
-            $comment_id = $comment_id['id'];
-        }
-        return $comment_id;
+    public function post_comment($post_id, $params) {
+        $body = $this->_add_auth($params);
+        $object = $this->post("$post_id/comments", $body);
+        return $this->_has_id($object);
     }
 
     /* post_note
@@ -295,19 +175,10 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function post_note($profile_id, $note_params) {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "$profile_id/notes";
-        $this->request_params['query_params'] = array_merge(array(
-                    'access_token' => $this->token
-                        ), $message_params);
-        $this->request_params['body'] = $this->build_query($message_params);
-        $note_id = $this->do_request() ? $this->get_data() : null;
-        if ($note_id != null) {
-            $note_id = json_decode($note_id, true);
-            $note_id = $note_id['id'];
-        }
-        return $note_id;
+    public function post_note($profile_id, $params) {
+        $body = $this->_add_auth($params);
+        $object = $this->post("$profile_id/notes", $body);
+        return $this->_has_id($object);
     }
 
     /* post_link
@@ -319,20 +190,10 @@ class facebook_graph extends http_request {
      * <http://developers.facebook.com/docs/api>
      */
 
-    function post_link($profile_id, $link_params) {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "$profile_id/links";
-        $this->request_params['query_params'] = array_merge(
-          array('access_token' => $this->token),
-          $message_params
-        );
-        $this->request_params['body'] = $this->build_query($message_params);
-        $link_id = $this->do_request() ? $this->get_data() : null;
-        if ($link_id != null) {
-            $link_id = json_decode($link_id, true);
-            $link_id = $link_id['id'];
-        }
-        return $link_id;
+    public function post_link($profile_id, $params) {
+        $body = $this->_add_auth($params);
+        $object = $this->post("$profile_id/links", $body);
+        return $this->_has_id($object);
     }
 
 }

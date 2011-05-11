@@ -69,9 +69,9 @@ class OAuth2 extends http_request {
         //call parent constructor
         parent::__construct();
 
-        $this->user_auth = '';//https://beta.geoloqi.com/oauth/authorize
-        $this->domain = '';//api.geoloqi.com
-        $this->api_version = '';//'/1'
+        $this->user_auth = '';
+        $this->domain = '';
+        $this->api_version = '';
         $this->permissions_delim = ' ';
 
         //set up the specifics for connecting via OAuth2
@@ -80,11 +80,19 @@ class OAuth2 extends http_request {
         $this->request_params['host'] = $this->domain;
     }
 
-    public function init($client_id, $client_secret, $uri) {
+    public function init($client_params) {
+        $defaults = array(
+          'app_id' => NULL,
+          'app_key' => NULL,
+          'app_secret' => NULL,
+          'redirect_uri' => NULL,
+        );
+        $params = array_merge($client_params, $defaults);
         //put the gl API keys here:
-        $this->app_id = $client_id;
-        $this->app_secret = $client_secret;
-        $this->redirect_uri = $uri;
+        $this->app_id = $params['app_id'];
+        $this->app_key = $params['app_key'];
+        $this->app_secret = $params['app_secret'];
+        $this->redirect_uri = $params['redirect_uri'];
     }
 
     /* set_redirect_uri
@@ -161,7 +169,7 @@ class OAuth2 extends http_request {
 
     protected function _update_token() {
         $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}/oauth/token";
+        $this->request_params['path'] = "{$this->api_version}/";
         $data = $this->do_request() ? json_decode($this->get_data()) : null;
         $access_token = isset($data['access_token']) ? $data['access_token'] : null;
         $expiration = isset($data['access_token']) ? $data['access_token'] : null;
@@ -203,9 +211,11 @@ class OAuth2 extends http_request {
      * Returns data as a hash.
      */
 
-    public function post($object) {
+    public function post($object, $post_data, $content_type = null) {
         $this->request_params['method'] = 'POST';
         $this->request_params['path'] = "{$this->api_version}/{$object}";
+        $this->request_params['body'] = $post_data;
+        $this->request_params['content-type'] = $content_type;
         $object = $this->do_request() ? $this->get_data() : null;
         if ($object != null) {
             $object = json_decode($object, true);

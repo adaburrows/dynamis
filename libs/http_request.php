@@ -143,8 +143,14 @@ class http_request {
         $request .= "Host: {$this->request_params['host']}\r\n";
         $request .= "Connection: Close\r\n";
         if ($this->request_params['method'] == 'POST') {
+            if ($this->request_params['content-type'] == null) {
+                $content_type = 'application/x-www-form-urlencoded';
+                $this->request_params['body'] = $this->build_query($this->request_params['body']);
+            } else {
+                $content_type = $this->request_params['content-type'];
+            }
             $request .= 'Content-Length: ' . strlen($this->request_params['body']) . "\r\n";
-            $request .= "Content-Type: application/x-www-form-urlencoded\r\n";
+            $request .= "Content-Type: {$content_type}\r\n";
         }
         if (isset($this->request_params['header_params'])) {
             $request .= $this->build_headers();
