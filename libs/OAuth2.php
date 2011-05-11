@@ -121,7 +121,7 @@ class OAuth2 extends http_request {
                 $redirect_url .=
                   '&scope='.implode($this->permission_delim, $permissions);
             }
-            http_redirect($redirect_url);
+            header("Location: $redirect_url");
             exit(0);
         }
     }
