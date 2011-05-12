@@ -50,6 +50,8 @@ class OAuth2 extends http_request {
     protected $domain;
     //OAuth2 Endpoint
     protected $api_version;
+    //Endpoint for token retrieval
+    protected $token_endpoint;
     //OAuth2 App ID
     protected $app_id;
     //OAuth2 App Key
@@ -61,9 +63,9 @@ class OAuth2 extends http_request {
     protected $permissions_delim;
 
     //the token info
-    protected $access_token;
-    protected $expiration;
-    protected $refresh_token;
+    public $access_token;
+    public $expiration;
+    public $refresh_token;
 
     public function __construct() {
         //call parent constructor
@@ -72,6 +74,7 @@ class OAuth2 extends http_request {
         $this->user_auth = '';
         $this->domain = '';
         $this->api_version = '';
+        $this->token_endpoint = '';
         $this->permissions_delim = ' ';
 
         //set up the specifics for connecting via OAuth2
@@ -112,11 +115,10 @@ class OAuth2 extends http_request {
      * You must see the specs for API you are trying to use.
      */
 
-    public function auth_redirect($permissions=null) {
+    public function auth_redirect($response_type = 'code', $permissions = null) {
         if (!isset($_GET['code'])) {
             $redirect_url = $this->user_auth;
-            $redirect_url .= "?client_id={$this->app_id}";
-            $redirect_url .= "&redirect_uri={$this->redirect_uri}";
+            $redirect_url .= "?response_type={$response_type}&client_id={$this->app_id}&redirect_uri={$this->redirect_uri}";
             if($permissions != null) {
                 $redirect_url .=
                   '&scope='.implode($this->permission_delim, $permissions);
@@ -169,11 +171,11 @@ class OAuth2 extends http_request {
 
     protected function _update_token() {
         $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}/";
-        $data = $this->do_request() ? json_decode($this->get_data()) : null;
+        $this->request_params['path'] = "{$this->api_version}/{$this->token_endpoint}";
+        $data = $this->do_request() ? json_decode($this->get_data(), true) : null;
         $access_token = isset($data['access_token']) ? $data['access_token'] : null;
-        $expiration = isset($data['access_token']) ? $data['access_token'] : null;
-        $refresh_token = isset($data['access_token']) ? $data['access_token'] : null;
+        $expiration = isset($data['expires_in']) ? $data['expires_in'] : null;
+        $refresh_token = isset($data['refresh_token']) ? $data['refresh_token'] : null;
         $this->access_token = $access_token;
         $this->expiration = $expiration;
         $this->refresh_token = $refresh_token;

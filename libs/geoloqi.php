@@ -47,6 +47,8 @@ class geoloqi extends OAuth2 {
         $this->user_auth = 'https://beta.geoloqi.com/oauth/authorize';
         $this->domain = 'api.geoloqi.com';
         $this->api_version = '/1';
-        $this->token_auth = 'oauth/token';
+        $this->token_endpoint = 'oauth/token';
+
+        $this->request_params['host'] = $this->domain;
     }
 }

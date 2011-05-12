@@ -143,9 +143,13 @@ class http_request {
         $request .= "Host: {$this->request_params['host']}\r\n";
         $request .= "Connection: Close\r\n";
         if ($this->request_params['method'] == 'POST') {
-            if ($this->request_params['content-type'] == null) {
+            if (empty($this->request_params['content-type'])) {
                 $content_type = 'application/x-www-form-urlencoded';
-                $this->request_params['body'] = $this->build_query($this->request_params['body']);
+                if(!empty($this->request_params['body'])) {
+                  $this->request_params['body'] = $this->build_query($this->request_params['body']);
+                } else {
+                  $this->request_params['body'] = $this->build_query($this->request_params['query_params']);
+                }
             } else {
                 $content_type = $this->request_params['content-type'];
             }
