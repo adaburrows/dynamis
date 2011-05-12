@@ -87,8 +87,8 @@ class OAuth2 extends http_request {
           'app_secret' => NULL,
           'redirect_uri' => NULL,
         );
-        $params = array_merge($client_params, $defaults);
-        //put the gl API keys here:
+        $params = array_merge($defaults, $client_params);
+        //set up all the needed app values:
         $this->app_id = $params['app_id'];
         $this->app_key = $params['app_key'];
         $this->app_secret = $params['app_secret'];
