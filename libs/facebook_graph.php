@@ -120,7 +120,7 @@ class facebook_graph extends OAuth2 {
         $this->request_params['path'] = $object;
         $this->request_params['query_params'] = array(
             'metadata' => 1,
-            'access_token' => $this->token
+            'access_token' => $this->access_token
         );
         $object = $this->do_request() ? $this->get_data() : null;
         $meta = $this->_has_meta($object);
