@@ -186,26 +186,44 @@ class OAuth2 extends http_request {
 
     /* get()
      * -----
-     * Requests an object's basic info from . Returns data
-     * as a hash with keys that match the expected values as specified at:
+     * Requests an object's basic info from the OAuth2 service.
+     * Returns returns raw text response.
      */
 
     public function get($object) {
-        $this->request_params['path'] = "{$this->api_version}/{$object}";
+        $this->request_params['path'] = "{$this->api_version}{$object}";
+        $this->request_params['query_params'] = array(
+            'access_token' => $this->access_token
+        );
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
     }
-    
+
     /* post()
      * ------
      * Posts the specified data to the object location.
-     * Returns data as a hash.
+     * Returns returns raw text response.
      */
 
-    public function post($object, $post_data, $content_type = null) {
+    public function post($object, $data, $content_type = null) {
         $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}/{$object}";
-        $this->request_params['body'] = $post_data;
+        $this->request_params['path'] = "{$this->api_version}{$object}";
+        $this->request_params['body'] = $data;
+        $this->request_params['content-type'] = $content_type;
+        $object = $this->do_request() ? $this->get_data() : null;
+        return $object;
+    }
+
+    /* put()
+     * ------
+     * Puts the specified data to the object location.
+     * Returns returns raw text response.
+     */
+
+    public function put($object, $data, $content_type = null) {
+        $this->request_params['method'] = 'PUT';
+        $this->request_params['path'] = "{$this->api_version}{$object}";
+        $this->request_params['body'] = $data;
         $this->request_params['content-type'] = $content_type;
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
@@ -214,14 +232,12 @@ class OAuth2 extends http_request {
     /* delete()
      * --------
      * Deletes an object if you have permissions.
+     * Returns returns raw text response.
      */
 
     public function delete($object) {
         $this->request_params['method'] = 'DELETE';
-        $this->request_params['path'] = "{$this->api_version}/{$object}";
-        $this->request_params['query_params'] = array(
-            'access_token' => $this->token
-        );
+        $this->request_params['path'] = "{$this->api_version}{$object}";
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
     }

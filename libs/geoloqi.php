@@ -46,7 +46,7 @@ class geoloqi extends OAuth2 {
     public function initialize() {
         $this->user_auth = 'https://beta.geoloqi.com/oauth/authorize';
         $this->domain = 'api.geoloqi.com';
-        $this->api_version = '/1';
+        $this->api_version = '/1/';
         $this->token_endpoint = 'oauth/token';
 
         $this->request_params['host'] = $this->domain;
@@ -66,7 +66,7 @@ class geoloqi extends OAuth2 {
 
     protected function _update_token() {
         $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}/{$this->token_endpoint}";
+        $this->request_params['path'] = "{$this->api_version}{$this->token_endpoint}";
         $data = $this->do_request() ? $this->get_data() : null;
         $data = json_decode($data, true);
         $access_token = isset($data['access_token']) ? $data['access_token'] : null;
