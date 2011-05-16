@@ -47,7 +47,7 @@ class facebook_graph extends OAuth2 {
     public function initialize() {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
-        $this->token_endpoint = 'oauth/token';
+        $this->token_endpoint = 'oauth/access_token';
         $this->permissions_delim = ',';
 
         $this->request_params['host'] = $this->domain;
@@ -93,13 +93,17 @@ class facebook_graph extends OAuth2 {
         $this->request_params['method'] = 'GET';
         $this->request_params['path'] = "{$this->token_endpoint}";
         $data = $this->do_request() ? $this->get_data() : null;
-        $values = array();
-        parse_str($data, $values);
-        $access_token = isset($data['access_token']) ? $data['access_token'] : null;
-        $expiration = isset($data['expires']) ? $data['expires'] : null;
-        $this->access_token = $access_token;
-        $this->expiration = $expiration;
-        $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
+        if(json_decode($data) == null) {
+            $values = array();
+            parse_str($data, $values);
+            $access_token = isset($data['access_token']) ? $data['access_token'] : null;
+            $expiration = isset($data['expires']) ? $data['expires'] : null;
+            $this->access_token = $access_token;
+            $this->expiration = $expiration;
+            $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
+        } else {
+            throw new Exception("Error in retreiving token: {$data}");
+        }
     }
 
 
