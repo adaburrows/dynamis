@@ -47,7 +47,7 @@ class facebook_graph extends OAuth2 {
     public function initialize() {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
-        $this->token_auth = 'oauth/token';
+        $this->token_endpoint = 'oauth/token';
         $this->permissions_delim = ',';
 
         $this->request_params['host'] = $this->domain;
@@ -90,8 +90,8 @@ class facebook_graph extends OAuth2 {
      */
 
     protected function _update_token() {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}/{$this->token_endpoint}";
+        $this->request_params['method'] = 'GET';
+        $this->request_params['path'] = "{$this->token_endpoint}";
         $data = $this->do_request() ? $this->get_data() : null;
         $values = array();
         parse_str($data, $values);
