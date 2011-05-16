@@ -49,6 +49,8 @@ class facebook_graph extends OAuth2 {
         $this->domain = 'graph.facebook.com';
         $this->token_auth = 'oauth/token';
         $this->permissions_delim = ',';
+
+        $this->request_params['host'] = $this->domain;
     }
 
     private function _add_auth($data) {
