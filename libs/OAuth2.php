@@ -140,7 +140,8 @@ class OAuth2 extends http_request {
             'grant_type' => 'authorization_code',
             'code' => $_GET['code'],
             'redirect_uri' => $this->redirect_uri,
-            'client_id' => $this->app_id
+            'client_id' => $this->app_id,
+            'client_secret' => $this->app_secret
         );
         $this->_update_token();
         return $this->access_token != null;
