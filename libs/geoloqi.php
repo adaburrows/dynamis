@@ -51,4 +51,32 @@ class geoloqi extends OAuth2 {
 
         $this->request_params['host'] = $this->domain;
     }
+
+    private function _has_data($object) {
+        if ($object != null) {
+            $object = json_decode($object, true);
+        }
+        return isset($object['data']) ? $object['data'] : null;
+    }
+
+    /* _update_token()
+     * ----------------
+     * Executes the oauth token endpoint and sets the proper properties
+     */
+
+    protected function _update_token() {
+        $this->request_params['method'] = 'POST';
+        $this->request_params['path'] = "{$this->api_version}/{$this->token_endpoint}";
+        $data = $this->do_request() ? $this->get_data() : null;
+        $data = json_decode($data, true);
+        $access_token = isset($data['access_token']) ? $data['access_token'] : null;
+        $expiration = isset($data['expires_in']) ? $data['expires_in'] : null;
+        $refresh_token = isset($data['refresh_token']) ? $data['refresh_token'] : null;
+        $this->access_token = $access_token;
+        $this->expiration = $expiration;
+        $this->refresh_token = $refresh_token;
+        $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
+    }
+
+
 }

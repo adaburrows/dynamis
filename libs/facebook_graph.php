@@ -81,6 +81,26 @@ class facebook_graph extends OAuth2 {
         return isset($object['metadata']) ? $object['metadata'] : null;
     }
 
+
+    /* _update_token()
+     * ----------------
+     * Executes the oauth token endpoint and sets the proper properties
+     */
+
+    protected function _update_token() {
+        $this->request_params['method'] = 'POST';
+        $this->request_params['path'] = "{$this->api_version}/{$this->token_endpoint}";
+        $data = $this->do_request() ? $this->get_data() : null;
+        $values = array();
+        parse_str($data, $values);
+        $access_token = isset($data['access_token']) ? $data['access_token'] : null;
+        $expiration = isset($data['expires']) ? $data['expires'] : null;
+        $this->access_token = $access_token;
+        $this->expiration = $expiration;
+        $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
+    }
+
+
     /* get_connection_types
      * --------------------
      * Requests an object's connection types to the FB social graph. Returns

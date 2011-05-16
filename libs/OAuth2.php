@@ -167,19 +167,11 @@ class OAuth2 extends http_request {
     /* _update_token()
      * ----------------
      * Executes the oauth token endpoint and sets the proper properties
+     *
+     * NOTE: Override this function in each implementation
      */
 
     protected function _update_token() {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}/{$this->token_endpoint}";
-        $data = $this->do_request() ? json_decode($this->get_data(), true) : null;
-        $access_token = isset($data['access_token']) ? $data['access_token'] : null;
-        $expiration = isset($data['expires_in']) ? $data['expires_in'] : null;
-        $refresh_token = isset($data['refresh_token']) ? $data['refresh_token'] : null;
-        $this->access_token = $access_token;
-        $this->expiration = $expiration;
-        $this->refresh_token = $refresh_token;
-        $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
     }
 
     /* restore_token()
@@ -201,9 +193,6 @@ class OAuth2 extends http_request {
     public function get($object) {
         $this->request_params['path'] = "{$this->api_version}/{$object}";
         $object = $this->do_request() ? $this->get_data() : null;
-        if ($object != null) {
-            $object = json_decode($object, true);
-        }
         return $object;
     }
     
@@ -219,9 +208,6 @@ class OAuth2 extends http_request {
         $this->request_params['body'] = $post_data;
         $this->request_params['content-type'] = $content_type;
         $object = $this->do_request() ? $this->get_data() : null;
-        if ($object != null) {
-            $object = json_decode($object, true);
-        }
         return $object;
     }
 
@@ -237,9 +223,6 @@ class OAuth2 extends http_request {
             'access_token' => $this->token
         );
         $object = $this->do_request() ? $this->get_data() : null;
-        if ($object != null) {
-            $object = json_decode($object, true);
-        }
         return $object;
     }
 
