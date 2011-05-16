@@ -96,8 +96,8 @@ class facebook_graph extends OAuth2 {
         if(json_decode($data) == null) {
             $values = array();
             parse_str($data, $values);
-            $access_token = isset($data['access_token']) ? $data['access_token'] : null;
-            $expiration = isset($data['expires']) ? $data['expires'] : null;
+            $access_token = isset($values['access_token']) ? $values['access_token'] : null;
+            $expiration = isset($values['expires']) ? $values['expires'] : null;
             $this->access_token = $access_token;
             $this->expiration = $expiration;
             $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
