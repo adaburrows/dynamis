@@ -161,7 +161,7 @@ class facebook_graph extends OAuth2 {
             'format' => 'JSON'
         ));
         if ($source != null) $params['source'] = $source;
-        $result = $this->old_get('fql.query', $params);
+        $result = $this->old_get('friends.getMutualFriends', $params);
         return $result;
     }
 
