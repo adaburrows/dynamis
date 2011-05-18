@@ -43,7 +43,7 @@
 app::getLib('OAuth2');
 
 class facebook_graph extends OAuth2 {
-    protected $fql_domain;
+    protected $old_domain;
 
     /* initialize
      * ----------
@@ -53,7 +53,7 @@ class facebook_graph extends OAuth2 {
     public function initialize() {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
-        $this->fql_domain = 'api.facebook.com';
+        $this->old_domain = 'api.facebook.com';
         $this->token_endpoint = 'oauth/access_token';
         $this->permissions_delim = ',';
 
@@ -120,6 +120,20 @@ class facebook_graph extends OAuth2 {
         }
     }
 
+    /* old_get
+     * -------
+     * Does a GET to an old API method
+     */
+
+    public function old_get($method, $params = array()) {
+        $this->request_params['method'] = 'GET';
+        $this->request_params['host'] = $this->old_domain;
+        $this->request_params['path'] = "/method/{$method}";
+        $this->request_params['query_params'] = $this->_add_auth($params);
+        $result = $this->do_request() ? $this->get_data() : null;
+        $this->request_params['host'] = $this->domain;
+        return json_decode($result, true);
+    }
 
     /* fql
      * ---
@@ -127,16 +141,28 @@ class facebook_graph extends OAuth2 {
      */
 
     public function fql($fql) {
-        $this->request_params['method'] = 'GET';
-        $this->request_params['host'] = $this->fql_domain;
-        $this->request_params['path'] = '/method/fql.query';
-        $this->request_params['query_params'] = $this->_add_auth(array(
+        $result = $this->old_get('fql.query', $this->_add_auth(array(
             'query' => $fql,
             'format' => 'JSON'
+        )));
+        return $result;
+    }
+
+    /* mutual_friends
+     * --------------
+     * Returns the mutual friends of the $target user and either
+     *  + the current user if, $source is not specified
+     *  + the $source user
+     */
+
+    public function mutual_friends($target, $source = null) {
+        $params = $this->_add_auth(array(
+            'target' => $target,
+            'format' => 'JSON'
         ));
-        $result = $this->do_request() ? $this->get_data() : null;
-        $this->request_params['host'] = $this->domain;
-        return json_decode($result, true);
+        if ($source != null) $params['source'] = $source;
+        $result = $this->old_get('fql.query', $params);
+        return $result;
     }
 
     /* get_connection_types
