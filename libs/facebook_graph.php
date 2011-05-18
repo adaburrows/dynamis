@@ -128,14 +128,14 @@ class facebook_graph extends OAuth2 {
 
     public function fql($fql) {
         $this->request_params['method'] = 'GET';
-        $this->request_params['domain'] = $this->fql_domain;
+        $this->request_params['host'] = $this->fql_domain;
         $this->request_params['path'] = '/method/fql.query';
         $this->request_params['query_params'] = $this->_add_auth(array(
             'query' => $fql,
             'format' => 'JSON'
         ));
         $result = $this->do_request() ? $this->get_data() : null;
-        $this->request_params['domain'] = $this->domain;
+        $this->request_params['host'] = $this->domain;
         return json_decode($result, true);
     }
 
