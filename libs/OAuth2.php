@@ -113,7 +113,7 @@ class OAuth2 extends http_request {
 
     protected function _add_auth($data) {
         $return = array_merge(
-            array('access_token' => $this->token),
+            array('access_token' => $this->access_token),
             $data
         );
         return ($return);

@@ -129,7 +129,7 @@ class facebook_graph extends OAuth2 {
     public function fql($fql) {
         $this->request_params['method'] = 'GET';
         $this->request_params['domain'] = $this->fql_domain;
-        $this->request_params['path'] = 'method/fql.query';
+        $this->request_params['path'] = '/method/fql.query';
         $this->request_params['query_params'] = $this->_add_auth(array(
             'query' => $fql,
             'format' => 'JSON'
