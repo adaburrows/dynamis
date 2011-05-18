@@ -1,7 +1,10 @@
 <?php
 
 /* OAuth2
+ * ------
  * Basic implementation of an OAuth2 base class
+ *
+ * An OAuth2 consumer wishing to store tokens must create it's own storage class.
  * ==============================================================================
  * -- Version alpha 0.1 --
  * The source code is fairly well documented, except for the base class it
@@ -83,6 +86,11 @@ class OAuth2 extends http_request {
         $this->request_params['host'] = $this->domain;
     }
 
+    /* init($client_params)
+     * --------------------
+     * Initializes needes variables for authenticating with an OAuth2 Provider.
+     */
+
     public function init($client_params) {
         $defaults = array(
           'app_id' => NULL,
@@ -96,6 +104,19 @@ class OAuth2 extends http_request {
         $this->app_key = $params['app_key'];
         $this->app_secret = $params['app_secret'];
         $this->redirect_uri = $params['redirect_uri'];
+    }
+
+    /* _add_auth
+     * ---------
+     * Adds the access_token param to requests
+     */
+
+    protected function _add_auth($data) {
+        $return = array_merge(
+            array('access_token' => $this->token),
+            $data
+        );
+        return ($return);
     }
 
     /* set_redirect_uri
@@ -190,11 +211,9 @@ class OAuth2 extends http_request {
      * Returns returns raw text response.
      */
 
-    public function get($object) {
+    public function get($object, $params = array()) {
         $this->request_params['path'] = "{$this->api_version}{$object}";
-        $this->request_params['query_params'] = array(
-            'access_token' => $this->access_token
-        );
+        $this->request_params['query_params'] = _add_auth($params);
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
     }

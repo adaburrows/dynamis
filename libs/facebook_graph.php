@@ -43,23 +43,27 @@
 app::getLib('OAuth2');
 
 class facebook_graph extends OAuth2 {
+    protected $fql_domain;
+
+    /* initialize
+     * ----------
+     * Initializes the variables required to communicate with facebook.
+     */
 
     public function initialize() {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
+        $this->fql_domain = 'api.facebook.com';
         $this->token_endpoint = 'oauth/access_token';
         $this->permissions_delim = ',';
 
         $this->request_params['host'] = $this->domain;
     }
 
-    private function _add_auth($data) {
-        $return = array_merge(
-            array('access_token' => $this->token),
-            $data
-        );
-        return ($return);
-    }
+    /* _has_id
+     * -------
+     * Determines if the resulting object has an id
+     */
 
     private function _has_id($object) {
         if ($object != null) {
@@ -69,12 +73,22 @@ class facebook_graph extends OAuth2 {
         return $object;
     }
 
+    /* _has_data
+     * ---------
+     * Determines if the resulting object has data
+     */
+
     private function _has_data($object) {
         if ($object != null) {
             $object = json_decode($object, true);
         }
         return isset($object['data']) ? $object['data'] : null;
     }
+
+    /* _has_meta
+     * ---------
+     * Determines if the resulting object has meta data.
+     */
 
     private function _has_meta($object) {
         if ($object != null) {
@@ -107,6 +121,24 @@ class facebook_graph extends OAuth2 {
     }
 
 
+    /* fql
+     * ---
+     * Runs an fql query
+     */
+
+    public function fql($fql) {
+        $this->request_params['method'] = 'GET';
+        $this->request_params['domain'] = $this->fql_domain;
+        $this->request_params['path'] = 'method/fql.query';
+        $this->request_params['query_params'] = $this->_add_auth(array(
+            'query' => $fql,
+            'format' => 'JSON'
+        ));
+        $result = $this->do_request() ? $this->get_data() : null;
+        $this->request_params['domain'] = $this->domain;
+        return json_decode($result, true);
+    }
+
     /* get_connection_types
      * --------------------
      * Requests an object's connection types to the FB social graph. Returns
@@ -117,16 +149,15 @@ class facebook_graph extends OAuth2 {
 
     public function get_relationships($object) {
         $data = null;
-        $this->request_params['path'] = $object;
-        $this->request_params['query_params'] = array(
+        $this->get($object, array(
             'metadata' => 1
-        );
-        $object = $this->do_request() ? $this->get_data() : null;
-        $meta = $this->_has_meta($object);
+        ));
+        $data = $this->do_request() ? $this->get_data() : null;
+        $meta = $this->_has_meta($data);
         if (($meta != null) && isset($meta['connections'])) {
             $data = $meta['connections'];
         }
-        return $meta;
+        return $data;
     }
 
     /* get_connections
