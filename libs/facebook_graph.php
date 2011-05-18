@@ -157,10 +157,10 @@ class facebook_graph extends OAuth2 {
 
     public function mutual_friends($target, $source = null) {
         $params = $this->_add_auth(array(
-            'target' => $target,
+            'target_uid' => $target,
             'format' => 'JSON'
         ));
-        if ($source != null) $params['source'] = $source;
+        if ($source != null) $params['source_uid'] = $source;
         $result = $this->old_get('friends.getMutualFriends', $params);
         return $result;
     }
