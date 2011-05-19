@@ -44,6 +44,7 @@ app::getLib('OAuth2');
 
 class facebook_graph extends OAuth2 {
     protected $old_domain;
+    protected $signed_request;
 
     /* initialize
      * ----------
@@ -56,8 +57,50 @@ class facebook_graph extends OAuth2 {
         $this->old_domain = 'api.facebook.com';
         $this->token_endpoint = 'oauth/access_token';
         $this->permissions_delim = ',';
-
         $this->request_params['host'] = $this->domain;
+        $this->signed_request = null;
+
+        if(!empty($_REQUEST['signed_request'])){
+            $this->parse_signed_request($_REQUEST['signed_request']);
+        }
+    }
+
+    /* parse_signed_request
+     * --------------------
+     * Parses a signed_request parameter and returns the decoded array
+     *
+     * Thank you Facebook! I ripped this off your docs and modified it
+     *   + now it's extensible if more signing algorithms become available.
+     */
+    private function parse_signed_request($signed_request) {
+        list($encoded_sig, $payload) = explode('.', $signed_request, 2);
+
+        // decode the data
+        $sig = $this->_base64_url_decode($encoded_sig);
+        $data = json_decode($this->_base64_url_decode($payload), true);
+        $algorithm = strtoupper($data['algorithm']);
+        switch($algorithm) {
+            case 'HMAC-SHA256':
+                // check sig
+                $expected_sig = hash_hmac('sha256', $payload, $this->app_secret, $raw = true);
+                if ($sig == $expected_sig) {
+                    $this->signed_request = $data;
+                } else {
+                    error_log('Bad Signed JSON signature!');
+                }
+                break;
+            default:
+                error_log('Unknown algorithm. Expected HMAC-SHA256');
+        }
+    }
+
+    /* _base64_url_decode
+     * ------------------
+     * Performs a base64 URL decoding,
+     * not to be confused with just plain base 64 (en/de)coding
+     */
+    protected function _base64_url_decode($input) {
+        return base64_decode(strtr($input, '-_', '+/'));
     }
 
     /* _has_id
@@ -143,6 +186,19 @@ class facebook_graph extends OAuth2 {
     public function fql($fql) {
         $result = $this->old_get('fql.query', $this->_add_auth(array(
             'query' => $fql,
+            'format' => 'JSON'
+        )));
+        return $result;
+    }
+
+    /* multi_fql
+     * ---
+     * Runs a multi.fql query
+     */
+
+    public function multi_fql($multi_fql_array) {
+        $result = $this->old_get('fql.multiquery', $this->_add_auth(array(
+            'query' => json_encode($multi_fql_array),
             'format' => 'JSON'
         )));
         return $result;
