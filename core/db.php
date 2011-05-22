@@ -165,6 +165,44 @@ class db {
     $this->update_defaults = array (
       'modified' => 'NOW()'
     );
+
+    // Get the primary aspect -- first item in ordered hash
+    $aspect_list = array_keys($this->aspects);
+    $this->primary_aspect = array_shift($aspect_list);
+  }
+
+  /*
+   * get_all()
+   * ---------
+   * Select everything from the model
+   */
+  public function get_all() {
+    $select = $this->build_select().';';
+    return self::query_array($select);
+  }
+
+  /*
+   * set()
+   * ---------
+   * Set the data for the model, create it if it doesn't exist
+   */
+  public function set($data) {
+    if (isset($data['id']) && $this->get_by_id($data['id'])) {
+      $query = $this->build_update($data, $this->primary_aspect);
+    } else {
+      $query = $this->build_insert($data, $this->primary_aspect);
+    }
+    $result = db::query_ins($query);
+    return $result;
+  }
+
+  /*
+   * delete()
+   * --------
+   * deletes data from the primary table in the model
+   */
+  protected function delete($id) {
+      return db::query_ins("DELETE FROM `{$this->primary_aspect}` WHERE `id` = {$id};");
   }
 
   protected function build_select($aspect = NULL) {
@@ -186,9 +224,7 @@ class db {
     } else {
       // We have joins for multiple tables (all aspects)
 
-      // Get the primary aspect -- first item in ordered hash
-      $aspect_list = array_keys($this->aspects);
-      $primary_aspect = array_shift($aspect_list);
+      $primary_aspect = $this->primary_aspect;
 
       foreach ($this->aspects as $aspect => $aspect_fields) {
         $iter_fields = $aspect_fields;
