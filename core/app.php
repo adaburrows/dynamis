@@ -227,11 +227,11 @@ class app {
     $controller = array_shift($parts);
     $method = array_shift($parts);
     // If there is no specified $controller or $method use defaults
-    $controller = ($controller !== NULL && $controller !== "") ? $controller : $config['default_controller'];
+    $controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
     $method = ($method !== NULL && $method !== "") ? $method : 'index';
 
     // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
-    $type = isset($_GET['ext']) ? $_GET['ext'] : $config['default_request_type'];
+    $type = isset($_GET['ext']) ? $_GET['ext'] : self::$config['default_request_type'];
     router::setReqType($type);
 
     // Load the $controller's $method, passing in $parts as the parameters.
