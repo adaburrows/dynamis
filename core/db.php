@@ -201,7 +201,7 @@ class db {
    * --------
    * deletes data from the primary table in the model
    */
-  protected function delete($id) {
+  public function delete($id) {
       return db::query_ins("DELETE FROM `{$this->primary_aspect}` WHERE `id` = {$id};");
   }
 
