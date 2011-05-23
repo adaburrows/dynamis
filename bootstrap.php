@@ -40,16 +40,17 @@
 
 // Require the application configuration file
 require_once APPPATH.'config'.EXT;
-if(!isset($config['default_request_type'])){
-  $config['default_request_type'] = 'html';
-}
-if (!isset($config['timezone'])) {
+if (empty($config['timezone'])) {
   $config['timezone'] = 'America/Los_Angeles';
 }
 
 // Set up time
 date_default_timezone_set($config['timezone']);
 $start_time = microtime(true);
+
+if(empty($config['default_request_type'])){
+  $config['default_request_type'] = 'html';
+}
 
 // Include global utility functions
 require_once BASEPATH.'utilities'.EXT;
@@ -60,9 +61,11 @@ if(file_exists(APPPATH.'init'.EXT)) {
 }
 
 // Core libraries to load
-$core = array('controller', 'db', 'layout', 'app', 'router');
+if(empty ($config['core'])) {
+    $config['core'] = array('controller', 'db', 'layout', 'app', 'router');
+}
 // Load core classes that all classes extend
-foreach($core as $class) {
+foreach($config['core'] as $class) {
   if (file_exists(APPPATH."core/$class".EXT)) {
     require_once APPPATH."core/$class".EXT;
   } else {
@@ -78,7 +81,13 @@ if(isset($config['use_database']) && $config['use_database'] == true) {
   db::connect();
 }
 
-app::setStartTime($start_time);
+// Set the global error handler
+set_error_handler( array('app', 'error_handler') );
+// Set the global exception handler
+set_exception_handler( array('app', 'exception_handler') );
+// Set the global shutdown handler
+register_shutdown_function( array('app', 'shutdown_handler') );
 
-// Start the app by dispatching the route
-require_once BASEPATH.'core/dispatcher'.EXT;
+app::setStartTime($start_time);
+app::setConfig($config);
+app::go();
