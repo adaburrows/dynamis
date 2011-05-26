@@ -43,9 +43,10 @@ class app {
   public static $config = array();
   
   // Private statics vars for storing class references:
-  private static $libs = array();
+  private static $libraries = array();
   private static $controllers = array();
   private static $models = array();
+  private static $core = array();
   
   private static $classes = array();
 
@@ -72,7 +73,7 @@ class app {
    * Return a reference to a library, or create a new one if ! existing.
    */
   public static function &getLib($lib_name) {
-    return self::_load_class($lib_name, BASEPATH.'libs', self::$libs);
+    return self::_load_class($lib_name, BASEPATH.'libs', self::$libraries);
   }
 
   /*
@@ -117,25 +118,38 @@ class app {
   }
 
   /*
-   * app::getContollerMethods();
-   * ---------------------------
-   * Returns a list
+   * app::getClassMethods();
+   * ----------------------------
+   * Returns a list of controller and their methods.
    */
-   public static function getControllerMethods() {
-     $controller_names = self::getControllers();
-     $controllers = array();
-     foreach ($controller_names as $controller) {
-       $controllers[$controller] = self::getClassMethods($controller);
+   public static function getClassMethods($type = 'controllers') {
+     $classes = array();
+     switch($type) {
+       case 'controllers':
+         $classes = self::getControllers();
+         break;
+       case 'models':
+         $classes = self::getModels();
+         break;
+       case 'libraries':
+         $classes = self::getLibraries();
+         break;
+       case 'core':
+         $clases = self::getCore();
      }
-     return $controllers;
+     $classes_methods = array();
+     foreach ($classes as $class) {
+       $classes_methods[$class] = self::getMethods($class);
+     }
+     return $classes_methods;
    }
 
   /*
-   * app::getClassMethods();
-   * -----------------------
+   * app::getMethods();
+   * ------------------
    * Returns a list of methods in the public, protected and private scopes
    */
-   public static function getClassMethods($class_name) {
+   public static function getMethods($class_name) {
      $reflector = new ReflectionClass($class_name);
      $methods = array(
        'public'    => self::filterMethods($reflector->getMethods(ReflectionMethod::IS_PUBLIC)),
@@ -176,6 +190,26 @@ class app {
    public static function getControllers() {
      self::$controllers = self::getClassesInDir(APPPATH.'controllers');
      return array_keys(self::$controllers);
+   }
+
+  /*
+   * app::getLibraries();
+   * --------------------
+   * Returns a list of libraries
+   */
+   public static function getLibraries() {
+     self::$libraries = self::getClassesInDir(BASEPATH.'libs');
+     return array_keys(self::$libraries);
+   }
+
+  /*
+   * app::getCore();
+   * --------------------
+   * Returns a list of core classes
+   */
+   public static function getCore() {
+     self::$core = self::getClassesInDir(BASEPATH.'core');
+     return array_keys(self::$core);
    }
 
   /*

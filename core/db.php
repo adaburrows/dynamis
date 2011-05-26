@@ -44,14 +44,14 @@ class db {
   protected static $db_query_results = array();
  
   protected $aspects = array();
-  protected $aliases;
+  protected $aliases = array();
   protected $join_on = array();
   protected $default_fields = array();
   protected $insert_defaults = array();
   protected $update_defaults = array();
   protected $stat = array();
-  protected $primary_aspect;
-  protected $primary_key;
+  protected $primary_aspect ='';
+  protected $primary_key = '';
 
 /*
  * Methods for dealing with the database.
