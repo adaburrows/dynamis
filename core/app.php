@@ -218,7 +218,7 @@ class app {
    * Returns an array of classes, where the keys are the names of the instances 
    */
    public static function getClassesInDir($directory) {
-     self::$classes = $array();
+     self::$classes = array();
      $classes = self::getCodeFilesInDir($directory);
      foreach ($classes as $classname) {
        try {
