@@ -208,7 +208,7 @@ class app {
    * Returns a list of core classes
    */
    public static function getCore() {
-     self::$core = self::getClassesInDir(BASEPATH.'core');
+     self::$core = self::getCodeFilesInDir(BASEPATH.'core');
      return array_keys(self::$core);
    }
 
@@ -218,7 +218,26 @@ class app {
    * Returns an array of classes, where the keys are the names of the instances 
    */
    public static function getClassesInDir($directory) {
-     self::$classes = array();
+     self::$classes = $array();
+     $classes = self::getCodeFilesInDir($directory);
+     foreach ($classes as $classname) {
+       try {
+         self::_load_class($classname, $directory, self::$classes);
+       } catch (Exception $e) {
+         // Do nothing, classes were not added to the array passed into the above function.
+       }
+     }
+     return self::$classes;
+   }
+
+
+  /*
+   * app::getCodeFilesInDir();
+   * -----------------------
+   * Returns an array of classes, where the keys are the names of the instances
+   */
+   public static function getCodeFilesInDir($directory) {
+     $files = array();
      $dir = opendir($directory);
      if($dir) {
        while (false !== ($file = readdir($dir))) {
@@ -226,22 +245,17 @@ class app {
          if (is_file($path)) {
            $file_parts = explode('.', $file);
            $extension = array_pop($file_parts);
-           $classname = array_shift($file_parts);
+           $filename = array_shift($file_parts);
            // This is the right type of file try it
            if (".$extension" == EXT) {
-             try {
-               self::_load_class($classname, $directory, self::$classes);
-             } catch (Exception $e) {
-               // Do nothing, classes were not added to the array passed into the above function.
-             }
+             $files[] = $filename;
            }
          }
        }
        closedir($dir);
      }
-     return self::$classes;
+     return $files;
    }
-
 
 /*
  * Methods for dealing with application requests.
