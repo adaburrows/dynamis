@@ -56,7 +56,8 @@ class http_request {
             'scheme' => '',
             'host' => 'localhost',
             'path' => '/',
-            'method' => 'GET'
+            'method' => 'GET',
+            'header_params' => array()
         );
         //string represntation of the request
         $this->request = '';
@@ -67,6 +68,28 @@ class http_request {
         // set block size in bytes to 4096 to speed up reading in response
         $this->bs = 4096;
     }
+
+    /* add_header();
+     * -------------
+     * Add basic auth to a request, should really only be used over TLS or SSL
+     */
+
+     public function add_header($field, $data) {
+         $this->request_params['header_params'] = array_merge(
+             $this->request_params['header_params'],
+             array($field => $data)
+         );
+     }
+
+    /* add_basic_auth();
+     * -----------------
+     * Add basic auth to a request, should really only be used over TLS or SSL
+     */
+
+     public function add_basic_auth($user, $pass) {
+         $auth_b64 = base64_encode("$user:$pass");
+         $this->add_header('Authorization', "Basic $auth_b64");
+     }
 
     /* explode_query
      * -------------
