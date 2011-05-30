@@ -43,9 +43,12 @@ class session extends db {
   protected $hashes;
   protected $default_expiration;
 
+  /**
+   * session::__construct();
+   * -----------------------
+   * Initializes the class
+   */
   public function  __construct() {
-    parent::__construct();
-
     // Setup aspects for sessions
     $this->aspects = array (
       'ulynk_sessions' => array (
@@ -56,10 +59,17 @@ class session extends db {
         'hash'
       )
     );
-
+    parent::__construct();
     // Set the default expiration of the cookie to a half hour session
     $this->default_expiration = 30 * 60 * 60;
+  }
 
+  /**
+   * session::initialize();
+   * ----------------------
+   * Checks database for current sessions based on the cookie
+   */
+  public function initialize() {
     // Fetch all of the session info from the database
     $this->sessions = array();
     foreach ($_COOKIE['dynamis_sessions'] as $name => $hash) {
@@ -69,20 +79,36 @@ class session extends db {
     $data = self::query_array($query);
     if($data) {
       foreach ($data as $datum) {
+        $datum['data'] = unserialize($datum['data']);
         $this->sessions[$datum['name']] = $datum;
       }
     }
   }
 
+  /**
+   * session::list_all();
+   * --------------------
+   * Lists all live sessions in the database
+   */
   public function list_all() {
     $query = $this->build_select();
     return self::query_array($query.';');
   }
 
+  /**
+   * session::is_current();
+   * ----------------------
+   * checks to see if the current user has a session named $name
+   */
   public function is_current($name) {
-    return key_exists($name, $$this->sessions);
+    return key_exists($name, $this->sessions);
   }
 
+  /**
+   * session::make();
+   * ----------------
+   * Creates a session if none exists
+   */
   public function make($name) {
     $status = false;
     if (!$this->is_current($name)) {
@@ -105,6 +131,11 @@ class session extends db {
     return $status;
   }
 
+  /**
+   * session::get();
+   * ---------------
+   * retreives data stored in the sessions variable
+   */
   public function get($name) {
     $return = false;
     if(!empty($this->sessions[$name])) {
@@ -113,11 +144,27 @@ class session extends db {
     return $return;
   }
 
+  /**
+   * session::set();
+   * ---------------
+   * sets the data for a session
+   */
   public function set($data) {
+    if($this->is_current($data['name'])) {
+      $this->sessions[$data['name']] = $data;
+    } else {
+      $this->make($data['name']);
+    }
+    $data['data'] = serialize($data['data']);
     $query = $this->build_update($data, 'ulynk_sessions');
     return self::query_ins($query);
   }
 
+  /**
+   * session::end();
+   * ---------------
+   * Ends a session, deleting it from the database
+   */
   public function end($name) {
     setcookie("dynamis_sessions[{$name}]", '', (time() - 3600));
     $hash = $this->sessions['hash'];
