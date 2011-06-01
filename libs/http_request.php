@@ -167,7 +167,7 @@ class http_request {
         }
         $request .= "Host: {$this->request_params['host']}\r\n";
         if (!empty($this->request_params['auth'])) {
-            $request .= "Authorization {$this->request_params['auth']}\r\n";
+            $request .= "Authorization: {$this->request_params['auth']}\r\n";
         }
         if (isset($this->request_params['header_params'])) {
             $request .= $this->build_headers();
