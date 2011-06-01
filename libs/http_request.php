@@ -56,8 +56,7 @@ class http_request {
             'scheme' => '',
             'host' => 'localhost',
             'path' => '/',
-            'method' => 'GET',
-            'header_params' => array()
+            'method' => 'GET'
         );
         //string represntation of the request
         $this->request = '';
@@ -75,6 +74,9 @@ class http_request {
      */
 
      public function add_header($field, $data) {
+         if(empty($this->request_params['header_params'])) {
+             $this->request_params['header_params'] = array();
+         }
          $this->request_params['header_params'] = array_merge(
              $this->request_params['header_params'],
              array($field => $data)
