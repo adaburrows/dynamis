@@ -88,7 +88,7 @@ class http_request {
 
      public function add_basic_auth($user, $pass) {
          $auth_b64 = base64_encode("$user:$pass");
-         $this->add_header('Authorization', "Basic $auth_b64");
+         $this->request_params['auth'] = "Basic $auth_b64";
      }
 
     /* explode_query
@@ -164,6 +164,12 @@ class http_request {
             $request = "{$this->request_params['method']} {$this->request_params['path']} HTTP/1.1\r\n";
         }
         $request .= "Host: {$this->request_params['host']}\r\n";
+        if (!empty($this->request_params['auth'])) {
+            $request .= "Authorization {$this->request_params['auth']}\r\n";
+        }
+        if (isset($this->request_params['header_params'])) {
+            $request .= $this->build_headers();
+        }
         $request .= "Connection: Close\r\n";
         if ($this->request_params['method'] == 'POST') {
             if (empty($this->request_params['content-type'])) {
@@ -178,9 +184,6 @@ class http_request {
             }
             $request .= 'Content-Length: ' . strlen($this->request_params['body']) . "\r\n";
             $request .= "Content-Type: {$content_type}\r\n";
-        }
-        if (isset($this->request_params['header_params'])) {
-            $request .= $this->build_headers();
         }
         $request .= "\r\n";
         if (isset($this->request_params['body'])) {
