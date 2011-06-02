@@ -50,7 +50,6 @@ class facebook_graph extends OAuth2 {
      * ----------
      * Initializes the variables required to communicate with facebook.
      */
-
     public function initialize() {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
@@ -64,7 +63,6 @@ class facebook_graph extends OAuth2 {
             $this->parse_signed_request($_REQUEST['signed_request']);
         }
     }
-
     /* parse_signed_request
      * --------------------
      * Parses a signed_request parameter and returns the decoded array
@@ -107,7 +105,6 @@ class facebook_graph extends OAuth2 {
      * -------
      * Determines if the resulting object has an id
      */
-
     private function _has_id($object) {
         if ($object != null) {
             $object = json_decode($object, true);
@@ -120,7 +117,6 @@ class facebook_graph extends OAuth2 {
      * ---------
      * Determines if the resulting object has data
      */
-
     private function _has_data($object) {
         if ($object != null) {
             $object = json_decode($object, true);
@@ -132,7 +128,6 @@ class facebook_graph extends OAuth2 {
      * ---------
      * Determines if the resulting object has meta data.
      */
-
     private function _has_meta($object) {
         if ($object != null) {
             $object = json_decode($object, true);
@@ -145,7 +140,6 @@ class facebook_graph extends OAuth2 {
      * ----------------
      * Executes the oauth token endpoint and sets the proper properties
      */
-
     protected function _update_token() {
         $this->request_params['method'] = 'GET';
         $this->request_params['path'] = "{$this->token_endpoint}";
@@ -167,7 +161,6 @@ class facebook_graph extends OAuth2 {
      * -------
      * Does a GET to an old API method
      */
-
     public function old_get($method, $params = array()) {
         $this->request_params['method'] = 'GET';
         $this->request_params['host'] = $this->old_domain;
@@ -182,7 +175,6 @@ class facebook_graph extends OAuth2 {
      * ---
      * Runs an fql query
      */
-
     public function fql($fql) {
         $result = $this->old_get('fql.query', $this->_add_auth(array(
             'query' => $fql,
@@ -195,7 +187,6 @@ class facebook_graph extends OAuth2 {
      * ---
      * Runs a multi.fql query
      */
-
     public function multi_fql($multi_fql_array) {
         $result = $this->old_get('fql.multiquery', $this->_add_auth(array(
             'query' => json_encode($multi_fql_array),
@@ -210,7 +201,6 @@ class facebook_graph extends OAuth2 {
      *  + the current user if, $source is not specified
      *  + the $source user
      */
-
     public function mutual_friends($target, $source = null) {
         $params = $this->_add_auth(array(
             'target_uid' => $target,
@@ -220,7 +210,6 @@ class facebook_graph extends OAuth2 {
         $result = $this->old_get('friends.getMutualFriends', $params);
         return $result;
     }
-
     /* get_connection_types
      * --------------------
      * Requests an object's connection types to the FB social graph. Returns
@@ -228,7 +217,6 @@ class facebook_graph extends OAuth2 {
      * calls.
      * <http://developers.facebook.com/docs/api>
      */
-
     public function get_relationships($object) {
         $data = null;
         $this->get($object, array(
@@ -251,7 +239,6 @@ class facebook_graph extends OAuth2 {
      * an object supports.
      * <http://developers.facebook.com/docs/api>
      */
-
     public function get_connections($object, $relation) {
         $object = $this->get("$object/$relation");
         return $this->_has_data($object);
@@ -267,7 +254,6 @@ class facebook_graph extends OAuth2 {
      *
      * <http://developers.facebook.com/docs/api>
      */
-
     public function post_feed($profile_id, $params) {
         $body = $this->_add_auth($params);
         $object = $this->post("$profile_id/feed", $body);
@@ -282,7 +268,6 @@ class facebook_graph extends OAuth2 {
      *
      * <http://developers.facebook.com/docs/api>
      */
-
     public function post_like($post_id, $params) {
         $body = $this->_add_auth($params);
         $object = $this->post("$post_id/likes", $body);
@@ -297,7 +282,6 @@ class facebook_graph extends OAuth2 {
      *
      * <http://developers.facebook.com/docs/api>
      */
-
     public function post_comment($post_id, $params) {
         $body = $this->_add_auth($params);
         $object = $this->post("$post_id/comments", $body);
@@ -312,7 +296,6 @@ class facebook_graph extends OAuth2 {
      *
      * <http://developers.facebook.com/docs/api>
      */
-
     public function post_note($profile_id, $params) {
         $body = $this->_add_auth($params);
         $object = $this->post("$profile_id/notes", $body);
@@ -327,7 +310,6 @@ class facebook_graph extends OAuth2 {
      *
      * <http://developers.facebook.com/docs/api>
      */
-
     public function post_link($profile_id, $params) {
         $body = $this->_add_auth($params);
         $object = $this->post("$profile_id/links", $body);

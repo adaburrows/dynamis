@@ -39,17 +39,17 @@
 class http_request {
 
     //basic request parameters
-    var $request_params;
+    protected $request_params;
     //string represntation of the request
-    var $request;
+    protected $request;
     //array representation of the response
-    var $response;
+    protected $response;
     // number of blocks to read.
-    var $count;
+    protected $count;
     // block size in bytes
-    var $bs;
+    protected $bs;
 
-    function __construct() {
+    public function __construct() {
         //basic request parameters
         $this->request_params = array(
             'port' => 80,
@@ -72,7 +72,6 @@ class http_request {
      * -------------
      * Add basic auth to a request, should really only be used over TLS or SSL
      */
-
      public function add_header($field, $data) {
          if(empty($this->request_params['header_params'])) {
              $this->request_params['header_params'] = array();
@@ -87,7 +86,6 @@ class http_request {
      * -----------------
      * Add basic auth to a request, should really only be used over TLS or SSL
      */
-
      public function add_basic_auth($user, $pass) {
          $auth_b64 = base64_encode("$user:$pass");
          $this->request_params['auth'] = "Basic $auth_b64";
@@ -97,8 +95,7 @@ class http_request {
      * -------------
      * Takes a query string and turns it into a hash
      */
-
-    function explode_query($q) {
+    protected function explode_query($q) {
         $q = explode("&", $q);
         foreach ($q as $value) {
             $datum = explode("=", $value);
@@ -113,8 +110,7 @@ class http_request {
      * -----------
      * Builds a query string from a query hash.
      */
-
-    function build_query() {
+    protected  function build_query() {
         foreach ($this->request_params['query_params'] as $key => $value) {
             $k = rawurlencode($key);
             $v = rawurlencode($value);
@@ -128,8 +124,7 @@ class http_request {
      * ---------------
      * Takes an array of string header lines and turns it into a hash format.
      */
-
-    function explode_headers($h) {
+    protected function explode_headers($h) {
         $data = array();
         foreach ($h as $header) {
             $datum = explode(": ", $header);
@@ -144,8 +139,7 @@ class http_request {
      * -------------
      * Takes an header array and returns a string version.
      */
-
-    function build_headers() {
+    protected function build_headers() {
         foreach ($this->request_params['header_params'] as $key => $value) {
             $header_line[] = "$key: $value";
         }
@@ -157,8 +151,7 @@ class http_request {
      * -------------
      * Takes the request array and turns it into a usable string.
      */
-
-    function build_request() {
+    protected function build_request() {
         $query = (isset($this->request_params['query_params'])) ? ($this->build_query()) : '';
         if ($this->request_params['method'] == 'GET') {
             $request = "{$this->request_params['method']} {$this->request_params['path']}?$query HTTP/1.1\r\n";
@@ -203,8 +196,7 @@ class http_request {
      * $bs specifies the block size to read: defaults to 4096 for faster reads.
      * $count specifies how many blocks to read in: by default all are read.
      */
-
-    function tx_request() {
+    protected function tx_request() {
         $scheme = isset($this->request_params['scheme']) ? $this->request_params['scheme'] : '';
         $port = isset($this->request_params['port']) ? $this->request_params['port'] : 80;
         $fp = @fsockopen($scheme . $this->request_params['host'], $port);
@@ -234,8 +226,7 @@ class http_request {
      * -------
      * Takes chunky data and composes it.
      */
-
-    function unchunk($chunky_data) {
+    protected function unchunk($chunky_data) {
         $data = '';
         $chunks = explode("\r\n", $chunky_data);
         for ($i = 1; $i < count($chunks); $i = $i + 2) {
@@ -249,8 +240,7 @@ class http_request {
      * Takes the string representation of the response and parses it into
      * it's components for easy digestion.
      */
-
-    function parse_response($response) {
+    protected function parse_response($response) {
         $parts = explode("\r\n\r\n", $response);
         $header = $parts[0];
         $message = $parts[1];
@@ -290,8 +280,7 @@ class http_request {
      * ----------
      * Executes the request and parses status
      */
-
-    function do_request() {
+    public function do_request() {
         $resp = $this->tx_request();
         $status = $this->parse_response($resp);
         //Reset method to 'GET' for next call
@@ -299,12 +288,63 @@ class http_request {
         return $status;
     }
 
+    /* get()
+     * -----
+     * Requests an object.
+     * Returns returns raw text response.
+     */
+    public function get($object, $params = array()) {
+        $this->request_params['path'] = $object;
+        $this->request_params['query_params'] = _add_auth($params);
+        $object = $this->do_request() ? $this->get_data() : null;
+        return $object;
+    }
+
+    /* post()
+     * ------
+     * Posts the specified data to the object location.
+     * Returns returns raw text response.
+     */
+    public function post($object, $data, $content_type = null) {
+        $this->request_params['method'] = 'POST';
+        $this->request_params['path'] = $object;
+        $this->request_params['body'] = $data;
+        $this->request_params['content-type'] = $content_type;
+        $object = $this->do_request() ? $this->get_data() : null;
+        return $object;
+    }
+
+    /* put()
+     * ------
+     * Puts the specified data to the object location.
+     * Returns returns raw text response.
+     */
+    public function put($object, $data, $content_type = null) {
+        $this->request_params['method'] = 'PUT';
+        $this->request_params['path'] = $object;
+        $this->request_params['body'] = $data;
+        $this->request_params['content-type'] = $content_type;
+        $object = $this->do_request() ? $this->get_data() : null;
+        return $object;
+    }
+
+    /* delete()
+     * --------
+     * Deletes an object if you have permissions.
+     * Returns returns raw text response.
+     */
+    public function delete($object) {
+        $this->request_params['method'] = 'DELETE';
+        $this->request_params['path'] = $object;
+        $object = $this->do_request() ? $this->get_data() : null;
+        return $object;
+    }
+
     /* get_data
      * --------
      * Fetches the data from the reponse
      */
-
-    function get_data() {
+    public function get_data() {
         return isset($this->response['body']) ? $this->response['body'] : NULL;
     }
 
@@ -312,8 +352,7 @@ class http_request {
      * ----------
      * Fetches the reponse status
      */
-
-    function get_status() {
+    public function get_status() {
         return isset($this->response['status']) ? $this->response['status'] : NULL;
     }
 
@@ -321,8 +360,7 @@ class http_request {
      * ----------
      * Fetches the reason for the status
      */
-
-    function get_reason() {
+    public function get_reason() {
         return isset($this->response['reason']) ? $this->response['reason'] : NULL;
     }
 
@@ -330,8 +368,7 @@ class http_request {
      * -----------
      * Fetches the headers from the reponse
      */
-
-    function get_headers() {
+    public function get_headers() {
         return isset($this->response['headers']) ? $this->response['headers'] : NULL;
     }
 
@@ -339,8 +376,7 @@ class http_request {
      * ------------
      * Fetches the protocol given by the server
      */
-
-    function get_protocol() {
+    public function get_protocol() {
         return isset($this->response['protocol']) ? $this->response['protocol'] : NULL;
     }
 
@@ -348,8 +384,7 @@ class http_request {
      * ----------------------
      * Fetches the data from the reponse
      */
-
-    function get_protocol_version() {
+    public function get_protocol_version() {
         return isset($this->response['protocol_version']) ? $this->response['protocol_version'] : NULL;
     }
 

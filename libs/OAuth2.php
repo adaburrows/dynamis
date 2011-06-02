@@ -90,7 +90,6 @@ class OAuth2 extends http_request {
      * --------------------
      * Initializes needes variables for authenticating with an OAuth2 Provider.
      */
-
     public function init($client_params) {
         $defaults = array(
           'app_id' => NULL,
@@ -110,7 +109,6 @@ class OAuth2 extends http_request {
      * ---------
      * Adds the access_token param to requests
      */
-
     protected function _add_auth($data) {
         $return = array_merge(
             array('access_token' => $this->access_token),
@@ -123,7 +121,6 @@ class OAuth2 extends http_request {
      * ----------------
      * Sets which URI the user is redirected after authentication
      */
-
     public function set_redirect_uri($uri) {
         $this->redirect_uri = $uri;
     }
@@ -135,7 +132,6 @@ class OAuth2 extends http_request {
      *     auth_redirect( array( 'publish_stream', 'create_event', 'rsvp_event' ) );
      * You must see the specs for API you are trying to use.
      */
-
     public function auth_redirect($response_type = 'code', $permissions = null) {
         if (!isset($_GET['code'])) {
             $redirect_url = $this->user_auth;
@@ -155,7 +151,6 @@ class OAuth2 extends http_request {
      * the access token was retreived successfully. The access token is stored
      * in $this->token.
      */
-
     public function token() {
         $this->request_params['query_params'] = array(
             'grant_type' => 'authorization_code',
@@ -174,7 +169,6 @@ class OAuth2 extends http_request {
      * the access token was retreived successfully. The access token is stored
      * in $this->token.
      */
-
     public function refresh_token() {
         $this->request_params['query_params'] = array(
             'grant_type' => 'refresh_token',
@@ -191,7 +185,6 @@ class OAuth2 extends http_request {
      *
      * NOTE: Override this function in each implementation
      */
-
     protected function _update_token() {
     }
 
@@ -200,7 +193,6 @@ class OAuth2 extends http_request {
      * Sets an access token to use
      * Used to restore access using a stored token
      */
-
     public function restore_token($token) {
         $this->access_token = $token;
     }
@@ -210,12 +202,8 @@ class OAuth2 extends http_request {
      * Requests an object's basic info from the OAuth2 service.
      * Returns returns raw text response.
      */
-
     public function get($object, $params = array()) {
-        $this->request_params['path'] = "{$this->api_version}{$object}";
-        $this->request_params['query_params'] = _add_auth($params);
-        $object = $this->do_request() ? $this->get_data() : null;
-        return $object;
+        return parent::get("{$this->api_version}{$object}", _add_auth($params));
     }
 
     /* post()
@@ -223,14 +211,8 @@ class OAuth2 extends http_request {
      * Posts the specified data to the object location.
      * Returns returns raw text response.
      */
-
     public function post($object, $data, $content_type = null) {
-        $this->request_params['method'] = 'POST';
-        $this->request_params['path'] = "{$this->api_version}{$object}";
-        $this->request_params['body'] = $data;
-        $this->request_params['content-type'] = $content_type;
-        $object = $this->do_request() ? $this->get_data() : null;
-        return $object;
+        return parent::post("{$this->api_version}{$object}", $data, $content_type);
     }
 
     /* put()
@@ -238,14 +220,8 @@ class OAuth2 extends http_request {
      * Puts the specified data to the object location.
      * Returns returns raw text response.
      */
-
     public function put($object, $data, $content_type = null) {
-        $this->request_params['method'] = 'PUT';
-        $this->request_params['path'] = "{$this->api_version}{$object}";
-        $this->request_params['body'] = $data;
-        $this->request_params['content-type'] = $content_type;
-        $object = $this->do_request() ? $this->get_data() : null;
-        return $object;
+        return parent::put("{$this->api_version}{$object}", $data, $content_type);
     }
 
     /* delete()
@@ -253,12 +229,8 @@ class OAuth2 extends http_request {
      * Deletes an object if you have permissions.
      * Returns returns raw text response.
      */
-
     public function delete($object) {
-        $this->request_params['method'] = 'DELETE';
-        $this->request_params['path'] = "{$this->api_version}{$object}";
-        $object = $this->do_request() ? $this->get_data() : null;
-        return $object;
+        return parent::delete("{$this->api_version}{$object}");
     }
 
 }
