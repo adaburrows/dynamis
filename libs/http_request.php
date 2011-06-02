@@ -295,7 +295,7 @@ class http_request {
      */
     public function get($object, $params = array()) {
         $this->request_params['path'] = $object;
-        $this->request_params['query_params'] = _add_auth($params);
+        $this->request_params['query_params'] = $params;
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
     }
