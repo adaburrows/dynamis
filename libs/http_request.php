@@ -152,6 +152,10 @@ class http_request {
      * Takes the request array and turns it into a usable string.
      */
     protected function build_request() {
+        $query = '';
+        if(!empty ($this->request_params['query_params'])) {
+            $query = $this->build_query($this->request_params['query_params']);
+        }
         // Set the verb, path, protocol, and version.
         // if this is a GET append query parameters
         // if not don't append
@@ -188,7 +192,7 @@ class http_request {
                     $this->request_params['body'] = $this->build_query($this->request_params['body']);
                 }
             } else {
-                $this->request_params['body'] = $this->build_query($this->request_params['query_params']);
+                $this->request_params['body'] = $query;
             }
             // Set the content length
             $request .= 'Content-Length: ' . strlen($this->request_params['body']) . "\r\n";
