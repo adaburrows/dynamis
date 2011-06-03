@@ -152,7 +152,6 @@ class http_request {
      * Takes the request array and turns it into a usable string.
      */
     protected function build_request() {
-        $query = (isset($this->request_params['query_params'])) ? ($this->build_query()) : '';
         if ($this->request_params['method'] == 'GET') {
             $request = "{$this->request_params['method']} {$this->request_params['path']}?$query HTTP/1.1\r\n";
         } else {
@@ -182,7 +181,7 @@ class http_request {
         }
         $request .= "\r\n";
         if (isset($this->request_params['body'])) {
-            $request .= $query . "\r\n" . $this->request_params['body'];
+            $request .= $this->request_params['body'];
         }
         $request .= "\r\n";
         $this->request = $request;
