@@ -152,37 +152,55 @@ class http_request {
      * Takes the request array and turns it into a usable string.
      */
     protected function build_request() {
+        // Set the verb, path, protocol, and version.
+        // if this is a GET append query parameters
+        // if not don't append
         if ($this->request_params['method'] == 'GET') {
             $request = "{$this->request_params['method']} {$this->request_params['path']}?$query HTTP/1.1\r\n";
         } else {
             $request = "{$this->request_params['method']} {$this->request_params['path']} HTTP/1.1\r\n";
         }
+        // Set the host parameter
         $request .= "Host: {$this->request_params['host']}\r\n";
+        // If an auth type has been requested, add it here
         if (!empty($this->request_params['auth'])) {
             $request .= "Authorization: {$this->request_params['auth']}\r\n";
         }
+        // If header parameters are set, include them here
         if (isset($this->request_params['header_params'])) {
             $request .= $this->build_headers();
         }
+        // Set the connection type
         $request .= "Connection: Close\r\n";
+        // If it's a post, process what we're sending
         if ($this->request_params['method'] == 'POST') {
+            // If the content-type has not been set, set it
             if (empty($this->request_params['content-type']) || $this->request_params['content-type'] == null) {
                 $content_type = 'application/x-www-form-urlencoded';
-                if(!empty($this->request_params['body'])) {
-                  $this->request_params['body'] = $this->request_params['body'];
-                } else {
-                  $this->request_params['body'] = $this->build_query($this->request_params['query_params']);
-                }
             } else {
                 $content_type = $this->request_params['content-type'];
             }
+            // If a body has been set, use it; otherwise try the query params
+            if(!empty($this->request_params['body'])) {
+                // If the body is an array, then it should probably be serialized
+                // in url-encode fashion
+                if(is_array($this->request_params['body'])) {
+                    $this->request_params['body'] = $this->build_query($this->request_params['body']);
+                }
+            } else {
+                $this->request_params['body'] = $this->build_query($this->request_params['query_params']);
+            }
+            // Set the content length
             $request .= 'Content-Length: ' . strlen($this->request_params['body']) . "\r\n";
+            // Set the content type
             $request .= "Content-Type: {$content_type}\r\n";
         }
+        // Add the space to indicate the body
         $request .= "\r\n";
         if (isset($this->request_params['body'])) {
             $request .= $this->request_params['body'];
         }
+        // End the request
         $request .= "\r\n";
         $this->request = $request;
     }
