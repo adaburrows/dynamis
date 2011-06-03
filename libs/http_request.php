@@ -110,8 +110,8 @@ class http_request {
      * -----------
      * Builds a query string from a query hash.
      */
-    protected  function build_query() {
-        foreach ($this->request_params['query_params'] as $key => $value) {
+    protected function build_query($data) {
+        foreach ($data as $key => $value) {
             $k = rawurlencode($key);
             $v = rawurlencode($value);
             $q[] = "$k=$v";
@@ -167,10 +167,10 @@ class http_request {
         }
         $request .= "Connection: Close\r\n";
         if ($this->request_params['method'] == 'POST') {
-            if (empty($this->request_params['content-type'])) {
+            if (empty($this->request_params['content-type']) || $this->request_params['content-type'] == null) {
                 $content_type = 'application/x-www-form-urlencoded';
                 if(!empty($this->request_params['body'])) {
-                  $this->request_params['body'] = $this->build_query($this->request_params['body']);
+                  $this->request_params['body'] = $this->request_params['body'];
                 } else {
                   $this->request_params['body'] = $this->build_query($this->request_params['query_params']);
                 }
