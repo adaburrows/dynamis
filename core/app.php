@@ -284,6 +284,16 @@ class app {
 
     // Load the $controller's $method, passing in $parts as the parameters.
     router::dispatch($controller, $method, $parts);
+
+    // If any error messages have accumulated, show them.
+    if (count(self::$error_messages) > 0) {
+      layout::setSlots(array('content' => 'errors/error'));
+      layout::overrideSlot('content', 'errors/error');
+      // Set the data for the view.
+      layout::setData(array('error_messages' => self::$error_messages));
+    }
+    // Render output
+    layout::render();
   }
 
   /*
@@ -396,14 +406,8 @@ ERROR;
    * Application wide shutdown handler
    */
   public static function shutdown_handler() {
-    if (count(self::$error_messages) > 0) {
-      layout::setSlots(array('content' => 'errors/error'));
-      layout::overrideSlot('content', 'errors/error');
-      // Set the data for the view.
-      layout::setData(array('error_messages' => self::$error_messages));
-    }
     // Output stored view buffer
-    echo layout::render();
+    echo layout::getOutputBuffer();
     // Output the random shit from the controller
     // **Should probably just write this to a log **
 //    echo "\n<!--\n".self::$controller_output."\n-->";
