@@ -253,7 +253,7 @@ class layout {
         }
     }
 
-    public function getOuputBuffer() {
+    public function getOutputBuffer() {
         return self::$ob;
     }
 
