@@ -285,13 +285,6 @@ class app {
     // Load the $controller's $method, passing in $parts as the parameters.
     router::dispatch($controller, $method, $parts);
 
-    // If any error messages have accumulated, show them.
-    if (count(self::$error_messages) > 0) {
-      layout::setSlots(array('content' => 'errors/error'));
-      layout::overrideSlot('content', 'errors/error');
-      // Set the data for the view.
-      layout::setData(array('error_messages' => self::$error_messages));
-    }
     // Render output
     layout::render();
   }
@@ -329,7 +322,25 @@ class app {
  * Methods for dealing with errors and exceptions.
  * ==========================================================================
  */
-   
+
+  /*
+   * app::hasErrorMessages();
+   * -------------------------
+   * Returns true if there are any error messages
+   */
+  public static function hasErrorMessages() {
+      return (count(self::$error_messages) > 0);
+  }
+
+  /*
+   * app::getErrorMessages();
+   * -------------------------
+   * Returns the error messages in an application
+   */
+  public static function getErrorMessages() {
+      return self::$error_messages;
+  }
+
   /*
    * app::error_handler();
    * -------------------------

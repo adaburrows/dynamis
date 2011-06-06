@@ -229,17 +229,19 @@ class layout {
                 break;
             // The default is the full layout and html
             default:
-                $layout_data = array();
-                foreach (array('title', 'keywords', 'description') as $data_field) {
-                    if (isset(self::$data[$data_field]))
-                        $layout_data[$data_field] = self::$data[$data_field];
-                }
-                $layout_data['css'] = self::buildStyleTags();
-                $layout_data['scripts'] = self::buildScriptTags();
+                self::$data['css'] = self::buildStyleTags();
+                self::$data['scripts'] = self::buildScriptTags();
                 foreach (self::$slots as $slot => $view) {
-                    $layout_data[$slot] = self::view($view, self::$data, true);
+                    self::$data[$slot] = self::view($view, self::$data, true);
                 }
-                extract($layout_data);
+                // If any error messages have accumulated, show them.
+                if (app::hasErrorMessages()) {
+                    self::setSlots(array('content' => 'errors/error'));
+                    self::overrideSlot('content', 'errors/error');
+                    // Set the data for the view.
+                    self::setData(array('error_messages' => app::getErrorMessages));
+                }
+                extract(self::$data);
                 $layout = self::$layout === NULL ? $config['default_layout'] : self::$layout;
                 if (is_file(APPPATH . "layouts/$layout" . EXT)) {
                     ob_start();
@@ -247,13 +249,14 @@ class layout {
                     self::$temp_ob = ob_get_contents();
                     ob_end_clean();
                 } else {
+                    //TODO: if the layout isn't found, this error will not be handled properly.
                     throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT);
                 }
                 self::$ob = self::$temp_ob;
         }
     }
 
-    public function getOutputBuffer() {
+    public static function getOutputBuffer() {
         return self::$ob;
     }
 
