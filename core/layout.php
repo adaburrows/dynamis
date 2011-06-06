@@ -266,10 +266,8 @@ class layout {
      * Fetches error views/layouts if needed.
      */
     public static function render() {
-        // Get request type
-        $request_type = router::getReqType();
         // Render output based on request type
-        switch ($request_type) {
+        switch (router::getReqType()) {
             // It's a json request
             case 'json':
                 header('Content-Type: application/json');
@@ -284,8 +282,6 @@ class layout {
                 break;
             // The default is the full layout and html
             default:
-                self::$data['css'] = self::buildStyleTags();
-                self::$data['scripts'] = self::buildScriptTags();
                 $slots = array();
                 foreach (self::$slots as $slot => $view) {
                     try {
@@ -296,17 +292,22 @@ class layout {
                         app::exception_handler($e);
                     }
                 }
-                self::setData($slots);
                 // If any error messages have accumulated, show them.
                 if (app::hasErrorMessages()) {
                     // Set the data for the error messages
-                    self::setData(array('error_messages' => app::getErrorMessages()));
-                    self::$data['content'] = self::view('errors/error', self::$data, true);
+                    $slots['content'] = self::view(
+                                    'errors/error',
+                                    array('error_messages' => app::getErrorMessages()),
+                                    true
+                    );
                 }
-                extract(self::$data);
+                self::$data = array_merge(self::$data, $slots);
+                self::$data['css'] = self::buildStyleTags();
+                self::$data['scripts'] = self::buildScriptTags();
                 $layout = self::$layout === NULL ? app::$config['default_layout'] : self::$layout;
                 if (is_file(APPPATH . "layouts/$layout" . EXT)) {
                     ob_start();
+                    extract(self::$data);
                     include(APPPATH . "layouts/$layout" . EXT);
                     self::$temp_ob = ob_get_contents();
                     ob_end_clean();
