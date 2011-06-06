@@ -55,18 +55,20 @@ class layout {
     }
 
     /*
+     * layout::setSlots();
+     * -------------------
      * Accepts a key value array in the form of:
      *   array( 'slot_name' => 'view_name' )
      */
-
     public static function setSlots($views = array()) {
         self::$slots = array_merge(self::$slots, $views);
     }
 
     /*
+     * layout::overideSlot();
+     * ----------------------
      * Overides a particular slot.
      */
-
     public static function overrideSlot($name, $view) {
         $status = false;
         if (array_key_exists($name, self::$slots)) {
@@ -77,43 +79,66 @@ class layout {
     }
 
     /*
+     * layout::getSlots();
+     * -------------------
      * Returns the slot array
      */
-
     public static function getSlots() {
         return self::$slots;
     }
 
     /*
+     * layout::choose();
+     * -----------------
      * Sets layout to use for rendering.
      */
-
     public static function choose($layout) {
         self::$layout = $layout;
     }
 
     /*
-     * Gets layout chosen for rendering.
+     * layout::which();
+     * ----------------
+     * Return the current layout chosen for rendering.
      */
-
     public static function which() {
         return self::$layout;
     }
 
+    /*
+     * layout::addCSS();
+     * -----------------
+     * Adds a named CSS file.
+     */
     public static function addCss($name, $file) {
         self::$css[$name] = array('file' => $file);
     }
 
+    /*
+     * layout::addCssBlock();
+     * ----------------------
+     * Adds a named block of css.
+     */
     public static function addCssBlock($name, $css) {
         self::$css[$name] = array('css' => $css);
     }
 
+    /*
+     * layout::delCss();
+     * -----------------
+     * Removes CSS from the queue by name.
+     */
     public static function delCss($name) {
         if (isset(self::$css[$name])) {
             unset(self::$css[$name]);
         }
     }
 
+    /*
+     * layout::buildStyleTags();
+     * -------------------------
+     * Creates an HTML partial of all CSS
+     */
     public static function buildStyleTags() {
         $style_tags = "";
         foreach (self::$css as $style) {
@@ -126,20 +151,41 @@ class layout {
         return $style_tags;
     }
 
+    /*
+     * layout::addSCript();
+     * --------------------
+     * Add a named script to the queue.
+     * $file must be a full path.
+     */
     public static function addScript($name, $file) {
         self::$js[$name] = array('file' => $file);
     }
 
+    /*
+     * layout::addScriptBlock();
+     * -------------------------
+     * Add a named block of javascript to the queue
+     */
     public static function addScriptBlock($name, $script) {
         self::$js[$name] = array('script' => $script);
     }
 
+    /*
+     * layout::delScript();
+     * -------------------
+     * Removes a script from the queue by name
+     */
     public static function delScript($name) {
         if (isset(self::$js[$name])) {
             unset(self::$js[$name]);
         }
     }
 
+    /*
+     * layout::buildScriptTags();
+     * --------------------------
+     * Builds an HTML fragment containing all script tags
+     */
     public static function buildScriptTags() {
         $script_tags = '';
         foreach (self::$js as $js) {
@@ -151,23 +197,29 @@ class layout {
         return $script_tags;
     }
 
+    /*
+     * layout::_build_script_tag();
+     * ----------------------------
+     * Builds an html fragment to add a script
+     */
     private static function _build_script_tag($file, $code) {
         return '<script type="text/javascript"' . (!is_null($file) ? ' src="' . $file . '"' : '' ) . " >$code</script>";
     }
 
-    private static function _read_file($filename) {
-        if (is_file($filename)) {
-            $data = file_get_contents($filename);
-        } else {
-            throw new Exception("Error: Cannot find file: $filename.");
-        }
-        return $data;
-    }
-
+    /*
+     * layout::setData();
+     * ------------------
+     * Sets the data to be rendered as HTML, JSON, or XML
+     */
     public static function setData($data) {
         self::$data = array_merge(self::$data, $data);
     }
 
+    /*
+     * layout::setText();
+     * ------------------
+     * Sets the text to return on text requests
+     */
     public static function setText($text) {
         self::$text = $text;
     }
@@ -183,7 +235,6 @@ class layout {
      * Loads the desired view and fills in the variables
      * Optionally, returns all data in a string.
      */
-
     public static function view($view_name, $data = array(), $buffer = false) {
         self::$temp_ob = "";
         // Move key value pairs from data into variables in the current scope.
@@ -208,9 +259,13 @@ class layout {
         }
     }
 
+    /*
+     * layout::render();
+     * -----------------
+     * Renders the pages if they need to be rendered.
+     * Fetches error views/layouts if needed.
+     */
     public static function render() {
-        global $config;
-
         // Get request type
         $request_type = router::getReqType();
         // Render output based on request type
@@ -236,7 +291,7 @@ class layout {
                     try {
                         $slots[$slot] = self::view($view, self::$data, true);
                     // If that failed add the error to the queue and keep going.
-                    // Otherwise, exception handler gets called globally and no output is shown
+                    // Otherwise, global exception handler is called poping function stack
                     } catch (Exception $e) {
                         app::exception_handler($e);
                     }
@@ -249,20 +304,25 @@ class layout {
                     self::$data['content'] = self::view('errors/error', self::$data, true);
                 }
                 extract(self::$data);
-                $layout = self::$layout === NULL ? $config['default_layout'] : self::$layout;
+                $layout = self::$layout === NULL ? app::$config['default_layout'] : self::$layout;
                 if (is_file(APPPATH . "layouts/$layout" . EXT)) {
                     ob_start();
                     include(APPPATH . "layouts/$layout" . EXT);
                     self::$temp_ob = ob_get_contents();
                     ob_end_clean();
                 } else {
-                    //TODO: if the layout isn't found, this error will not be handled properly.
+                    //TODO: if the layout isn't found, load a static page from core
                     throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT);
                 }
                 self::$ob = self::$temp_ob;
         }
     }
 
+    /*
+     * layout::getOutputBuffer();
+     * --------------------------
+     * Returns the output buffer for display
+     */
     public static function getOutputBuffer() {
         return self::$ob;
     }
