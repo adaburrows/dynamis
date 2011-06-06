@@ -239,7 +239,7 @@ class layout {
                     self::setSlots(array('content' => 'errors/error'));
                     self::overrideSlot('content', 'errors/error');
                     // Set the data for the view.
-                    self::setData(array('error_messages' => app::getErrorMessages));
+                    self::setData(array('error_messages' => app::getErrorMessages()));
                 }
                 extract(self::$data);
                 $layout = self::$layout === NULL ? $config['default_layout'] : self::$layout;
