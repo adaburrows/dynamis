@@ -231,9 +231,17 @@ class layout {
             default:
                 self::$data['css'] = self::buildStyleTags();
                 self::$data['scripts'] = self::buildScriptTags();
+                $slots = array();
                 foreach (self::$slots as $slot => $view) {
-                    self::$data[$slot] = self::view($view, self::$data, true);
+                    try {
+                        $slots[$slot] = self::view($view, self::$data, true);
+                    // If that failed add the error to the queue and keep going.
+                    // Otherwise, exception handler gets called globally and no output is shown
+                    } catch (Exception $e) {
+                        app::exception_handler($e);
+                    }
                 }
+                self::setData($slots);
                 // If any error messages have accumulated, show them.
                 if (app::hasErrorMessages()) {
                     self::setSlots(array('content' => 'errors/error'));
