@@ -346,7 +346,7 @@ class app {
             $reflector = new ReflectionMethod($app_controller, self::$method);
             // Get the number of required arguments for the method parameter
             $num_req_args = $reflector->getNumberOfRequiredParameters();
-            if (count($args) >= $num_req_args) {
+            if (count(self::$params) >= $num_req_args) {
                 // Set the default view, can be changed by the controller
                 layout::setSlots(array(
                             'content' => self::$controller . "/" . self::$method
@@ -355,7 +355,7 @@ class app {
                  * TODO: any hooks for additional processing before calling the controller's method
                  */
                 // Parse all named parameters passed as arguments
-                foreach ($args as $arg) {
+                foreach (self::$params as $arg) {
                     $split = explode(':', $arg);
                     if (count($split) == 2) {
                         self::$named_params[$split[0]] = $split[1];
