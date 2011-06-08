@@ -425,7 +425,7 @@ class app {
      * Return the current method of the request
      */
     public static function getNamedParams() {
-        return self::$method;
+        return self::$named_params;
     }
 
     /*
