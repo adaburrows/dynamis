@@ -493,12 +493,12 @@ class app {
             // The default is the full layout and html
             default:
                 foreach (layout::getSlots() as $slot => $view) {
-                    self::setData(array($slot => layout::view($view, self::$controller_data, true)));
+                    self::$controller_data[$slot] = layout::view($view, self::$controller_data, true);
                 }
                 // If any error messages have accumulated, show them.
                 if (self::hasErrorMessages()) {
                     // Set the data for the error messages
-                    self::setData(array('content' => layout::error(self::getErrorMessages())));
+                    self::$controller_data['content'] = layout::error(self::getErrorMessages());
                 }
                 self::$controller_data['css'] = layout::buildStyleTags();
                 self::$controller_data['scripts'] = layout::buildScriptTags();
