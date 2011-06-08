@@ -331,7 +331,7 @@ class layout {
      */
     public static function render() {
         // Render output based on request type
-        switch (router::getReqType()) {
+        switch (app::getReqType()) {
             // It's a json request
             case 'json':
                 header('Content-Type: application/json');

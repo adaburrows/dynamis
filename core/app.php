@@ -40,7 +40,7 @@
  */
 
 class app {
-
+    public static $named_params = array();
     public static $config = array();
     // Private statics vars for storing class references:
     private static $libraries = array();
@@ -49,7 +49,14 @@ class app {
     private static $core = array();
     private static $classes = array();
     private static $error_messages = array();
+
     private static $start_time;
+    private static $controller = "";
+    private static $method = "";
+    private static $params = array();
+    private static $controller_data = array();
+    private static $controller_output = "";
+    private static $request_type = "";
 
     // private constructor, this is a purely static class
     private function __construct() {
@@ -60,10 +67,10 @@ class app {
         self::$config = $config;
     }
 
-    /*
-     * Methods for loading classes from libraries, controllers, and models.
-     * ==========================================================================
-     */
+/*
+ * Methods for loading classes from libraries, controllers, and models.
+ * =============================================================================
+ */
 
     /*
      * app::getCore();
@@ -283,10 +290,10 @@ class app {
         return $files;
     }
 
-    /*
-     * Methods for dealing with application requests.
-     * ==========================================================================
-     */
+/*
+ * Methods for dealing with application requests.
+ * =============================================================================
+ */
 
     /*
      * app::go();
@@ -296,25 +303,118 @@ class app {
      */
     public static function go() {
         $route = ""; // Used to store the route
-        $parts = array(); // Used to store the parts of the route
+
         // Check if a route is set and get its parts
         if (isset($_GET['route'])) {
             $route = $_GET['route'];
         }
-        $parts = router::map($route);
+        self::$params = router::map($route);
         // Get the controller off the array
-        $controller = array_shift($parts);
-        $method = array_shift($parts);
+        $controller = array_shift(self::$params);
+        // Get the method off the array
+        $method = array_shift(self::$params);
         // If there is no specified $controller or $method use defaults
-        $controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
-        $method = ($method !== NULL && $method !== "") ? $method : 'index';
+        self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
+        self::$method = ($method !== NULL && $method !== "") ? $method : 'index';
 
         // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
         $type = isset($_GET['ext']) ? $_GET['ext'] : self::$config['default_request_type'];
-        router::setReqType($type);
+        self::setReqType($type);
 
         // Load the $controller's $method, passing in $parts as the parameters.
-        router::dispatch($controller, $method, $parts);
+        self::dispatch();
+    }
+
+    /*
+     * app::dispatch();
+     * ----------------
+     * This function handles finding the controller class, calling its methods, and passing arguments.
+     */
+
+    public static function dispatch() {
+        // Start the session
+        session_start();
+        // try loading the specified controller
+        // if this throws an exception, our app::exception_handler() will catch it.
+        $app_controller = &self::getController(self::$controller);
+        // Find out if the controller has the requested method
+        if (method_exists($app_controller, self::$method)) {
+
+            // Get a reflection class
+            $reflector = new ReflectionMethod($app_controller, self::$method);
+            // Get the number of required arguments for the method parameter
+            $num_req_args = $reflector->getNumberOfRequiredParameters();
+            if (count($args) >= $num_req_args) {
+                // Set the default view, can be changed by the controller
+                layout::setSlots(array(
+                            'content' => self::$controller . "/" . self::$method
+                        ));
+                /**
+                 * TODO: any hooks for additional processing before calling the controller's method
+                 */
+                // Parse all named parameters passed as arguments
+                foreach ($args as $arg) {
+                    $split = explode(':', $arg);
+                    if (count($split) == 2) {
+                        self::$named_params[$split[0]] = $split[1];
+                    }
+                }
+                ob_start(); // Buffer the controller output
+                // We have more than enough parameters for the method, dispatch.
+                self::$controller_data = call_user_func_array(array($app_controller, self::$method), self::$params);
+                self::$controller_output = ob_get_contents(); // Get the output
+                ob_end_clean(); // End and clean the buffer
+                // Write and close the session
+                session_write_close();
+
+                // Set the data for the view.
+                layout::setData(self::$controller_data);
+                layout::setText(self::$controller_output);
+            } else {
+                // Error, need more params
+                throw new Exception("Error: the method $controller::$method() requires $num_req_args parameters.");
+            }
+        } else {
+            // Error! can't find the method
+            throw new Exception("Error: the controller $controller does not have method $controller::$method().");
+        }
+    }
+
+    /*
+     * app::setReqType();
+     * ------------------
+     * Sets the request type. Normally set by the dispatcher based on the extension.
+     */
+
+    public static function setReqType($type) {
+        self::$request_type = $type;
+    }
+
+    /*
+     * app::getReqType();
+     * ------------------
+     * Return the request type.
+     */
+    public static function getReqType() {
+        return self::$request_type;
+    }
+
+    /*
+     * app::getController();
+     * ---------------------
+     * Returns the current controller of the request
+     */
+    public static function getReqController() {
+        return self::$controller;
+    }
+
+    /*
+     * app::getMethod();
+     * ------------------
+     * Return the current method of the request
+     */
+    public static function getReqMethod() {
+        return self::$method;
     }
 
     /*
@@ -345,10 +445,10 @@ class app {
         return microtime(true) - self::$start_time;
     }
 
-    /*
-     * Methods for dealing with errors and exceptions.
-     * ==========================================================================
-     */
+/*
+ * Methods for dealing with errors, exceptions, and shutdown.
+ * =============================================================================
+ */
 
     /*
      * app::hasErrorMessages();

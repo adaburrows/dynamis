@@ -38,13 +38,6 @@
 
 class router {
   private static $routes = array();
-  private static $request_type = "";
-  private static $request_controller = "";
-  private static $request_method = "";
-  private static $controller_data = array();
-  private static $controller_output = "";
-  public static $named_params = array();
-
   private static $conversions = array(
     // Group of one or more digits
     '/\/:num/'  => '((\/?)[0-9]+(\/?))',
@@ -103,102 +96,6 @@ class router {
     505     => 'HTTP Version Not Supported'
     );
 
-  /*
-   * router::dispatchRequest();
-   * ------------------------
-   * This function handles finding the controller class, calling its methods, and passing arguments.
-   */
-  public static function dispatch($controller, $method='index', $args=array()) {
-    // Start the session
-    session_start();
-    // try loading the specified controller
-    // if this throws an exception, our app::exception_handler() will catch it.
-    $app_controller = &app::getController($controller);
-    // Find out if the controller has the requested method
-    if (method_exists($app_controller, $method)) {
-      self::$request_controller = $controller;
-      self::$request_method = $method;
-      // Get a reflection class
-      $reflector = new ReflectionMethod($app_controller, $method);
-      // Get the number of required arguments for the method parameter
-      $num_req_args = $reflector->getNumberOfRequiredParameters();
-      if (count($args) >= $num_req_args) {
-
-        // Set the default view, can be changed by the controller
-        layout::setSlots( array(
-          'content' => self::$request_controller."/".self::$request_method
-        ));
-
-        /**
-         * TODO: any hooks for additional processing before calling the controller's method
-         */
-
-        // Parse all named parameters passed as arguments
-        foreach ($args as $arg) {
-          $split = explode(':', $arg);
-          if (count($split) == 2) {
-            self::$named_params[$split[0]] = $split[1];
-          }
-        }
-
-        ob_start(); // Buffer the controller output
-        // We have more than enough parameters for the method, dispatch.
-        self::$controller_data = call_user_func_array(array($app_controller,$method), $args);
-        self::$controller_output = ob_get_contents(); // Get the output
-        ob_end_clean(); // End and clean the buffer
-
-        // Write and close the session
-        session_write_close();
-
-        // Set the data for the view.
-        layout::setData(self::$controller_data);
-        layout::setText(self::$controller_output);
-
-      } else {
-        // Error, need more params
-        throw new Exception ("Error: the method $controller::$method() requires $num_req_args parameters.");
-      }
-    } else {
-      // Error! can't find the method
-      throw new Exception( "Error: the controller $controller does not have method $controller::$method().");
-    }
-  }
-
-  /*
-   * router::setReqType();
-   * ------------------
-   * Sets the request type. Normally set by the dispatcher based on the extension.
-   */
-  public static function setReqType($type) {
-    self::$request_type = $type;
-  }
-
-  /*
-   * router::getReqType();
-   * ------------------
-   * Return the request type.
-   */
-  public static function getReqType() {
-    return self::$request_type;
-  }
-
-  /*
-   * router::getController();
-   * ------------------
-   * Returns the current controller of the request
-   */
-  public static function getController() {
-    return self::$request_controller;
-  }
-
-  /*
-   * router::getMethod();
-   * ------------------
-   * Return the current method of the request
-   */
-  public static function getMethod() {
-    return self::$request_method;
-  }
   /*
    * router::setRoutes();
    * ------------------
