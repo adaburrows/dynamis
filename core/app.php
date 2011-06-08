@@ -369,6 +369,7 @@ class {$controller} extends controller {
 return new $controller;
 CLASS;
             $app_controller = eval($dynamic_class);
+            $app_controller->initialize();
         }
         // Find out if the controller has the requested method
         if (method_exists($app_controller, self::$method)) {
