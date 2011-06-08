@@ -381,7 +381,12 @@ class app {
                 }
                 ob_start(); // Buffer the controller output
                 // We have more than enough parameters for the method, dispatch.
-                self::$controller_data = call_user_func_array(array($app_controller, self::$method), self::$params);
+                self::$controller_data = self::setData(
+                        call_user_func_array(
+                                array($app_controller, self::$method),
+                                self::$params
+                        )
+                );
                 self::$controller_output = ob_get_contents(); // Get the output
                 ob_end_clean(); // End and clean the buffer
                 // Write and close the session
