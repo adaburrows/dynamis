@@ -40,8 +40,14 @@
  */
 
 class app {
-    public static $named_params = array();
     public static $config = array();
+
+    protected static $request_type = "";
+    protected static $controller = "";
+    protected static $method = "";
+    protected static $params = array();
+    protected static $named_params = array();
+
     // Private statics vars for storing class references:
     private static $libraries = array();
     private static $controllers = array();
@@ -49,14 +55,10 @@ class app {
     private static $core = array();
     private static $classes = array();
     private static $error_messages = array();
-
     private static $start_time;
-    private static $controller = "";
-    private static $method = "";
-    private static $params = array();
     private static $controller_data = array();
     private static $controller_output = "";
-    private static $request_type = "";
+
 
     // private constructor, this is a purely static class
     private function __construct() {
