@@ -374,11 +374,11 @@ class app {
                 layout::setText(self::$controller_output);
             } else {
                 // Error, need more params
-                throw new Exception("Error: the method {self::$controller}::{self::$method()} requires $num_req_args parameters.");
+                throw new Exception('Error: the method '.self::$controller.'::'.self::$method."() requires $num_req_args parameters.");
             }
         } else {
             // Error! can't find the method
-            throw new Exception("Error: the controller {self::$controller} does not have method {self::$controller}::{self::$method}().");
+            throw new Exception('Error: the controller '.self::$controller.' does not have method '.self::$controller.'::'.self::$method.'().');
         }
     }
 
