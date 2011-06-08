@@ -71,7 +71,13 @@ class app {
      * Return a reference to a library, or create a new one if ! existing.
      */
     public static function &getCore($class_name) {
-        return self::_load_class($class_name, BASEPATH . 'core', self::$core);
+        $class = null;
+        try {
+            $class = self::_load_class($class_name, APPPATH . 'core', self::$core);
+        } catch (Exception $exc) {
+            $class = self::_load_class($class_name, BASEPATH . 'core', self::$core);
+        }
+        return $class;
     }
 
     /*
