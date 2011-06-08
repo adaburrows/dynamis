@@ -95,8 +95,7 @@ if(isset($config['use_database']) && $config['use_database'] == true) {
   db::connect();
 }
 
-$core_controller = app::getCore('controller');
-$core_controller->initialize();
 app::setStartTime($start_time);
 app::setConfig($config);
+app::getCore('controller');
 app::go();
