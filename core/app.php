@@ -488,8 +488,8 @@ class app {
                     $slots['content'] = layout::error(self::getErrorMessages());
                 }
                 self::$controller_data = array_merge(self::$controller_data, $slots);
-                self::$controller_data['css'] = self::buildStyleTags();
-                self::$controller_data['scripts'] = self::buildScriptTags();
+                self::$controller_data['css'] = layout::buildStyleTags();
+                self::$controller_data['scripts'] = layout::buildScriptTags();
                 $layout = layout::which() === NULL ? self::$config['default_layout'] : layout::which();
                 try {
                     $temp_ob = layout::layout($layout, self::$controller_data);
