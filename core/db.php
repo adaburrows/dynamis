@@ -134,8 +134,8 @@ class db {
    */
   public static function paginate ($page = 0, $show = 10, $params = '') {
     $data = array(
-      'request_controller' => router::getController(),
-      'request_method'     => router::getMethod(),
+      'request_controller' => app::getReqController(),
+      'request_method'     => app::getReqMethod(),
       'page'               => $page,
       'show'               => $show,
       'prev'               => $page-1,
