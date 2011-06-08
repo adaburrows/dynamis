@@ -293,6 +293,24 @@ class app {
         return $files;
     }
 
+    /*
+     * app::setData();
+     * ---------------
+     * Sets the data to be rendered as HTML, JSON, or XML
+     */
+    public static function setData($data) {
+        self::$controller_data = array_merge(self::$controller_data, $data);
+    }
+
+    /*
+     * app::setText();
+     * ---------------
+     * Sets the text to return on text requests
+     */
+    public static function setText($text) {
+        self::$controller_output = $text;
+    }
+
 /*
  * Methods for dealing with application requests.
  * =============================================================================

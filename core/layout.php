@@ -206,24 +206,6 @@ class layout {
     }
 
     /*
-     * layout::setData();
-     * ------------------
-     * Sets the data to be rendered as HTML, JSON, or XML
-     */
-    public static function setData($data) {
-        self::$data = array_merge(self::$data, $data);
-    }
-
-    /*
-     * layout::setText();
-     * ------------------
-     * Sets the text to return on text requests
-     */
-    public static function setText($text) {
-        self::$text = $text;
-    }
-
-    /*
      * Methods for loading views.
      * ==========================================================================
      */
