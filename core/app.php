@@ -355,8 +355,21 @@ class app {
         // Start the session
         session_start();
         // try loading the specified controller
-        // if this throws an exception, our app::exception_handler() will catch it.
-        $app_controller = &self::getController(self::$controller);
+        // if this throws an exception, catch it and create a new blank class.
+        try {
+            $app_controller = &self::getController(self::$controller);
+        } catch (Exception $e) {
+            self::exception_handler($e);
+            $controller = self::$controller;
+            $method = self::$method;
+            $dynamic_class = <<<CLASS
+class {$controller} extends controller {
+    public function {$method} () {return array();}
+}
+CLASS;
+            eval($class);
+            $app_controller = new $controller;
+        }
         // Find out if the controller has the requested method
         if (method_exists($app_controller, self::$method)) {
 
