@@ -609,9 +609,9 @@ ERROR;
      */
     public static function shutdown_handler() {
         // Render output
-        layout::render();
+        self::render();
         // Output stored view buffer
-        echo layout::getOutputBuffer();
+        echo self::getOutputBuffer();
         // Output the random shit from the controller
         // **Should probably just write this to a log **
 //    echo "\n<!--\n".self::$controller_output."\n-->";
