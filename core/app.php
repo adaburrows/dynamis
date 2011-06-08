@@ -420,6 +420,15 @@ class app {
     }
 
     /*
+     * app::getNamedParams();
+     * ----------------------
+     * Return the current method of the request
+     */
+    public static function getNamedParams() {
+        return self::$method;
+    }
+
+    /*
      * app::setStartTime();
      * --------------------
      * Set the start time of the application.
