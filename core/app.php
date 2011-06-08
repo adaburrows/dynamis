@@ -386,10 +386,6 @@ class app {
                 ob_end_clean(); // End and clean the buffer
                 // Write and close the session
                 session_write_close();
-
-                // Set the data for the view.
-                layout::setData(self::$controller_data);
-                layout::setText(self::$controller_output);
             } else {
                 // Error, need more params
                 throw new Exception('Error: the method '.self::$controller.'::'.self::$method."() requires $num_req_args parameters.");
