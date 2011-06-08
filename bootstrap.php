@@ -80,10 +80,10 @@ if(empty ($config['core'])) {
 }
 // Load core classes that all classes extend
 foreach($config['core'] as $class) {
-    if (file_exists(APPPATH.'core/app'.EXT)) {
-        require_once APPPATH.'core/app'.EXT;
-    } else if (file_exists(BASEPATH.'core/app'.EXT)) {
-        require_once BASEPATH.'core/app'.EXT;
+    if (file_exists(APPPATH."core/$class".EXT)) {
+        require_once APPPATH."core/$class".EXT;
+    } else if (file_exists(BASEPATH."core/$class".EXT)) {
+        require_once BASEPATH."core/$class".EXT;
     }
 }
 
