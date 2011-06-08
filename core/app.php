@@ -58,6 +58,7 @@ class app {
     private static $start_time;
     private static $controller_data = array();
     private static $controller_output = "";
+    private static $ob = "";
 
 
     // private constructor, this is a purely static class
@@ -332,7 +333,6 @@ class app {
      * ----------------
      * This function handles finding the controller class, calling its methods, and passing arguments.
      */
-
     public static function dispatch() {
         // Start the session
         session_start();
@@ -387,7 +387,6 @@ class app {
      * ------------------
      * Sets the request type. Normally set by the dispatcher based on the extension.
      */
-
     public static function setReqType($type) {
         self::$request_type = $type;
     }
@@ -412,7 +411,7 @@ class app {
 
     /*
      * app::getMethod();
-     * ------------------
+     * -----------------
      * Return the current method of the request
      */
     public static function getReqMethod() {
@@ -440,7 +439,7 @@ class app {
 
     /*
      * app::getStartTime();
-     * ------------------
+     * --------------------
      * Return the start time.
      */
     public static function getStartTime() {
@@ -449,11 +448,65 @@ class app {
 
     /*
      * app::getElapsedTime();
-     * ------------------
+     * ----------------------
      * Return the time elapsed since starting.
      */
     public static function getElapsedTime() {
         return microtime(true) - self::$start_time;
+    }
+
+    /*
+     * app::render();
+     * --------------
+     * Renders the pages if they need to be rendered.
+     * Fetches error views/layouts if needed.
+     */
+    public static function render() {
+        // Render output based on request type
+        switch (self::getReqType()) {
+            // It's a json request
+            case 'json':
+                header('Content-Type: application/json');
+                self::$ob = json_encode(self::$controller_data);
+                break;
+            // It's a text request
+            case 'text':
+                $content = self::$controller_output;
+                header('Content-Type: text/plain');
+                header('Content-Length: ' . strlen($content));
+                self::$ob = $content;
+                break;
+            // The default is the full layout and html
+            default:
+                $slots = array();
+                foreach (layout::getSlots() as $slot => $view) {
+                    $slots[$slot] = layout::view($view, self::$controller_data, true);
+                }
+                // If any error messages have accumulated, show them.
+                if (self::hasErrorMessages()) {
+                    // Set the data for the error messages
+                    $slots['content'] = self::error();
+                }
+                self::$controller_data = array_merge(self::$controller_data, $slots);
+                self::$controller_data['css'] = self::buildStyleTags();
+                self::$controller_data['scripts'] = self::buildScriptTags();
+                $layout = layout::which() === NULL ? self::$config['default_layout'] : layout::which();
+                try {
+                    $temp_ob = layout::layout($layout, self::$controller_data);
+                } catch(Exception $e) {
+                    $temp_ob = layout::distribution_layout($layout, self::$controller_data);
+                }
+                self::$ob = $temp_ob;
+        }
+    }
+
+    /*
+     * app::getOutputBuffer();
+     * -----------------------
+     * Returns the output buffer for display
+     */
+    public static function getOutputBuffer() {
+        return self::$ob;
     }
 
 /*

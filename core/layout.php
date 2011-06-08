@@ -47,7 +47,6 @@ class layout {
     private static $slots = array();
     private static $data = array();
     private static $text = "";
-    private static $ob = "";
     private static $temp_ob = "";
 
     private function __construct() {
@@ -322,59 +321,6 @@ class layout {
             throw new Exception("Could not load file: $file");
         }
         return self::$temp_ob;
-    }
-    /*
-     * layout::render();
-     * -----------------
-     * Renders the pages if they need to be rendered.
-     * Fetches error views/layouts if needed.
-     */
-    public static function render() {
-        // Render output based on request type
-        switch (app::getReqType()) {
-            // It's a json request
-            case 'json':
-                header('Content-Type: application/json');
-                self::$ob = json_encode(self::$data);
-                break;
-            // It's a text request
-            case 'text':
-                $content = self::$text;
-                header('Content-Type: text/plain');
-                header('Content-Length: ' . strlen($content));
-                self::$ob = $content;
-                break;
-            // The default is the full layout and html
-            default:
-                $slots = array();
-                foreach (self::$slots as $slot => $view) {
-                    $slots[$slot] = self::view($view, self::$data, true);
-                }
-                // If any error messages have accumulated, show them.
-                if (app::hasErrorMessages()) {
-                    // Set the data for the error messages
-                    $slots['content'] = self::error();
-                }
-                self::$data = array_merge(self::$data, $slots);
-                self::$data['css'] = self::buildStyleTags();
-                self::$data['scripts'] = self::buildScriptTags();
-                $layout = self::$layout === NULL ? app::$config['default_layout'] : self::$layout;
-                try {
-                    self::$temp_ob = self::layout($layout, self::$data);
-                } catch(Exception $e) {
-                    self::$temp_ob = self::distribution_layout($layout, self::$data);
-                }
-                self::$ob = self::$temp_ob;
-        }
-    }
-
-    /*
-     * layout::getOutputBuffer();
-     * --------------------------
-     * Returns the output buffer for display
-     */
-    public static function getOutputBuffer() {
-        return self::$ob;
     }
 
 }
