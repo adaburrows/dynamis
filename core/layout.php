@@ -271,18 +271,17 @@ class layout {
      * ----------------
      * Loads the error view, fails gracefully.
      */
-    public function error() {
+    public function error($errors) {
         try {
             self::$temp_ob = self::load_template(
                     APPPATH . "views/errors/error" . EXT,
-                    array('error_messages' => app::getErrorMessages())
+                    array('error_messages' => $errors)
             );
         } catch (Exception $e) {
-            app::exception_handler($e);
             try {
                 self::$temp_ob = self::load_template(
                         BASEPATH . "views/errors/error" . EXT,
-                        array('error_messages' => app::getErrorMessages())
+                        array('error_messages' => $errors)
                 );
             } catch (Exception $f) {
                 self::$temp_ob = "System Error! Could not find built-in error view. Please re-install Dynamis.";

@@ -485,7 +485,7 @@ class app {
                 // If any error messages have accumulated, show them.
                 if (self::hasErrorMessages()) {
                     // Set the data for the error messages
-                    $slots['content'] = self::error();
+                    $slots['content'] = layout::error(self::getErrorMessages());
                 }
                 self::$controller_data = array_merge(self::$controller_data, $slots);
                 self::$controller_data['css'] = self::buildStyleTags();
