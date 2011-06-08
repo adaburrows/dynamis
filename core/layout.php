@@ -282,8 +282,8 @@ class layout {
             } catch (Exception $f) {
                 self::$temp_ob = "System Error! Could not find built-in error view. Please re-install Dynamis.";
             }
-
         }
+        return self::$temp_ob;
     }
 
     /*
@@ -347,9 +347,7 @@ class layout {
                 // If any error messages have accumulated, show them.
                 if (app::hasErrorMessages()) {
                     // Set the data for the error messages
-                    $slots['content'] = self::error(
-                            array('error_messages' => app::getErrorMessages())
-                    );
+                    $slots['content'] = self::error();
                 }
                 self::$data = array_merge(self::$data, $slots);
                 self::$data['css'] = self::buildStyleTags();
