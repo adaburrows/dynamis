@@ -66,11 +66,19 @@ class app {
      */
 
     /*
+     * app::getCore();
+     * --------------
+     * Return a reference to a library, or create a new one if ! existing.
+     */
+    public static function &getCore($class_name) {
+        return self::_load_class($class_name, BASEPATH . 'core', self::$core);
+    }
+
+    /*
      * app::getLib();
      * --------------
      * Return a reference to a library, or create a new one if ! existing.
      */
-
     public static function &getLib($lib_name) {
         return self::_load_class($lib_name, BASEPATH . 'libs', self::$libraries);
     }
@@ -80,7 +88,6 @@ class app {
      * ---------------------
      * Return a reference to a controller or create a new one if ! existing.
      */
-
     public static function &getController($controller_name) {
         return self::_load_class($controller_name, APPPATH . 'controllers', self::$controllers);
     }
@@ -90,7 +97,6 @@ class app {
      * ----------------
      * Return a reference to a model or create a new one if ! existing.
      */
-
     public static function &getModel($model_name) {
         return self::_load_class($model_name, APPPATH . 'models', self::$models);
     }
@@ -102,7 +108,6 @@ class app {
      * If a class instance doesn't already exist, it creates a new one.
      * Loads class from a file if necessary.
      */
-
     private static function &_load_class($class_name, $class_dir, &$class_array) {
         if (!array_key_exists($class_name, $class_array)) {
             if (is_file("$class_dir/$class_name" . EXT)) {
@@ -124,7 +129,6 @@ class app {
      * ----------------------------
      * Returns a list of controller and their methods.
      */
-
     public static function getClassMethods($type = 'controllers') {
         $classes = array();
         switch ($type) {
@@ -138,7 +142,7 @@ class app {
                 $classes = self::getLibraries();
                 break;
             case 'core':
-                $clases = self::getCore();
+                $clases = self::getCores();
         }
         $classes_methods = array();
         foreach ($classes as $class) {
@@ -152,7 +156,6 @@ class app {
      * ------------------
      * Returns a list of methods in the public, protected and private scopes
      */
-
     public static function getMethods($class_name) {
         $reflector = new ReflectionClass($class_name);
         $methods = array(
@@ -168,7 +171,6 @@ class app {
      * ---------------------
      * Filters the list of methods so there is only an array of function names
      */
-
     protected static function filterMethods($unfiltered) {
         $filtered = array();
         foreach ($unfiltered as $method) {
@@ -182,7 +184,6 @@ class app {
      * -----------------
      * Returns a list of models
      */
-
     public static function getModels() {
         self::$models = self::getClassesInDir(APPPATH . 'models');
         return array_keys(self::$models);
@@ -193,7 +194,6 @@ class app {
      * ----------------------
      * Returns a list of controllers
      */
-
     public static function getControllers() {
         self::$controllers = self::getClassesInDir(APPPATH . 'controllers');
         return array_keys(self::$controllers);
@@ -204,19 +204,17 @@ class app {
      * --------------------
      * Returns a list of libraries
      */
-
     public static function getLibraries() {
         self::$libraries = self::getClassesInDir(BASEPATH . 'libs');
         return array_keys(self::$libraries);
     }
 
     /*
-     * app::getCore();
+     * app::getCores();
      * --------------------
      * Returns a list of core classes
      */
-
-    public static function getCore() {
+    public static function getCores() {
         self::$core = self::getCodeFilesInDir(BASEPATH . 'core');
         return array_keys(self::$core);
     }
@@ -226,7 +224,6 @@ class app {
      * -----------------------
      * Returns an array of classes, where the keys are the names of the instances
      */
-
     public static function getClassesInDir($directory) {
         self::$classes = array();
         $classes = self::getCodeFilesInDir($directory);
@@ -245,7 +242,6 @@ class app {
      * ---------------------
      * Reads a file off disk
      */
-
     private static function _read_file($filename) {
         if (is_file($filename)) {
             $data = file_get_contents($filename);
@@ -260,7 +256,6 @@ class app {
      * -----------------------
      * Returns an array of classes, where the keys are the names of the instances
      */
-
     public static function getCodeFilesInDir($directory) {
         $files = array();
         $dir = opendir($directory);
@@ -287,6 +282,12 @@ class app {
      * ==========================================================================
      */
 
+    /*
+     * app::go();
+     * ----------
+     * Kicks the app in the rear!
+     * Called from bootstrap.php
+     */
     public static function go() {
         $route = ""; // Used to store the route
         $parts = array(); // Used to store the parts of the route
@@ -316,7 +317,6 @@ class app {
      * Set the start time of the application.
      * Called from bootstrap.php
      */
-
     public static function setStartTime($time) {
         self::$start_time = $time;
     }
@@ -326,7 +326,6 @@ class app {
      * ------------------
      * Return the start time.
      */
-
     public static function getStartTime() {
         return self::$start_time;
     }
@@ -336,7 +335,6 @@ class app {
      * ------------------
      * Return the time elapsed since starting.
      */
-
     public static function getElapsedTime() {
         return microtime(true) - self::$start_time;
     }
@@ -351,7 +349,6 @@ class app {
      * -------------------------
      * Returns true if there are any error messages
      */
-
     public static function hasErrorMessages() {
         return (count(self::$error_messages) > 0);
     }
@@ -361,7 +358,6 @@ class app {
      * -------------------------
      * Returns the error messages in an application
      */
-
     public static function getErrorMessages() {
         return self::$error_messages;
     }
@@ -372,7 +368,6 @@ class app {
      * Application wide error handler
      * TODO: load error view
      */
-
     public static function error_handler($errno, $errstr, $errfile, $errline, $errcontext) {
         $error = "";
 
@@ -426,7 +421,6 @@ Fatal error on line $errline in file $errfile\n:
      * -------------------------
      * Application wide exception handler
      */
-
     public static function exception_handler(Exception $e) {
         $error = <<<ERROR
 <pre>
@@ -443,7 +437,6 @@ ERROR;
      * -------------------------
      * Application wide shutdown handler
      */
-
     public static function shutdown_handler() {
         // Render output
         layout::render();

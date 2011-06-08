@@ -60,17 +60,24 @@ if(file_exists(APPPATH.'init'.EXT)) {
   require_once APPPATH.'init'.EXT;
 }
 
+//Include the core app file, used to power the rest of the process.
+if (file_exists(BASEPATH.'core/app'.EXT)) {
+  require_once BASEPATH.'core/app'.EXT;
+}
+// Set the global error handler
+set_error_handler( array('app', 'error_handler') );
+// Set the global exception handler
+set_exception_handler( array('app', 'exception_handler') );
+// Set the global shutdown handler
+register_shutdown_function( array('app', 'shutdown_handler') );
+
 // Core libraries to load
 if(empty ($config['core'])) {
-    $config['core'] = array('controller', 'db', 'layout', 'app', 'router');
+    $config['core'] = array('controller', 'db', 'layout', 'router');
 }
 // Load core classes that all classes extend
 foreach($config['core'] as $class) {
-  if (file_exists(APPPATH."core/$class".EXT)) {
-    require_once APPPATH."core/$class".EXT;
-  } else {
-    require_once BASEPATH."core/$class".EXT;
-  }
+  app::getCore($class);
 }
 
 // Setup routes for application 
@@ -80,13 +87,6 @@ require_once APPPATH.'routes'.EXT;
 if(isset($config['use_database']) && $config['use_database'] == true) {
   db::connect();
 }
-
-// Set the global error handler
-set_error_handler( array('app', 'error_handler') );
-// Set the global exception handler
-set_exception_handler( array('app', 'exception_handler') );
-// Set the global shutdown handler
-register_shutdown_function( array('app', 'shutdown_handler') );
 
 app::setStartTime($start_time);
 app::setConfig($config);
