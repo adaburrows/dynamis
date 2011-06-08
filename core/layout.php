@@ -241,7 +241,7 @@ class layout {
             self::$temp_ob = self::load_template(APPPATH . "views/$view_name" . EXT, $data);
         } catch(Exception $e) {
             // Error! View missing!
-            throw new Exception("Error: Could not find view: $view_name", 912, $e);
+            app::exception_handler(new Exception("Error: Could not find view: $view_name", 912, $e));
         }
         // If buffering, return the buffer.
         // If not, just append it to the full buffer.
@@ -268,6 +268,25 @@ class layout {
     }
 
     /*
+     * layout::error();
+     * ----------------
+     * Loads the error view, fails gracefully.
+     */
+    public function error() {
+        try {
+            self::$temp_ob = self::load_template(APPPATH . "views/errors/error" . EXT, app::getErrorMessages());
+        } catch (Exception $e) {
+            app::exception_handler($e);
+            try {
+                self::$temp_ob = self::load_template(BASEPATH . "views/errors/error" . EXT, app::getErrorMessages());
+            } catch (Exception $f) {
+                self::$temp_ob = "System Error! Could not find built-in error view. Please re-install Dynamis.";
+            }
+
+        }
+    }
+
+    /*
      * layout::distribution_layout();
      * ------------------------------
      * Loads the default layout that comes with the Dyanmis core.
@@ -276,7 +295,7 @@ class layout {
         try { 
             self::$temp_ob = self::load_template(BASEPATH . "layouts/default" . EXT, $data);
         } catch (Exception $e) {
-            self::$temp_ob = "Serious Error! Could not find built in layout. Check the core Dynamis files.";
+            self::$temp_ob = "System Error! Could not find built-in default layout. Please re-install Dynamis.";
         }
         return self::$temp_ob;
     }
@@ -323,22 +342,13 @@ class layout {
             default:
                 $slots = array();
                 foreach (self::$slots as $slot => $view) {
-                    // Try loading view, if it fails add the error to the queue
-                    // and keep going. Otherwise, global exception handler is
-                    // called exiting function and rendering nothing.
-                    try {
-                        $slots[$slot] = self::view($view, self::$data, true);
-                    } catch (Exception $e) {
-                        app::exception_handler($e);
-                    }
+                    $slots[$slot] = self::view($view, self::$data, true);
                 }
                 // If any error messages have accumulated, show them.
                 if (app::hasErrorMessages()) {
                     // Set the data for the error messages
-                    $slots['content'] = self::view(
-                                    'errors/error',
-                                    array('error_messages' => app::getErrorMessages()),
-                                    true
+                    $slots['content'] = self::error(
+                            array('error_messages' => app::getErrorMessages())
                     );
                 }
                 self::$data = array_merge(self::$data, $slots);
