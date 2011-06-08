@@ -366,9 +366,9 @@ class app {
 class {$controller} extends controller {
     public function {$method} () {return array();}
 }
+$app_controller = new $controller;
 CLASS;
             eval($class);
-            $app_controller = new $controller;
         }
         // Find out if the controller has the requested method
         if (method_exists($app_controller, self::$method)) {
