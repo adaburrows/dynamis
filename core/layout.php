@@ -236,19 +236,12 @@ class layout {
      * Optionally, returns all data in a string.
      */
     public static function view($view_name, $data = array(), $buffer = false) {
-        self::$temp_ob = "";
-        // Move key value pairs from data into variables in the current scope.
-        extract($data);
         // If the view exists load it into an output buffer.
-        if (is_file(APPPATH . "views/$view_name" . EXT)) {
-            ob_start();
-            include(APPPATH . "views/$view_name" . EXT);
-            // Store the output buffer.
-            self::$temp_ob = ob_get_contents();
-            ob_end_clean();
-        } else {
+        try {
+            self::$temp_ob = self::load_template(APPPATH . "views/$view_name" . EXT, $data);
+        } catch(Exception $e) {
             // Error! View missing!
-            throw new Exception("Error: Could not find view: $view_name");
+            throw new Exception("Error: Could not find view: $view_name", 912, $e);
         }
         // If buffering, return the buffer.
         // If not, just append it to the full buffer.
@@ -259,6 +252,52 @@ class layout {
         }
     }
 
+    /*
+     * layout::layout();
+     * -----------------
+     * Loads the desired layout and fills in the variables
+     * Optionally, returns all data in a string.
+     */
+    public static function layout($layout, $data = array()) {
+        try {
+            self::$temp_ob = self::load_template(APPPATH . "layouts/$layout" . EXT, $data);
+        } catch (Exception $e) {
+            throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT, 911, $e);
+        }
+        return self::$temp_ob;
+    }
+
+    /*
+     * layout::distribution_layout();
+     * ------------------------------
+     * Loads the default layout that comes with the Dyanmis core.
+     */
+    public static function distribution_layout($data = array()) {
+        try { 
+            self::$temp_ob = self::load_template(BASEPATH . "layouts/default" . EXT, $data);
+        } catch (Exception $e) {
+            self::$temp_ob = "Serious Error! Could not find built in layout. Check the core Dynamis files.";
+        }
+        return self::$temp_ob;
+    }
+
+    /*
+     * layout::load_template();
+     * ------------------------
+     * Loads a template file.
+     */
+    public static function load_template($file, $data = array()) {
+        extract($data);
+        if (is_file($file)) {
+            ob_start();
+            include($file);
+            self::$temp_ob = ob_get_contents();
+            ob_end_clean();
+        } else {
+            throw new Exception("Could not load file: $file");
+        }
+        return self::$temp_ob;
+    }
     /*
      * layout::render();
      * -----------------
@@ -284,10 +323,11 @@ class layout {
             default:
                 $slots = array();
                 foreach (self::$slots as $slot => $view) {
+                    // Try loading view, if it fails add the error to the queue
+                    // and keep going. Otherwise, global exception handler is
+                    // called exiting function and rendering nothing.
                     try {
                         $slots[$slot] = self::view($view, self::$data, true);
-                    // If that failed add the error to the queue and keep going.
-                    // Otherwise, global exception handler is called poping function stack
                     } catch (Exception $e) {
                         app::exception_handler($e);
                     }
@@ -305,15 +345,10 @@ class layout {
                 self::$data['css'] = self::buildStyleTags();
                 self::$data['scripts'] = self::buildScriptTags();
                 $layout = self::$layout === NULL ? app::$config['default_layout'] : self::$layout;
-                if (is_file(APPPATH . "layouts/$layout" . EXT)) {
-                    ob_start();
-                    extract(self::$data);
-                    include(APPPATH . "layouts/$layout" . EXT);
-                    self::$temp_ob = ob_get_contents();
-                    ob_end_clean();
-                } else {
-                    //TODO: if the layout isn't found, load a static page from core
-                    throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT);
+                try {
+                    self::$temp_ob = self::layout($layout, self::$data);
+                } catch(Exception $e) {
+                    self::$temp_ob = self::distribution_layout($layout, self::$data);
                 }
                 self::$ob = self::$temp_ob;
         }
