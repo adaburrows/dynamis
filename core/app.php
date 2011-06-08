@@ -308,9 +308,6 @@ class app {
 
         // Load the $controller's $method, passing in $parts as the parameters.
         router::dispatch($controller, $method, $parts);
-
-        // Render output
-        layout::render();
     }
 
     /*
@@ -448,6 +445,8 @@ ERROR;
      */
 
     public static function shutdown_handler() {
+        // Render output
+        layout::render();
         // Output stored view buffer
         echo layout::getOutputBuffer();
         // Output the random shit from the controller
