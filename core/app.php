@@ -381,7 +381,7 @@ class app {
                 }
                 ob_start(); // Buffer the controller output
                 // We have more than enough parameters for the method, dispatch.
-                self::$controller_data = self::setData(
+                self::setData(
                         call_user_func_array(
                                 array($app_controller, self::$method),
                                 self::$params
