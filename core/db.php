@@ -313,7 +313,7 @@ class db {
       }
     }
     $query .= implode(',', $statements);
-    $query .= " WHERE `id` = '{$data['id']}';";
+    $query .= " WHERE `{$this->primary_key}` = '{$data[$this->primary_key]}';";
     return $query;
   }
 
