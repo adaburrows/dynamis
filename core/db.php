@@ -169,6 +169,7 @@ class db {
     // Get the primary aspect -- first item in ordered hash
     $aspect_list = array_keys($this->aspects);
     $this->primary_aspect = array_shift($aspect_list);
+    $this->primary_key = $this->aspects[$this->primary_aspect][0];
   }
 
   /*
@@ -340,11 +341,6 @@ class db {
    * Builds entire stat query and returns it.
    */
   public function build_stat_query($total_days) {
-    // Get the primary aspect -- first item in ordered hash
-    $aspect_list = array_keys($this->aspects);
-    $this->primary_aspect = array_shift($aspect_list);
-    $this->primary_key = $this->aspects[$this->primary_aspect][0];
-
     $verb             = 'SELECT';
     $stat_selections  = array("\n  `{$this->primary_aspect}`.`{$this->primary_key}` AS `{$this->primary_key}`");
     $stat_joins       = array("`{$this->primary_aspect}`");
