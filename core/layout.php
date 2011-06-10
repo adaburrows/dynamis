@@ -144,7 +144,7 @@ class layout {
             if (isset($style['file'])) {
                 $style_tags .= '<link rel="stylesheet" type="text/css" href="' . $style['file'] . '" />' . "\n";
             } else if (isset($style['css'])) {
-                $style_tags .= '<style type="text/css">' . $style['css'] . '</script>' . "\n";
+                $style_tags .= '<style type="text/css">' . $style['css'] . '</style>' . "\n";
             }
         }
         return $style_tags;
