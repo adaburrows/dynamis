@@ -114,7 +114,21 @@ class app {
      * Return a reference to a model or create a new one if ! existing.
      */
     public static function &getModel($model_name) {
-        return self::_load_class($model_name, APPPATH . 'models', self::$models);
+        $model = null;
+        try {
+            $model = self::_load_class($model_name, APPPATH . 'models', self::$models);
+        } catch (Exception $e) {
+            self::exception_handler($e);
+            $dynamic_class  = "class {$model_name} {";
+            $dynamic_class .= '  public function __call($name, $args) {';
+            $dynamic_class .= '    $e = new Exception("Function {$name} not found in non-existant class '.$model_name.'");';
+            $dynamic_class .= '    app::exception_handler($e);';
+            $dynamic_class .= '  }';
+            $dynamic_class .= '}';
+            $dynamic_class .= "return new {$model_name};";
+            $model = eval($dynamic_class);
+        }
+        return $model;
     }
 
     /*
@@ -368,8 +382,12 @@ class {$controller} extends controller {
 }
 return new $controller;
 CLASS;
-            $app_controller = eval($dynamic_class);
-            $app_controller->initialize();
+            try {
+                $app_controller = eval($dynamic_class);
+                $app_controller->initialize();
+            } catch (Exception $e) {
+                self::exception_handler($e);
+            }
         }
         // Find out if the controller has the requested method
         if (method_exists($app_controller, self::$method)) {
