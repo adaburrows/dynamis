@@ -96,7 +96,25 @@ class app {
      * Return a reference to a library, or create a new one if ! existing.
      */
     public static function &getLib($lib_name) {
-        return self::_load_class($lib_name, BASEPATH . 'libs', self::$libraries);
+        $lib = null;
+        try {
+            $lib = self::_load_class($lib_name, BASEPATH . 'libs', self::$libraries);
+        } catch (Exception $e) {
+            self::exception_handler($e);
+            $dynamic_class  = "class {$lib_name} {";
+            $dynamic_class .= '  public function __call($name, $args) {';
+            $dynamic_class .= '    $e = new Exception("Function {$name} not found in non-existant class '.$lib_name.'");';
+            $dynamic_class .= '    app::exception_handler($e);';
+            $dynamic_class .= '  }';
+            $dynamic_class .= '}';
+            $dynamic_class .= "return new {$lib_name};";
+            try {
+                $lib = eval($dynamic_class);
+            } catch (Exception $e) {
+                self::exception_handler($e);
+            }
+        }
+        return $lib;
     }
 
     /*
@@ -105,7 +123,26 @@ class app {
      * Return a reference to a controller or create a new one if ! existing.
      */
     public static function &getController($controller_name) {
-        return self::_load_class($controller_name, APPPATH . 'controllers', self::$controllers);
+        $controller = null;
+        try {
+            $controller = self::_load_class($controller_name, APPPATH . 'controllers', self::$controllers);
+        } catch (Exception $e) {
+            self::exception_handler($e);
+            $dynamic_class  = "class {$controller_name} extends controller {";
+            $dynamic_class .= '  public function __call($name, $args) {';
+            $dynamic_class .= '    $e = new Exception("Function {$name} not found in non-existant class '.$controller_name.'");';
+            $dynamic_class .= '    app::exception_handler($e);';
+            $dynamic_class .= '  }';
+            $dynamic_class .= '}';
+            $dynamic_class .= "return new {$controller_name};";
+            try {
+                $controller = eval($dynamic_class);
+                $controller->initialize();
+            } catch (Exception $e) {
+                self::exception_handler($e);
+            }
+        }
+        return $controller;
     }
 
     /*
@@ -126,7 +163,11 @@ class app {
             $dynamic_class .= '  }';
             $dynamic_class .= '}';
             $dynamic_class .= "return new {$model_name};";
-            $model = eval($dynamic_class);
+            try {
+                $model = eval($dynamic_class);
+            } catch (Exception $e) {
+                self::exception_handler($e);
+            }
         }
         return $model;
     }
@@ -370,25 +411,7 @@ class app {
         session_start();
         // try loading the specified controller
         // if this throws an exception, catch it and create a new blank class.
-        try {
-            $app_controller = &self::getController(self::$controller);
-        } catch (Exception $e) {
-            self::exception_handler($e);
-            $controller = self::$controller;
-            $method = self::$method;
-            $dynamic_class = <<<CLASS
-class {$controller} extends controller {
-    public function {$method} () {return array();}
-}
-return new $controller;
-CLASS;
-            try {
-                $app_controller = eval($dynamic_class);
-                $app_controller->initialize();
-            } catch (Exception $e) {
-                self::exception_handler($e);
-            }
-        }
+        $app_controller = &self::getController(self::$controller);
         // Find out if the controller has the requested method
         if (method_exists($app_controller, self::$method)) {
 
