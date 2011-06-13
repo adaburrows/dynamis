@@ -337,10 +337,10 @@ class db {
       $value = mysql_real_escape_string($data[$field]);
       // If it's numeric don't quote it
       if(is_numeric($value) || in_array($field, $this->default_fields)) {
-        $statements[] = "`$k`=$value";
+        $statements[] = "`$field`=$value";
       // If it's something else, quote it
       } else {
-        $statements[] = "`$k`='$value'";
+        $statements[] = "`$field`='$value'";
       }
     }
     $query .= implode(',', $statements);
