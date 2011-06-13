@@ -188,7 +188,7 @@ class db {
    * Set the data for the model, create it if it doesn't exist
    */
   public function set($data) {
-    if (isset($data['id']) && $this->get_by_id($data['id'])) {
+    if (isset($data[$this->primary_key]) && $this->get_by_id($data[$this->primary_key])) {
       $query = $this->build_update($data, $this->primary_aspect);
     } else {
       $query = $this->build_insert($data, $this->primary_aspect);
@@ -294,26 +294,27 @@ class db {
   }
 
   protected function build_insert($data, $aspect) {
-    $fields = array();
     $values = array();
+    // Grab the fields for the given aspect
     $field_list = $this->get_fields(array('aspect' => $aspect));
+    // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
+    // Calculate intersection of data with the field list
+    $fields = array_intersect($field_list, $data);
+    // Build query
     $query  = "INSERT INTO `$aspect` (";
-    foreach ($data as $k => $v) {
-      if (in_array($k, $field_list)){
-        $fields[] = "`$k`";
-      }
-    }
     $query .= implode(',', $fields);
     $query .= ") VALUES (";
-    foreach ($data as $k => $v) {
-      if (in_array($k, $field_list)){
-        $value = mysql_real_escape_string($v);
-        if(is_integer($v) || in_array($k, $this->default_fields)) {
-          $values[] = "$value";
-        } else {
-          $values[] = "'$value'";
-        }
+    // Iterate over each field and set the corresponding value
+    foreach ($fields as $field) {
+      // Not currently using prepared statements, so clean it.
+      $value = mysql_real_escape_string($data[$field]);
+      // If it's numeric don't quote it
+      if(is_numeric($value) || in_array($field, $this->default_fields)) {
+        $values[] = $value;
+      // If it's something else, quote it
+      } else {
+        $values[] = "'$value'";
       }
     }
     $query .= implode(',', $values);
@@ -323,17 +324,23 @@ class db {
 
   protected function build_update($data, $aspect) {
     $statements = array();
+    // Grab the fields for the given aspect
     $field_list = $this->get_fields(array('aspect' => $aspect));
-    $data = array_merge($data, $this->update_defaults);
+    // Merge in the default values
+    $data = array_merge($data, $this->insert_defaults);
+    // Calculate intersection of data with the field list
+    $fields = array_intersect($field_list, $data);
     $query  = "UPDATE `$aspect` SET ";
-    foreach ($data as $k => $v) {
-      if (in_array($k, $field_list)){
-        $value = mysql_real_escape_string($v);
-        if(is_integer($v) || in_array($k, $this->default_fields)) {
-          $statements[] = "`$k`=$value";
-        } else {
-          $statements[] = "`$k`='$value'";
-        }
+    // Iterate over each field and set the corresponding value
+    foreach ($fields as $field) {
+      // Not currently using prepared statements, so clean it.
+      $value = mysql_real_escape_string($data[$field]);
+      // If it's numeric don't quote it
+      if(is_numeric($value) || in_array($field, $this->default_fields)) {
+        $statements[] = "`$k`=$value";
+      // If it's something else, quote it
+      } else {
+        $statements[] = "`$k`='$value'";
       }
     }
     $query .= implode(',', $statements);
