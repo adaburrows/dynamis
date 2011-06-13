@@ -300,7 +300,7 @@ class db {
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
     // Calculate intersection of data with the field list
-    $fields = array_intersect_key($field_list, array_keys($data));
+    $fields = array_intersect_key($field_list, $data);
     // Build query
     $query  = "INSERT INTO `$aspect` (";
     $query .= implode(',', array_values($fields));
@@ -327,9 +327,9 @@ class db {
     // Grab the fields for the given aspect
     $field_list = $this->get_fields(array('aspect' => $aspect));
     // Merge in the default values
-    $data = array_merge($data, $this->insert_defaults);
+    $data = array_merge($data, $this->update_defaults);
     // Calculate intersection of data with the field list
-    $fields = array_intersect_key($field_list, array_keys($data));
+    $fields = array_intersect_key($field_list, $data);
     $query  = "UPDATE `$aspect` SET ";
     // Iterate over each field and set the corresponding value
     foreach ($fields as $field_name => $field_query) {
@@ -337,10 +337,10 @@ class db {
       $value = mysql_real_escape_string($data[$field_name]);
       // If it's numeric don't quote it
       if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
-        $statements[] = "`$field_query`=$value";
+        $statements[] = "$field_query=$value";
       // If it's something else, quote it
       } else {
-        $statements[] = "`$field_query`='$value'";
+        $statements[] = "$field_query='$value'";
       }
     }
     $query .= implode(',', $statements);
