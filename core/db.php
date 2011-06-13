@@ -156,6 +156,7 @@ class db {
  */
 
   public function __construct() {
+  global $aspects;
     $this->default_fields = array ( 'created', 'modified' );
 
     $this->insert_defaults = array (
@@ -167,9 +168,8 @@ class db {
     );
 
     // Get the primary aspect -- first item in ordered hash
-    $aspect_list = array_keys($this->aspects);
-    $this->primary_aspect = array_shift($aspect_list);
-    $this->primary_key = $this->aspects[$this->primary_aspect][0];
+    $this->primary_aspect = $this->aspects[0];
+    $this->primary_key = $aspects[$this->primary_aspect][0];
   }
 
   /*
@@ -206,6 +206,47 @@ class db {
       return db::query_ins("DELETE FROM `{$this->primary_aspect}` WHERE `id` = {$id};");
   }
 
+  protected function get_fields($data = array()) {
+  global $aspects;
+      // Default: don't subset fields
+      $subset_fields = false;
+      // If we have a subset field param and it's an array use it.
+      if(isset($data['subset']) && is_array($data['subset'])) {
+          $subset_fields = $data['subset'];
+      }
+      // Initialize variable to store resutant fields
+      $total_fields = array();
+      // If there is a specified aspect, lets use it.
+      if(isset($data['aspect'])) {
+          $current_aspects = array($data['aspect']);
+          $primary_aspect = $data['aspect'];
+      // Else, just use the models requested aspects and default primary aspect
+      } else {
+          $current_aspects = $this->aspects;
+          $primary_aspect = $this->primary_aspect;
+      }
+      // Iterate over all current aspects
+      foreach ($current_aspects as $aspect) {
+          // Add default fields to primary aspect
+          if ($aspect == $primary_aspect) {
+              $iter_fields = array_merge($aspects[$aspect], $this->default_fields);
+          // Don't merge in the default fields if not a primary aspect
+          } else {
+              $iter_fields = $aspects[$aspect];
+          }
+          // If we are subsetting the fields computer the intersection
+          if($subset_fields) {
+              $iter_fields = array_intersect($iter_fields, $subset_fields);
+          }
+          // Add each field into the total array, ready to be used in a query
+          foreach ($iter_fields as $field) {
+              $total_fields[] = "`{$aspect}`.`{$field}`";
+          }
+      }
+      // Send it back, all shiny and new...
+      return $total_fields;
+  }
+
   protected function build_select($aspect = NULL) {
     $verb = 'SELECT';
     $fields = array();
@@ -214,32 +255,14 @@ class db {
 
     // if we're selecting from only one aspect, there will be no joins
     if ($aspect != NULL) {
-      $fields = array_merge($this->aspects[$aspect], $this->default_fields);
-      // prepare fields by wrapping them in back ticks
-      foreach ($fields as $field) {
-        $fields[] = "`$field`";
-      }
+      $fields = $this->get_fields(array('aspect' => $aspect));
       // Set table to select from
       $from = "$aspect";
-
     } else {
       // We have joins for multiple tables (all aspects)
-
-      $primary_aspect = $this->primary_aspect;
-
-      foreach ($this->aspects as $aspect => $aspect_fields) {
-        $iter_fields = $aspect_fields;
-        // Add default fields to primary aspect
-        if ($aspect == $primary_aspect)
-          $iter_fields = array_merge($iter_fields, $this->default_fields);
-        // Add aspect name to list of tables being used
-        foreach ($iter_fields as $field) {
-          // Prepare fields for selection in a join.
-          $fields[] = "`$aspect`.`$field`";
-        }
-      }
-
-      $tables = array_keys($this->aspects);
+      $fields = $this->get_fields();
+      // Store the tables we are using - mnemonic for ease of following the code
+      $tables = $this->aspects;
       // Grab table to select from, and prevent it from being in the joins table
       $from = array_shift($tables);
 
@@ -273,7 +296,7 @@ class db {
   protected function build_insert($data, $aspect) {
     $fields = array();
     $values = array();
-    $field_list = array_merge($this->aspects[$aspect], $this->default_fields);
+    $field_list = $this->get_fields(array('aspect' => $aspect));
     $data = array_merge($data, $this->insert_defaults);
     $query  = "INSERT INTO `$aspect` (";
     foreach ($data as $k => $v) {
@@ -300,7 +323,7 @@ class db {
 
   protected function build_update($data, $aspect) {
     $statements = array();
-    $field_list = array_merge($this->aspects[$aspect], $this->default_fields);
+    $field_list = $this->get_fields(array('aspect' => $aspect));
     $data = array_merge($data, $this->update_defaults);
     $query  = "UPDATE `$aspect` SET ";
     foreach ($data as $k => $v) {

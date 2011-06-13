@@ -41,7 +41,7 @@
 // Require the application configuration file
 require_once APPPATH.'config'.EXT;
 if (empty($config['timezone'])) {
-  $config['timezone'] = 'America/Los_Angeles';
+    $config['timezone'] = 'America/Los_Angeles';
 }
 
 // Set up time
@@ -49,7 +49,7 @@ date_default_timezone_set($config['timezone']);
 $start_time = microtime(true);
 
 if(empty($config['default_request_type'])){
-  $config['default_request_type'] = 'html';
+    $config['default_request_type'] = 'html';
 }
 
 // Include global utility functions
@@ -57,7 +57,7 @@ require_once BASEPATH.'utilities'.EXT;
 
 // Setup extra init tasks if file exists
 if(file_exists(APPPATH.'init'.EXT)) {
-  require_once APPPATH.'init'.EXT;
+    require_once APPPATH.'init'.EXT;
 }
 
 // Include router - dependancy of app.
@@ -92,7 +92,10 @@ require_once APPPATH.'routes'.EXT;
 
 // Connect to database
 if(isset($config['use_database']) && $config['use_database'] == true) {
-  db::connect();
+    if(is_file(APPPATH.'models/schema/aspects'.EXT)) {
+        require_once APPPATH.'models/schema/aspects'.EXT;
+    }
+    db::connect();
 }
 
 app::setStartTime($start_time);
