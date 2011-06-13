@@ -240,7 +240,7 @@ class db {
           }
           // Add each field into the total array, ready to be used in a query
           foreach ($iter_fields as $field) {
-              $total_fields[] = "`{$aspect}`.`{$field}`";
+              $total_fields[$field] = "`{$aspect}`.`{$field}`";
           }
       }
       // Send it back, all shiny and new...
@@ -260,7 +260,7 @@ class db {
       $from = "$aspect";
     } else {
       // We have joins for multiple tables (all aspects)
-      $fields = $this->get_fields();
+      $fields = array_values($this->get_fields());
       // Store the tables we are using - mnemonic for ease of following the code
       $tables = $this->aspects;
       // Grab table to select from, and prevent it from being in the joins table
@@ -300,17 +300,17 @@ class db {
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
     // Calculate intersection of data with the field list
-    $fields = array_intersect($field_list, array_keys($data));
+    $fields = array_intersect_key($field_list, array_keys($data));
     // Build query
     $query  = "INSERT INTO `$aspect` (";
-    $query .= implode(',', $fields);
+    $query .= implode(',', array_values($fields));
     $query .= ") VALUES (";
     // Iterate over each field and set the corresponding value
-    foreach ($fields as $field) {
+    foreach ($fields as $field_name => $field_query) {
       // Not currently using prepared statements, so clean it.
-      $value = mysql_real_escape_string($data[$field]);
+      $value = mysql_real_escape_string($data[$field_name]);
       // If it's numeric don't quote it
-      if(is_numeric($value) || in_array($field, $this->default_fields)) {
+      if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
         $values[] = $value;
       // If it's something else, quote it
       } else {
@@ -329,18 +329,18 @@ class db {
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
     // Calculate intersection of data with the field list
-    $fields = array_intersect($field_list, array_keys($data));
+    $fields = array_intersect_key($field_list, array_keys($data));
     $query  = "UPDATE `$aspect` SET ";
     // Iterate over each field and set the corresponding value
-    foreach ($fields as $field) {
+    foreach ($fields as $field_name => $field_query) {
       // Not currently using prepared statements, so clean it.
-      $value = mysql_real_escape_string($data[$field]);
+      $value = mysql_real_escape_string($data[$field_name]);
       // If it's numeric don't quote it
-      if(is_numeric($value) || in_array($field, $this->default_fields)) {
-        $statements[] = "`$field`=$value";
+      if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
+        $statements[] = "`$field_query`=$value";
       // If it's something else, quote it
       } else {
-        $statements[] = "`$field`='$value'";
+        $statements[] = "`$field_query`='$value'";
       }
     }
     $query .= implode(',', $statements);
