@@ -300,7 +300,7 @@ class db {
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
     // Calculate intersection of data with the field list
-    $fields = array_intersect($field_list, $data);
+    $fields = array_intersect($field_list, array_keys($data));
     // Build query
     $query  = "INSERT INTO `$aspect` (";
     $query .= implode(',', $fields);
@@ -329,7 +329,7 @@ class db {
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
     // Calculate intersection of data with the field list
-    $fields = array_intersect($field_list, $data);
+    $fields = array_intersect($field_list, array_keys($data));
     $query  = "UPDATE `$aspect` SET ";
     // Iterate over each field and set the corresponding value
     foreach ($fields as $field) {
