@@ -262,7 +262,7 @@ class layout {
         } catch (Exception $e) {
             try {
                 self::$temp_ob = self::load_template(
-                        BASEPATH . "views/errors/error" . EXT,
+                        BASEPATH . "default/views/errors/error" . EXT,
                         array('error_messages' => $errors)
                 );
             } catch (Exception $f) {
@@ -279,7 +279,7 @@ class layout {
      */
     public static function distribution_layout($data = array()) {
         try { 
-            self::$temp_ob = self::load_template(BASEPATH . "layouts/default" . EXT, $data);
+            self::$temp_ob = self::load_template(BASEPATH . "default/layouts/default" . EXT, $data);
         } catch (Exception $e) {
             self::$temp_ob = "System Error! Could not find built-in default layout. Please re-install Dynamis.";
         }
