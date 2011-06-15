@@ -170,7 +170,11 @@ class db {
     // Get the primary aspect -- first item in ordered hash
     $aspects_copy = $this->aspects;
     $this->primary_aspect = array_shift($aspects_copy);
-    $aspect_fields = $aspects[$this->primary_aspect];
+    if($this->primary_aspect) {
+        $aspect_fields = $aspects[$this->primary_aspect];
+    } else {
+        $aspect_fields = array();
+    }
     $this->primary_key = array_shift($aspect_fields);
   }
 
