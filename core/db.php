@@ -173,9 +173,13 @@ class db {
     if($this->primary_aspect != null) {
         $aspect_fields = $aspects[$this->primary_aspect];
     } else {
+        $this->primary_aspect = '';
         $aspect_fields = array();
     }
     $this->primary_key = array_shift($aspect_fields);
+    if($this->primary_key == null) {
+        $this->primary_key = '';
+    }
   }
 
   /*
