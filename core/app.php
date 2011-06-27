@@ -624,7 +624,6 @@ class app {
 <b>ERROR</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
 \n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-                $error .= serialize($errcontext);
                 break;
 
             case E_USER_WARNING:
@@ -632,7 +631,6 @@ Fatal error on line $errline in file $errfile\n:
 <b>WARNING</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
 \n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-                $error .= serialize($errcontext);
                 break;
 
             case E_USER_NOTICE:
@@ -640,7 +638,6 @@ Fatal error on line $errline in file $errfile\n:
 <b>NOTICE</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
 \n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-                $error .= serialize($errcontext);
                 break;
 
             default:
@@ -648,10 +645,10 @@ Fatal error on line $errline in file $errfile\n:
 <b>ERROR</b> [$errno] $errstr<br />\n
 Fatal error on line $errline in file $errfile\n:
 \n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-                $error .= serialize($errcontext);
                 break;
         }
 
+        $error .= htmlentities(serialize($errcontext));
         self::$error_messages[] = $error;
 
         /* Don't execute PHP internal error handler */
