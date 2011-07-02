@@ -155,6 +155,11 @@ class db {
  * ==========================================================================
  */
 
+  /*
+   * __consruct()
+   * ------------
+   * Sets up the scene for the magic that follows.\/\/007!
+   */
   public function __construct() {
   global $aspects;
     $this->default_fields = array ( 'created', 'modified' );
@@ -176,6 +181,7 @@ class db {
         $this->primary_aspect = '';
         $aspect_fields = array();
     }
+    //Get the primary field -- first item in ordered hash
     $this->primary_key = array_shift($aspect_fields);
     if($this->primary_key == null) {
         $this->primary_key = '';
@@ -190,6 +196,26 @@ class db {
   public function get_all() {
     $select = $this->build_select().';';
     return self::query_array($select);
+  }
+
+  /*
+   * get_by_id()
+   * -----------
+   * Select a row with the given id
+   */
+  public function get_by_id($id) {
+    $select = $this->build_select($this->primary_aspect)." WHERE `{$this->primary_key}` = $id;";
+    return self::query_item($select);
+  }
+
+  /*
+   * get_by_($field, $value)
+   * -----------------------
+   * Select a row with the given id
+   */
+  public function get_by_($field, $value) {
+    $select = $this->build_select()." WHERE `$field` = $value;";
+    return self::query_item($select);
   }
 
   /*
@@ -216,13 +242,20 @@ class db {
       return db::query_ins("DELETE FROM `{$this->primary_aspect}` WHERE `id` = {$id};");
   }
 
+  /*
+   * get_fields()
+   * ------------
+   * Takes an array possibly containing two keys: 'aspect' + 'fields'
+   * Returns an array of strings in the form of: "`$table_name`.`$field_name`"
+   *   to be used in a SQL query.
+   */
   protected function get_fields($data = array()) {
   global $aspects;
       // Default: don't subset fields
       $subset_fields = false;
-      // If we have a subset field param and it's an array use it.
-      if(isset($data['subset']) && is_array($data['subset'])) {
-          $subset_fields = $data['subset'];
+      // If we have a fields param and it's an array use it.
+      if(isset($data['fields']) && is_array($data['fields'])) {
+          $subset_fields = $data['fields'];
       }
       // Initialize variable to store resutant fields
       $total_fields = array();
@@ -257,60 +290,79 @@ class db {
       return $total_fields;
   }
 
-  protected function build_select($aspect = NULL) {
+  /*
+   * build_joins()
+   * -------------
+   * $from - primary table with which to join.
+   * $tables - array of tables to join.
+   * Also uses the $this->join_on array to creat the join conditions.
+   * Returns a a string containing a standard MySQL compatible join clause.
+   */
+  protected function build_joins($from, $tables) {
+      $joins = array();
+      // loop through tables to prepare join statements
+      foreach($tables as $table) {
+          // begin join statement
+          $join = "JOIN `$table`";
+          // if there are join on conditions, use them here.
+          if (isset($this->join_on[$from])) {
+              if (isset($this->join_on[$from][$table])) {
+                  $join .= " ON ({$this->join_on[$from][$table]})";
+              }
+          }
+          // Add join statement to the array of joins
+          $joins[] = $join;
+      }
+      return $joins;
+  }
+
+  /*
+   * build_select()
+   * --------------
+   * Builds a select statement with all joins if no aspect is given.
+   */
+  protected function build_select($aspect = NULL, $fields = NULL) {
     $verb = 'SELECT';
     $fields = array();
     $from = '';
-    $joins = NULL;
+    $joins = array();
 
     // if we're selecting from only one aspect, there will be no joins
     if ($aspect != NULL) {
-      $fields = $this->get_fields(array('aspect' => $aspect));
+      $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => $fields));
       // Set table to select from
       $from = "$aspect";
     } else {
       // We have joins for multiple tables (all aspects)
-      $fields = array_values($this->get_fields());
+      $fields = array_values($this->get_fields(array('aspect' => $aspect, 'fields' => $fields)));
       // Store the tables we are using - mnemonic for ease of following the code
       $tables = $this->aspects;
       // Grab table to select from, and prevent it from being in the joins table
       $from = array_shift($tables);
-
-      $joins = array();
-      // loop through tables to prepare join statements
-      foreach($tables as $table) {
-        // begin join statement
-        $join = "JOIN `$table`";
-        // if there are join on conditions, use them here.
-        if (isset($this->join_on[$from])) {
-          if (isset($this->join_on[$from][$table])) {
-            $join .= " ON ({$this->join_on[$from][$table]})";
-          }
-        }
-        // Add join statement to the array of joins
-        $joins[] = $join;
-      }
+      // Build joins
+      $joins = $this->build_joins($from, $tables);
     }
 
     // finish building select statement
     $query_parts[] = $verb;
     $query_parts[] = implode(', ', $fields);
     $query_parts[] = "FROM `$from`";
-    if ($joins != NULL) {
-      $query_parts[] = implode(' ', $joins);
-    }
+    $query_parts[] = implode(' ', $joins);
     $query = implode(" ", $query_parts);
     return $query;
   }
 
+  /*
+   * build_insert()
+   * --------------
+   * Builds an insert statement for a specific aspect.
+   */
   protected function build_insert($data, $aspect) {
     $values = array();
-    // Grab the fields for the given aspect
-    $field_list = $this->get_fields(array('aspect' => $aspect));
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
-    // Calculate intersection of data with the field list
-    $fields = array_intersect_key($field_list, $data);
+    // Grab the fields for the given aspect
+    $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data)));
     // Build query
     $query  = "INSERT INTO `$aspect` (";
     $query .= implode(',', array_values($fields));
@@ -332,14 +384,18 @@ class db {
     return $query;
   }
 
+  /*
+   * build_update()
+   * --------------
+   * Builds an update statement with all joins if no aspect is given.
+   * TODO: reuse code from build select to implement the joins.
+   */
   protected function build_update($data, $aspect) {
     $statements = array();
-    // Grab the fields for the given aspect
-    $field_list = $this->get_fields(array('aspect' => $aspect));
     // Merge in the default values
     $data = array_merge($data, $this->update_defaults);
-    // Calculate intersection of data with the field list
-    $fields = array_intersect_key($field_list, $data);
+    // Grab the fields for the given aspect
+    $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data)));
     $query  = "UPDATE `$aspect` SET ";
     // Iterate over each field and set the corresponding value
     foreach ($fields as $field_name => $field_query) {
