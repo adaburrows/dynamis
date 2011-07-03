@@ -234,7 +234,7 @@ class model extends db {
       $table = "$aspect";
     } else {
       // We have joins for multiple tables (all aspects)
-      $fields = array_values($this->get_fields(array('aspect' => $aspect, 'fields' => $fields)));
+      $fields = array_values($this->get_fields(array('fields' => $fields)));
       // Store the tables we are using - mnemonic for ease of following the code
       $tables = $this->aspects;
       // Grab table to select from, and prevent it from being in the joins table
@@ -288,7 +288,6 @@ class model extends db {
    * build_update()
    * --------------
    * Builds an update statement with all joins if no aspect is given.
-   * TODO: reuse code from build select to implement the joins.
    */
   protected function build_update($data, $aspect = NULL) {
     $verb = 'UPDATE';
@@ -305,7 +304,7 @@ class model extends db {
       $table = "$aspect";
     } else {
       // We have joins for multiple tables (all aspects)
-      $fields = array_values($this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data))));
+      $fields = array_values($this->get_fields(array('fields' => array_keys($data))));
       // Store the tables we are using - mnemonic for ease of following the code
       $tables = $this->aspects;
       // Grab table to select from, and prevent it from being in the joins table
@@ -330,7 +329,7 @@ class model extends db {
       }
     }
 
-    // finish building select statement
+    // finish building update statement
     $query_parts[] = $verb;
     $query_parts[] = implode(', ', $fields);
     $query_parts[] = "`$table`";
@@ -342,6 +341,52 @@ class model extends db {
     // For update, we need a reference to the primary key
     $id = $data[$this->primary_key];
     $query .= " WHERE `{$this->primary_key}` = '{$id}';";
+    return $query;
+  }
+
+  /*
+   * build_delete()
+   * --------------
+   * Builds a delete statement with all joins if no aspect list is given.
+   */
+  protected function build_delete($data = NULL, $aspects = NULL) {
+    $verb = 'DELETE';
+    $fields = array();
+    $table = '';
+    $tables = array();
+    $joins = array();
+
+    // if we're selecting from only one aspect, there will be no joins
+    if ($aspects != NULL && is_string($aspects)) {
+      $table = $aspects;
+    } else if(is_array($aspects)) {
+      // Store the tables we are using - mnemonic for ease of following the code
+      $tables = $aspects;
+      // Grab table to select from, and prevent it from being in the joins table
+      $table = array_shift($tables);
+      // Build joins
+      $joins = $this->build_joins($table, $tables);
+    } else {
+        $table = $this->primary_aspect;
+    }
+
+    // finish building delete statement
+    $query_parts[] = $verb;
+    $query_parts[] = implode(', ', $tables);
+    $query_parts[] = "FROM `$table`";
+    $query_parts[] = implode(' ', $joins);
+    // We have data to build a where clause
+    if ($data != NULL && is_array($data)){
+        $query_parts[] = 'WHERE';
+        $where_parts = array();
+        // We have joins for multiple tables (all aspects)
+        $fields = $this->get_fields(array('fields' => $data));
+        foreach($fields as $field => $full_field) {
+            $where_parts[] = "{$full_field} = {$data[$field]}";
+        }
+        $query_parts[] = implode(' AND ', $where_parts);
+    }
+    $query = implode(" ", $query_parts);
     return $query;
   }
 
