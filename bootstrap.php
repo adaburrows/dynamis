@@ -76,7 +76,7 @@ register_shutdown_function( array('app', 'shutdown_handler') );
 
 // Core libraries to load
 if(empty ($config['core'])) {
-    $config['core'] = array('db');
+    $config['core'] = array('db', 'model');
 }
 // Load core classes that all classes extend
 foreach($config['core'] as $class) {
