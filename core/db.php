@@ -43,6 +43,7 @@ class db {
   protected static $db_num_results = 0;
   protected static $db_num_rows_affected = 0;
   protected static $db_insert_id = false;
+  protected static $db_error = array();
   protected static $db_query_results = array();
 
 /*
@@ -86,9 +87,10 @@ class db {
    * -------------------
    * This function retreives a number indexed array of rows (in associative array form) from a database query
    */
-  public static function query_array($query){
+  public static function query_array($query, $bind_values = NULL){
     $statement = self::$connection->prepare($query);
     $statement->execute();
+    self::$db_error = $statement->errorInfo();
     self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
     self::$db_num_results = count(self::$db_query_results);
     return self::$db_query_results;
@@ -101,9 +103,10 @@ class db {
    * Assumption of name: your query will only return one record.
    * If the query returns more than one record, only the first is returned by the function
    */
-  public static function query_item($query){
+  public static function query_item($query, $bind_values = NULL){
     $statement = self::$connection->prepare($query);
     $statement->execute();
+    self::$db_error = $statement->errorInfo();
     self::$db_query_results = $statement->fetch(PDO::FETCH_ASSOC);
     self::$db_num_results = self::$db_query_results ? 1 : 0;
     return self::$db_query_results;
@@ -114,9 +117,10 @@ class db {
    * -----------------
    * Runs an insert query, returning the result.
    */
-  public static function query_ins($query){
+  public static function query_ins($query, $bind_values = NULL){
     $statement = self::$connection->prepare($query);
     $statement->execute();
+    self::$db_error = $statement->errorInfo();
     self::$db_num_rows_affected = $statement->rowCount();
     self::$db_insert_id = self::$connection->lastInsertId();
     if (self::$db_num_rows_affected > 0) {
@@ -160,6 +164,15 @@ class db {
    */
   public static function insertId(){
     return self::$db_insert_id;
+  }
+
+  /*
+   * db::error();
+   * ------------
+   * Returns the error from the last query.
+   */
+  public static function error(){
+    return self::$db_error;
   }
 
   /*
