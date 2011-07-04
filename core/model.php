@@ -97,7 +97,7 @@ class model extends db {
    * Select a row with the given id
    */
   public function get_by_id($id) {
-    $select = $this->build_select($this->primary_aspect)." WHERE `{$this->primary_key}` = $id;";
+    $select = $this->build_select(NULL, NULL, array("{$this->primary_key}" => $id));
     return self::query_item($select);
   }
 
@@ -106,8 +106,8 @@ class model extends db {
    * -----------------------
    * Select a row with the given id
    */
-  public function get_by_($field, $value) {
-    $select = $this->build_select()." WHERE `$field` = $value;";
+  public function get_by_($data) {
+    $select = $this->build_select(NULL, NULL, $data);
     return self::query_item($select);
   }
 
@@ -138,8 +138,9 @@ class model extends db {
    * --------
    * deletes data from the primary table in the model
    */
-  public function delete($id, $aspect = NULL) {
-      return self::query_ins("DELETE FROM `{$this->primary_aspect}` WHERE `id` = {$id};");
+  public function delete($id, $aspects = NULL) {
+      $query = $this->build_delete(array("{$this->primary_key}" => $id), $aspects);
+      return self::query_ins($query);
   }
 
   /*
@@ -196,7 +197,7 @@ class model extends db {
    * $from - primary table with which to join.
    * $tables - array of tables to join.
    * Also uses the $this->join_on array to creat the join conditions.
-   * Returns a a string containing a standard MySQL compatible join clause.
+   * Returns a string containing a standard MySQL compatible join clause.
    */
   protected function build_joins($from, $tables) {
       $joins = array();
@@ -217,11 +218,30 @@ class model extends db {
   }
 
   /*
+   * build_where()
+   * -------------
+   * $data - contains fields and values to generate where statement.
+   * Returns a string containing a standard SQL where clause.
+   */
+  protected function build_where($data) {
+      $query_parts = array();
+      $query_parts[] = 'WHERE';
+      $where_parts = array();
+      // We have joins for multiple tables (all aspects)
+      $fields = $this->get_fields(array('fields' => $data));
+      foreach($fields as $field => $full_field) {
+          $where_parts[] = "{$full_field} = {$data[$field]}";
+      }
+      $query_parts[] = implode(' AND ', $where_parts);
+      return implode(' ', $query_parts);
+  }
+
+  /*
    * build_select()
    * --------------
    * Builds a select statement with all joins if no aspect is given.
    */
-  protected function build_select($aspect = NULL, $fields = NULL) {
+  protected function build_select($aspect = NULL, $fields = NULL, $where = NULL) {
     $verb = 'SELECT';
     $fields = array();
     $table = '';
@@ -248,7 +268,10 @@ class model extends db {
     $query_parts[] = implode(', ', $fields);
     $query_parts[] = "FROM `$table`";
     $query_parts[] = implode(' ', $joins);
-    $query = implode(" ", $query_parts);
+    if(is_array($where)) {
+        $query_parts[] = $this->build_where($where);
+    }
+    $query = implode(' ', $query_parts);
     return $query;
   }
 
@@ -257,7 +280,10 @@ class model extends db {
    * --------------
    * Builds an insert statement for a specific aspect.
    */
-  protected function build_insert($data, $aspect) {
+  protected function build_insert($data, $aspect = NULL) {
+    if($aspect == NULL) {
+        $aspect = $this->primary_aspect;
+    }
     $values = array();
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
@@ -347,7 +373,7 @@ class model extends db {
   /*
    * build_delete()
    * --------------
-   * Builds a delete statement with all joins if no aspect list is given.
+   * Builds a delete statement with primary aspect if no aspect list is given.
    */
   protected function build_delete($data = NULL, $aspects = NULL) {
     $verb = 'DELETE';
@@ -357,7 +383,7 @@ class model extends db {
     $joins = array();
 
     // if we're selecting from only one aspect, there will be no joins
-    if ($aspects != NULL && is_string($aspects)) {
+    if (is_string($aspects)) {
       $table = $aspects;
     } else if(is_array($aspects)) {
       // Store the tables we are using - mnemonic for ease of following the code
@@ -377,20 +403,15 @@ class model extends db {
     $query_parts[] = implode(' ', $joins);
     // We have data to build a where clause
     if ($data != NULL && is_array($data)){
-        $query_parts[] = 'WHERE';
-        $where_parts = array();
-        // We have joins for multiple tables (all aspects)
-        $fields = $this->get_fields(array('fields' => $data));
-        foreach($fields as $field => $full_field) {
-            $where_parts[] = "{$full_field} = {$data[$field]}";
-        }
-        $query_parts[] = implode(' AND ', $where_parts);
+        $query_parts[] = $this->build_where($data);
     }
     $query = implode(" ", $query_parts);
     return $query;
   }
 
   /*
+   * prepare_stat_subqueries()
+   * -------------------------
    * Prepares individual statements
    * Expects classes that derive from this implement the comparison functions
    *   that return a SQL comparison "verb predicate" (eg. ' > NOW()').
@@ -408,6 +429,8 @@ class model extends db {
   }
 
   /*
+   * build_stat_query()
+   * ------------------
    * Builds entire stat query and returns it.
    */
   public function build_stat_query($total_days) {
@@ -436,6 +459,8 @@ class model extends db {
   }
 
   /*
+   * get_stats()
+   * -----------
    * Builds + executes stat queries, parses results into the following format:
    *  $data[$aspect] = array($data_elements);
    */

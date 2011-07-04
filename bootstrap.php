@@ -66,6 +66,8 @@ require_once BASEPATH.'core/router'.EXT;
 require_once BASEPATH.'core/layout'.EXT;
 // Include app
 require_once BASEPATH.'core/app'.EXT;
+app::setConfig($config);
+app::setStartTime($start_time);
 // Set the global error handler
 set_error_handler( array('app', 'error_handler') );
 // Set the global exception handler
@@ -98,7 +100,5 @@ if(isset($config['use_database']) && $config['use_database'] == true) {
     db::connect();
 }
 
-app::setStartTime($start_time);
-app::setConfig($config);
 app::getCore('controller');
 app::go();

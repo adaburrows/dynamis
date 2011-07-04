@@ -41,6 +41,7 @@
 class db {
   protected static $connection;
   protected static $db_num_results = 0;
+  protected static $db_num_rows_affected = 0;
   protected static $db_query_results = array();
 
 /*
@@ -54,28 +55,42 @@ class db {
    * Connects to the database.
    */
   public static function connect() {
-  global $config;
-    //connect to mysql database server
-    self::$connection = mysql_connect($config['db_host'],$config['db_user'],$config['db_pass']) or die("Error connecting to database.");
-    //select our database
-    mysql_select_db($config['db_name']) or die("Error selecting database...");
+    $type = isset(app::$config['db_type']) ?
+      app::$config['db_type'] : 'unknown';
+    $host = isset(app::$config['db_host']) ?
+      app::$config['db_host'] : '127.0.0.1';
+    $port = isset(app::$config['db_port']) ?
+      'port='.app::$config['db_port'].';' : '';
+    $name = isset(app::$config['db_name']) ?
+      'dbname='.app::$config['db_name'].';' : '';
+    $user = isset(app::$config['db_user']) ?
+      app::$config['db_user'] : 'user';
+    $pass = isset(app::$config['db_pass']) ?
+      app::$config['db_pass'] : 'pass';
+    
+    $dsn = "{$type}:host={$host};{$port}{$name}";
+
+    // Lets try the settings and hope they work!
+    try {
+        //connect to mysql database server
+        self::$connection = new PDO($dsn, $user, $pass);
+    } catch (PDOException $e) {
+        self::$connection = null;
+        app::exception_handler(new Exception("Could not connect to database!"));
+    }
   }
 
   /*
    * db::query_array();
    * -------------------
-   * This function retreives a number indexed array of rows (stored in associative array form) from a database query
+   * This function retreives a number indexed array of rows (in associative array form) from a database query
    */
-  public static function query_array($sql_request){
-    $a=array();
-    $result= mysql_query($sql_request);
-    if($result) {
-      self::$db_num_results = mysql_num_rows($result);
-      while($row = mysql_fetch_array($result, MYSQL_ASSOC)){
-        $a[]=$row;
-      }
-    }
-    return $a;
+  public static function query_array($query){
+    $statement = self::$connection->prepare($query);
+    $statement->execute();
+    self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
+    self::$db_num_results = count(self::$db_query_results);
+    return self::$db_query_results;
   }
 
   /*
@@ -85,14 +100,12 @@ class db {
    * Assumption of name: your query will only return one record.
    * If the query returns more than one record, only the first is returned by the function
    */
-  public static function query_item($sql_request){
-    $row = array();
-    $result = mysql_query($sql_request);
-    if ($result) {
-      self::$db_num_results = mysql_num_rows($result);
-      $row = mysql_fetch_array($result, MYSQL_ASSOC);
-    }
-    return $row;
+  public static function query_item($query){
+    $statement = self::$connection->prepare($query);
+    $statement->execute();
+    self::$db_query_results = $statement->fetch(PDO::FETCH_ASSOC);
+    self::$db_num_results = self::$db_query_results ? 1 : 0;
+    return self::$db_query_results;
   }
 
   /*
@@ -100,12 +113,15 @@ class db {
    * -----------------
    * Runs an insert query, returning the result.
    */
-  public static function query_ins($sql_insert){
-    $result = mysql_query($sql_insert);
-    if ($result) {
-      self::$db_num_results = mysql_affected_rows();
+  public static function query_ins($query){
+    $statement = self::$connection->prepare($query);
+    $statement->execute();
+    self::$db_num_rows_affected = $statement->rowCount();
+    if (self::$db_num_rows_affected > 0) {
+        return true;
+    } else {
+        return false;
     }
-    return $result;
   }
 
   /*
@@ -115,6 +131,24 @@ class db {
    */
   public static function num_results(){
     return self::$db_num_results;
+  }
+
+  /*
+   * db::results();
+   * --------------
+   * Returns the results from the last query.
+   */
+  public static function results(){
+    return self::$db_query_results;
+  }
+
+  /*
+   * db::num_rows_affected();
+   * ------------------------
+   * Returns the number of results from the last query.
+   */
+  public static function num_results(){
+    return self::$db_num_rows_affected;
   }
 
   /*
