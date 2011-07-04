@@ -147,7 +147,7 @@ class db {
    * ------------------------
    * Returns the number of results from the last query.
    */
-  public static function num_results(){
+  public static function num_rows_affected(){
     return self::$db_num_rows_affected;
   }
 
