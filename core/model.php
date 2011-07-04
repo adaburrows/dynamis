@@ -296,7 +296,7 @@ class model extends db {
     // Iterate over each field and set the corresponding value
     foreach ($fields as $field_name => $field_query) {
       // Not currently using prepared statements, so clean it.
-      $value = mysql_real_escape_string($data[$field_name]);
+      $value = addcslashes($data[$field_name], "\\\000\n\r'\"\032%_");
       // If it's numeric don't quote it
       if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
         $values[] = $value;
@@ -345,7 +345,7 @@ class model extends db {
     foreach ($fields as $field_name => $field_query) {
       // Not currently using prepared statements, so clean it.
       // TODO: Change this into a colon prefixed field_name for prepared statements
-      $value = mysql_real_escape_string($data[$field_name]);
+      $value = addcslashes($data[$field_name], "\\\000\n\r'\"\032%_");
       // If it's numeric don't quote it
       if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
         $statements[] = "$field_query=$value";

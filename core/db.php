@@ -42,6 +42,7 @@ class db {
   protected static $connection;
   protected static $db_num_results = 0;
   protected static $db_num_rows_affected = 0;
+  protected static $db_insert_id = false;
   protected static $db_query_results = array();
 
 /*
@@ -117,6 +118,7 @@ class db {
     $statement = self::$connection->prepare($query);
     $statement->execute();
     self::$db_num_rows_affected = $statement->rowCount();
+    self::$db_insert_id = self::$connection->lastInsertId();
     if (self::$db_num_rows_affected > 0) {
         return true;
     } else {
@@ -145,10 +147,19 @@ class db {
   /*
    * db::num_rows_affected();
    * ------------------------
-   * Returns the number of results from the last query.
+   * Returns the number of affected rows from the last query.
    */
   public static function num_rows_affected(){
     return self::$db_num_rows_affected;
+  }
+
+  /*
+   * db::insert_id();
+   * ----------------
+   * Returns the insert id from the last query.
+   */
+  public static function insertId(){
+    return self::$db_insert_id;
   }
 
   /*
