@@ -230,6 +230,7 @@ class model extends db {
       // We have joins for multiple tables (all aspects)
       $fields = $this->get_fields(array('fields' => $data));
       foreach($fields as $field => $full_field) {
+          // TODO: change this to use binding placeholder
           $where_parts[] = "{$full_field} = {$data[$field]}";
       }
       $query_parts[] = implode(' AND ', $where_parts);
@@ -295,6 +296,7 @@ class model extends db {
     $query .= ") VALUES (";
     // Iterate over each field and set the corresponding value
     foreach ($fields as $field_name => $field_query) {
+      // TODO: change this to use binding placeholder
       // Not currently using prepared statements, so clean it.
       $value = addcslashes($data[$field_name], "\\\000\n\r'\"\032%_");
       // If it's numeric don't quote it
@@ -343,8 +345,8 @@ class model extends db {
     $statements = array();
     // Iterate over each field and set the corresponding value
     foreach ($fields as $field_name => $field_query) {
+      // TODO: change this to use binding placeholder
       // Not currently using prepared statements, so clean it.
-      // TODO: Change this into a colon prefixed field_name for prepared statements
       $value = addcslashes($data[$field_name], "\\\000\n\r'\"\032%_");
       // If it's numeric don't quote it
       if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
