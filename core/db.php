@@ -87,12 +87,22 @@ class db {
    * -------------------
    * This function retreives a number indexed array of rows (in associative array form) from a database query
    */
-  public static function query_array($query, $bind_values = NULL){
+  public static function query_array($query, $bind_values = NULL) {
     $statement = self::$connection->prepare($query);
-    $statement->execute();
-    self::$db_error = $statement->errorInfo();
-    self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
-    self::$db_num_results = count(self::$db_query_results);
+    if($bind_values!=NULL && is_array($bind_values)) {
+      foreach ($bind_values as $name => $value) {
+        $statement->bindValue(":{$name}", $value);
+      }
+    }
+    try {
+      $statement->execute();
+      self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
+      self::$db_num_results = count(self::$db_query_results);
+    } catch (PDOException $e) {
+      self::$db_error = $statement->errorInfo();
+      app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
+      self::$db_query_results = array();
+    }
     return self::$db_query_results;
   }
 
@@ -103,12 +113,22 @@ class db {
    * Assumption of name: your query will only return one record.
    * If the query returns more than one record, only the first is returned by the function
    */
-  public static function query_item($query, $bind_values = NULL){
+  public static function query_item($query, $bind_values = NULL) {
     $statement = self::$connection->prepare($query);
-    $statement->execute();
-    self::$db_error = $statement->errorInfo();
-    self::$db_query_results = $statement->fetch(PDO::FETCH_ASSOC);
-    self::$db_num_results = self::$db_query_results ? 1 : 0;
+    if($bind_values!=NULL && is_array($bind_values)) {
+      foreach ($bind_values as $name => $value) {
+        $statement->bindValue(":{$name}", $value);
+      }
+    }
+    try {
+      $statement->execute();
+      self::$db_query_results = $statement->fetch(PDO::FETCH_ASSOC);
+      self::$db_num_results = self::$db_query_results ? 1 : 0;
+    } catch (PDOException $e) {
+      self::$db_error = $statement->errorInfo();
+      app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
+      self::$db_query_results = array();
+    }
     return self::$db_query_results;
   }
 
@@ -117,12 +137,22 @@ class db {
    * -----------------
    * Runs an insert query, returning the result.
    */
-  public static function query_ins($query, $bind_values = NULL){
+  public static function query_ins($query, $bind_values = NULL) {
     $statement = self::$connection->prepare($query);
-    $statement->execute();
-    self::$db_error = $statement->errorInfo();
-    self::$db_num_rows_affected = $statement->rowCount();
-    self::$db_insert_id = self::$connection->lastInsertId();
+    if($bind_values!=NULL && is_array($bind_values)) {
+      foreach ($bind_values as $name => $value) {
+        $statement->bindValue(":{$name}", $value);
+      }
+    }
+    try {
+      $statement->execute();
+      self::$db_num_rows_affected = $statement->rowCount();
+      self::$db_insert_id = self::$connection->lastInsertId();
+    } catch (PDOException $e) {
+      self::$db_error = $statement->errorInfo();
+      app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
+      self::$db_num_rows_affected = 0;
+    }
     if (self::$db_num_rows_affected > 0) {
         return true;
     } else {

@@ -42,6 +42,7 @@ class model extends db {
   protected $aliases = array();
   protected $join_on = array();
   protected $default_fields = array();
+  protected $current_fields = array();
   protected $insert_defaults = array();
   protected $update_defaults = array();
   protected $stat = array();
@@ -97,8 +98,10 @@ class model extends db {
    * Select a row with the given id
    */
   public function get_by_id($id) {
-    $select = $this->build_select(NULL, NULL, array("{$this->primary_key}" => $id));
-    return self::query_item($select);
+    $data = array("{$this->primary_key}" => $id);
+    $select = $this->build_select(NULL, NULL, $data);
+    $data = array_intersect_key($data, $this->current_fields);
+    return self::query_item($select, $data);
   }
 
   /*
@@ -106,9 +109,10 @@ class model extends db {
    * -----------------------
    * Select a row with the given id
    */
-  public function get_by_($data) {
-    $select = $this->build_select(NULL, NULL, $data);
-    return self::query_item($select);
+  public function get_by_($data, $aspect = NULL) {
+    $select = $this->build_select($aspect, NULL, $data);
+    $data = array_intersect_key($data, $this->current_fields);
+    return self::query_item($select, $data);
   }
 
   /*
@@ -121,15 +125,19 @@ class model extends db {
    * inserts into specified aspect.
    */
   public function set($data, $aspect = NULL) {
-    if (isset($data[$this->primary_key]) && $this->get_by_id($data[$this->primary_key])) {
-      $query = $this->build_update($data);
+  global $aspects;
+    if($aspect == NULL) {
+        $primary_key = $this->primary_key;
     } else {
-      if($aspect == NULL) {
-          $aspect = $this->primary_aspect;
-      }
+        $primary_key = $aspects[$aspect][0];
+    }
+    if (isset($data[$primary_key]) && $this->get_by_(array("{$primary_key}" => $data[$primary_key]), $aspect)) {
+      $query = $this->build_update($data, $aspect);
+    } else {
       $query = $this->build_insert($data, $aspect);
     }
-    $result = self::query_ins($query);
+    $data = array_intersect_key($data, $this->current_fields);
+    $result = self::query_ins($query, $data);
     return $result;
   }
 
@@ -139,8 +147,10 @@ class model extends db {
    * deletes data from the primary table in the model
    */
   public function delete($id, $aspects = NULL) {
-      $query = $this->build_delete(array("{$this->primary_key}" => $id), $aspects);
-      return self::query_ins($query);
+      $data = array("{$this->primary_key}" => $id);
+      $query = $this->build_delete($data, $aspects);
+      $data = array_intersect_key($data, $this->current_fields);
+      return self::query_ins($query, $data);
   }
 
   /*
@@ -187,6 +197,7 @@ class model extends db {
               $total_fields[$field] = "`{$aspect}`.`{$field}`";
           }
       }
+      $this->current_fields = $total_fields;
       // Send it back, all shiny and new...
       return $total_fields;
   }
@@ -201,18 +212,15 @@ class model extends db {
    */
   protected function build_joins($from, $tables) {
       $joins = array();
-      // loop through tables to prepare join statements
+
       foreach($tables as $table) {
-          // begin join statement
-          $join = "JOIN `$table`";
-          // if there are join on conditions, use them here.
-          if (isset($this->join_on[$from])) {
-              if (isset($this->join_on[$from][$table])) {
-                  $join .= " ON ({$this->join_on[$from][$table]})";
+          foreach($this->join_on as $join_def) {
+              if(array_key_exists($table, $join_def)) {
+                  $joining = array_keys($join_def);
+                  $fields  = array_values($join_def);
+                  $joins[] = "JOIN {$table} ON (`{$joining[0]}`.`{$fields[0]}` = `{$joining[1]}`.`{$fields[1]}`)";
               }
           }
-          // Add join statement to the array of joins
-          $joins[] = $join;
       }
       return $joins;
   }
@@ -221,17 +229,21 @@ class model extends db {
    * build_where()
    * -------------
    * $data - contains fields and values to generate where statement.
-   * Returns a string containing a standard SQL where clause.
+   * Returns a string containing a standard SQL where clause to be used as a
+   * prepared statement with named bound values.
    */
-  protected function build_where($data) {
+  protected function build_where($data, $aspect = NULL) {
       $query_parts = array();
       $query_parts[] = 'WHERE';
       $where_parts = array();
-      // We have joins for multiple tables (all aspects)
-      $fields = $this->get_fields(array('fields' => $data));
+      if($aspect == NULL) {
+        // We have joins for multiple tables (all aspects)
+        $fields = $this->get_fields(array('fields' => array_keys($data)));
+      } else {
+        $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data)));
+      }
       foreach($fields as $field => $full_field) {
-          // TODO: change this to use binding placeholder
-          $where_parts[] = "{$full_field} = {$data[$field]}";
+          $where_parts[] = "{$full_field} = :{$field}";
       }
       $query_parts[] = implode(' AND ', $where_parts);
       return implode(' ', $query_parts);
@@ -270,7 +282,7 @@ class model extends db {
     $query_parts[] = "FROM `$table`";
     $query_parts[] = implode(' ', $joins);
     if(is_array($where)) {
-        $query_parts[] = $this->build_where($where);
+        $query_parts[] = $this->build_where($where, $aspect);
     }
     $query = implode(' ', $query_parts);
     return $query;
@@ -280,14 +292,16 @@ class model extends db {
    * build_insert()
    * --------------
    * Builds an insert statement for a specific aspect.
+   * Returned statement uses bound parameters to specify actual data.
    */
   protected function build_insert($data, $aspect = NULL) {
     if($aspect == NULL) {
         $aspect = $this->primary_aspect;
     }
-    $values = array();
+    $names = array();
     // Merge in the default values
     $data = array_merge($data, $this->insert_defaults);
+    $data = array_merge($data, $this->update_defaults);
     // Grab the fields for the given aspect
     $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data)));
     // Build query
@@ -295,19 +309,16 @@ class model extends db {
     $query .= implode(',', array_values($fields));
     $query .= ") VALUES (";
     // Iterate over each field and set the corresponding value
-    foreach ($fields as $field_name => $field_query) {
-      // TODO: change this to use binding placeholder
-      // Not currently using prepared statements, so clean it.
-      $value = addcslashes($data[$field_name], "\\\000\n\r'\"\032%_");
-      // If it's numeric don't quote it
-      if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
-        $values[] = $value;
-      // If it's something else, quote it
-      } else {
-        $values[] = "'$value'";
+    foreach ($fields as $name => $full_field) {
+      if($name == 'created') {
+        $names[] = 'NOW()';
+      } else if ($name == 'modified') {
+        $names[] = 'NOW()';
+      }else {
+        $names[] = ":{$name}";
       }
     }
-    $query .= implode(',', $values);
+    $query .= implode(',', $names);
     $query .= ");";
     return $query;
   }
@@ -316,6 +327,7 @@ class model extends db {
    * build_update()
    * --------------
    * Builds an update statement with all joins if no aspect is given.
+   * Returned statement uses bound parameters to specify actual data.
    */
   protected function build_update($data, $aspect = NULL) {
     $verb = 'UPDATE';
@@ -344,22 +356,16 @@ class model extends db {
     // Build the set statements for the update query
     $statements = array();
     // Iterate over each field and set the corresponding value
-    foreach ($fields as $field_name => $field_query) {
-      // TODO: change this to use binding placeholder
-      // Not currently using prepared statements, so clean it.
-      $value = addcslashes($data[$field_name], "\\\000\n\r'\"\032%_");
-      // If it's numeric don't quote it
-      if(is_numeric($value) || in_array($field_name, $this->default_fields)) {
-        $statements[] = "$field_query=$value";
-      // If it's something else, quote it
+    foreach ($fields as $name => $full_field) {
+      if($name == 'modified') {
+        $statements[] = "{$full_field} = NOW()";
       } else {
-        $statements[] = "$field_query='$value'";
+        $statements[] = "{$full_field} = :{$name}";
       }
     }
 
     // finish building update statement
     $query_parts[] = $verb;
-    $query_parts[] = implode(', ', $fields);
     $query_parts[] = "`$table`";
     $query_parts[] = implode(' ', $joins);
     $query_parts[] = 'SET';

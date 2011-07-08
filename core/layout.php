@@ -222,7 +222,7 @@ class layout {
             self::$temp_ob = self::load_template(APPPATH . "views/$view_name" . EXT, $data);
         } catch(Exception $e) {
             // Error! View missing!
-            app::exception_handler(new Exception("Error: Could not find view: $view_name", 912, $e));
+            app::exception_handler(new Exception("Error: Could not find view: $view_name", 912));
         }
         // If buffering, return the buffer.
         // If not, just append it to the full buffer.
