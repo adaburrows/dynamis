@@ -78,7 +78,7 @@ class db {
         self::$connection = new PDO($dsn, $user, $pass);
     } catch (PDOException $e) {
         self::$connection = null;
-        app::exception_handler(new Exception("Could not connect to database!"));
+        throw new Exception("Could not connect to database!");
     }
   }
 
