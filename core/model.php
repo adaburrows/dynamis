@@ -116,6 +116,17 @@ class model extends db {
   }
 
   /*
+   * get_all_by_($field, $value)
+   * -----------------------
+   * Select data
+   */
+  public function get_all_by_($data, $aspect = NULL) {
+    $select = $this->build_select($aspect, NULL, $data);
+    $data = array_intersect_key($data, $this->current_fields);
+    return self::query_array($select, $data);
+  }
+
+  /*
    * set()
    * ---------
    * Set the data for the model, creates it if it doesn't exist.
