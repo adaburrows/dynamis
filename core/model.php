@@ -411,7 +411,7 @@ class model extends db {
     $query_parts[] = implode(' ', $joins);
     // We have data to build a where clause
     if ($data != NULL && is_array($data)){
-        $query_parts[] = $this->build_where($data);
+        $query_parts[] = $this->build_where($data, $aspects);
     }
     $query = implode(" ", $query_parts);
     return $query;
