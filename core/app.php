@@ -41,6 +41,7 @@
 
 class app {
     public static $config = array();
+    public static $is_secure_url = false;
 
     protected static $request_type = "";
     protected static $controller = "";
@@ -380,6 +381,10 @@ class app {
     public static function go() {
         $route = ""; // Used to store the route
 
+        // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
+        $type = isset($_GET['ext']) ? $_GET['ext'] : self::$config['default_request_type'];
+        self::setReqType($type);
+
         // Check if a route is set and get its parts
         if (isset($_GET['route'])) {
             $route = $_GET['route'];
@@ -393,9 +398,15 @@ class app {
         self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
         self::$method = ($method !== NULL && $method !== "") ? $method : 'index';
 
-        // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
-        $type = isset($_GET['ext']) ? $_GET['ext'] : self::$config['default_request_type'];
-        self::setReqType($type);
+        // If url should be secure and it's not, redirect to secure url.
+        self::$is_secure_url = router::isSecureRoute(array($controller, $method));
+        if(self::$is_secure_url && ($_SERVER['SERVER_PORT'] != '443')) {
+            $url = site_url($route);
+            if(self::$request_type != 'html')
+                $url .= ".".self::$request_type;
+            header("Location: {$url}");
+            exit();
+        }
 
         // Load the $controller's $method, passing in $parts as the parameters.
         self::dispatch();
@@ -414,7 +425,6 @@ class app {
         $app_controller = &self::getController(self::$controller);
         // Find out if the controller has the requested method
         if (method_exists($app_controller, self::$method)) {
-
             // Get a reflection class
             $reflector = new ReflectionMethod($app_controller, self::$method);
             // Get the number of required arguments for the method parameter
@@ -422,8 +432,8 @@ class app {
             if (count(self::$params) >= $num_req_args) {
                 // Set the default view, can be changed by the controller
                 layout::setSlots(array(
-                            'content' => self::$controller . "/" . self::$method
-                        ));
+                    'content' => self::$controller . "/" . self::$method
+                ));
                 /**
                  * TODO: any hooks for additional processing before calling the controller's method
                  */
