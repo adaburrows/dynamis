@@ -6,16 +6,13 @@
  */
 function site_url($url) {
 global $config;
+  // Is this supposed to be a secure URL?
   $secure_url = app::$is_secure_url;
   if (is_array($url)) {
-    $url = router::unmap($url);
     $secure_url = router::isSecureRoute($url);
+    $url = router::unmap($url);
   }
-  if($secure_url) {
-      $proto = 'https://';
-  } else {
-      $proto = 'http://';
-  }
+  $proto = $secure_url ? 'https://' : 'http://';
   $base = $config['site_base'] != '/' ? $config['site_base'] : $_SERVER['SERVER_NAME'];
   return("{$proto}{$base}/{$url}");
 }

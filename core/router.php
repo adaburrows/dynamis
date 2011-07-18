@@ -171,7 +171,7 @@ class router {
     $secure_route = false;
     // Make sure it's an array -- not full proof, but I'm not throwing exceptions yet.
     if(is_string($url)) {
-        $url = explode('/', $url);
+        $url = self::map($url);
     }
     // Add null values to array -- in case there are too few array elements --
     //  and assign the array elements to the desired variables
@@ -196,7 +196,6 @@ class router {
     return $secure_route;
   }
 
-
   /*
    * router::map();
    * ------------------
@@ -205,7 +204,6 @@ class router {
   public static function map($route) {
     // Extract segments into an array to be returned if all route searches fail
     $parts = explode('/', $route);
-
     // Search for route with no parameters
     if (array_key_exists($route, self::$routes)) {
       // If matched set the parts to the mapped values
@@ -256,44 +254,34 @@ class router {
    * router::unmap();
    * ------------------
    * Turns a route into a cannonical route
+   * 
+   * TODO: actually replace the placeholders in the middle of a route with the
+   *  right parameters, instead of an empty space. Need to find a mapping
+   *  between the placeholders and parameters. Perhaps I should use named
+   *  parameters so that each placeholder is unique. Would introduce an
+   *  interesting caveat in to routing: all parameters inside of a route would
+   *  need to be named, but paramters on the end of a route could use the
+   *  generic placeholders.
    */
   public static function unmap($url) {
-    // Set the default mapped route
-    $mapped_route = '/';
-    // Get the route variable place holders for later
-    $placeholders = array_keys(self::$conversions);
-    // Add null values to array -- in case there are too few array elements --
-    //  and assign the array elements to the desired variables
-    list($controller, $method, $params) = ($url+Array(null, null, null));
-    // If null, assign default values
-    if($controller == null) $controller = self::$config['default_controller'];
-    if($method == null) $method = 'index';
-    if($params == null) $params = '';
-    $params = is_array($params) ? implode('/', $params) : $params;
+    if(is_string($url))
+        $url = explode('/',$url);
+    // Get the parts of the URL we need.
+    $path = array_slice($url,0,2);
+    $params = array_slice($url,2);
     // Assemble the route -- sans parameters
-    $route = "$controller#$method";
+    $route = implode('#', $path);
     // Search for the route
     $map = array_search($route, self::$routes);
     // If there's a match
     if ($map) {
-    /**
-     * TODO: actually replace the placeholders in the middle of a route with the
-     *  right parameters, instead of an empty space. Need to find a mapping
-     *  between the placeholders and parameters. Perhaps I should use named
-     *  parameters so that each placeholder is unique. Would introduce an
-     *  interesting caveat in to routing: all parameters inside of a route would
-     *  need to be named, but paramters on the end of a route could use the
-     *  generic placeholders.
-     */
+      // Get the route variable place holders
+      $placeholders = array_keys(self::$conversions);
       // replace placeholders with empty space
       $temp = preg_replace($placeholders, '', $map);
-      // append params to the end
-      $mapped_route = "$temp/$params";
-    } else {
-    // If not, just return the full path
-      $mapped_route = "$controller/$method/$params";
+      $path = explode('/',$temp);
     }
-    
+    $mapped_route = implode('/', array_merge_recursive($path,$params));
     // Return the mapped route.
     return $mapped_route;
   }
