@@ -399,7 +399,7 @@ class app {
         self::$method = ($method !== NULL && $method !== "") ? $method : 'index';
 
         // If url should be secure and it's not, redirect to secure url.
-        self::$is_secure_url = router::isSecureRoute(array($controller, $method));
+        self::$is_secure_url = router::isSecureRoute(array($controller, $method)) || ($_SERVER['SERVER_PORT'] == '443');
         if(self::$is_secure_url && ($_SERVER['SERVER_PORT'] != '443')) {
             $url = site_url($route);
             if(self::$request_type != 'html')

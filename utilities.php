@@ -18,6 +18,16 @@ global $config;
 }
 
 /**
+ * Return the proper http:// or https:// protocol
+ */
+function http_s($url) {
+  // Is this supposed to be a secure URL?
+  $secure_url = app::$is_secure_url;
+  $proto = $secure_url ? 'https://' : 'http://';
+  return("{$proto}{$url}");
+}
+
+/**
  * Takes a recognizable url and makes sure it has a http(s?):// prefix to ensure all urls are never relative
  */
 function normalize_url($url) {
