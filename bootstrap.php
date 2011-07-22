@@ -51,6 +51,12 @@ $start_time = microtime(true);
 if(empty($config['default_request_type'])){
     $config['default_request_type'] = 'html';
 }
+if(empty($config['default_controller'])){
+    $config['default_controller'] = 'main';
+}
+if(empty($config['default_method'])){
+    $config['default_method'] = 'index';
+}
 
 // Include global utility functions
 require_once BASEPATH.'utilities'.EXT;

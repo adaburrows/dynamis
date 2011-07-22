@@ -396,7 +396,7 @@ class app {
         $method = array_shift(self::$params);
         // If there is no specified $controller or $method use defaults
         self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
-        self::$method = ($method !== NULL && $method !== "") ? $method : 'index';
+        self::$method = ($method !== NULL && $method !== "") ? $method : self::$config['default_method'];
 
         // If url should be secure and it's not, redirect to secure url.
         self::$is_secure_url = router::isSecureRoute(array($controller, $method)) || ($_SERVER['SERVER_PORT'] == '443');
