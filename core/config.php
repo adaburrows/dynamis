@@ -81,4 +81,8 @@ class config {
         }
         return $value;
     }
+
+    public function getAll() {
+        return self::$config;
+    }
 }
