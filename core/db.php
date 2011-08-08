@@ -235,7 +235,7 @@ class db {
         self::$aspects[$aspect] = $to_add;
     }
 
-    public static function getAspect() {
+    public static function getAspects() {
         return self::$aspects;
     }
 
