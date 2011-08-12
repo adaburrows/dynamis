@@ -113,8 +113,15 @@ class http_request {
     protected function build_query($data) {
         foreach ($data as $key => $value) {
             $k = rawurlencode($key);
-            $v = rawurlencode($value);
-            $q[] = "$k=$v";
+            if(is_array($value)) {
+              foreach($value as $vu) {
+                $v = rawurlencode($vu);
+                $q[] = "$k=$v";
+              }
+            } else {
+              $v = rawurlencode($value);
+              $q[] = "$k=$v";
+            }
         }
         $query = implode("&", $q);
         return $query;
