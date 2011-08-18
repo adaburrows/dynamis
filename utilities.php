@@ -55,6 +55,7 @@ function isPhoneNumber($number) {
  * TODO: check number of digits and format accordingly
  */
 function formatPhoneNumber($number) {
+  $number = normalizePhoneNumber($number);
   return ('('.substr($number,0,3).') '.substr($number,3,3)."-".substr($number,6,4));
 }
 
