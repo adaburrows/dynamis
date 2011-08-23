@@ -38,23 +38,42 @@
  * 
  */
 
-// Include config class - dependancy of eveything
-require_once BASEPATH.'core/config'.EXT;
-$start_time = config::load();
+// Require the application configuration file
+require_once APPPATH.'config'.EXT;
+if (empty($config['timezone'])) {
+    $config['timezone'] = 'America/Los_Angeles';
+}
+
+// Set up time
+date_default_timezone_set($config['timezone']);
+$start_time = microtime(true);
+
+if(empty($config['default_request_type'])){
+    $config['default_request_type'] = 'html';
+}
+if(empty($config['default_controller'])){
+    $config['default_controller'] = 'main';
+}
+if(empty($config['default_method'])){
+    $config['default_method'] = 'index';
+}
+
+// Include global utility functions
+require_once BASEPATH.'utilities'.EXT;
+
+// Setup extra init tasks if file exists
+if(file_exists(APPPATH.'init'.EXT)) {
+    require_once APPPATH.'init'.EXT;
+}
 
 // Include router - dependancy of app.
 require_once BASEPATH.'core/router'.EXT;
-// Setup routes for application
-require_once APPPATH.'routes'.EXT;
-
-// Include layout - dependancy of app.
+// Include layout - depandancy of app.
 require_once BASEPATH.'core/layout'.EXT;
-
 // Include app
 require_once BASEPATH.'core/app'.EXT;
-app::setConfig(config::getAll());
+app::setConfig($config);
 app::setStartTime($start_time);
-
 // Set the global error handler
 set_error_handler( array('app', 'error_handler') );
 // Set the global exception handler
@@ -62,20 +81,25 @@ set_exception_handler( array('app', 'exception_handler') );
 // Set the global shutdown handler
 register_shutdown_function( array('app', 'shutdown_handler') );
 
+
+// Core libraries to load
+if(empty ($config['core'])) {
+    $config['core'] = array('db', 'model');
+}
 // Load core classes that all classes extend
-$core = config::get('core');
-if($core){
-    foreach($core as $class) {
-        if (file_exists(APPPATH."core/$class".EXT)) {
-            require_once APPPATH."core/$class".EXT;
-        } else if (file_exists(BASEPATH."core/$class".EXT)) {
-            require_once BASEPATH."core/$class".EXT;
-        }
+foreach($config['core'] as $class) {
+    if (file_exists(APPPATH."core/$class".EXT)) {
+        require_once APPPATH."core/$class".EXT;
+    } else if (file_exists(BASEPATH."core/$class".EXT)) {
+        require_once BASEPATH."core/$class".EXT;
     }
 }
 
+// Setup routes for application 
+require_once APPPATH.'routes'.EXT;
+
 // Connect to database
-if(config::get('use_database')) {
+if(isset($config['use_database']) && $config['use_database'] == true) {
     if(is_file(APPPATH.'models/schema/aspects'.EXT)) {
         require_once APPPATH.'models/schema/aspects'.EXT;
     }

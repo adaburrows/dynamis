@@ -2,7 +2,7 @@
 /* ============================================================================
  * class controller;
  * -----------------
- * Stub class. Completely overriden by APPPATH/core/controller.EXT if present.
+ * Stub class. Completely overriden by APPPATH/core/controller.EXT
  * ============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
@@ -38,6 +38,6 @@
  * 
  */
 
-class controller extends app {
+class controller {
 
 }

@@ -105,15 +105,6 @@ class layout {
     }
 
     /*
-     * layout::getData();
-     * -----------------
-     * Gets the data array.
-     */
-    public static function getData() {
-        return self::$data;
-    }
-
-    /*
      * layout::addCSS();
      * -----------------
      * Adds a named CSS file.
@@ -140,15 +131,6 @@ class layout {
         if (isset(self::$css[$name])) {
             unset(self::$css[$name]);
         }
-    }
-
-    /*
-     * layout::getCss();
-     * -------------------
-     * Gets CSS
-     */
-    public static function getCss() {
-        return self::$css;
     }
 
     /*
@@ -199,15 +181,6 @@ class layout {
     }
 
     /*
-     * layout::getScripts();
-     * -------------------
-     * Get Scripts
-     */
-    public static function getScripts() {
-        return self::$js;
-    }
-
-    /*
      * layout::buildScriptTags();
      * --------------------------
      * Builds an HTML fragment containing all script tags
@@ -249,7 +222,7 @@ class layout {
             self::$temp_ob = self::load_template(APPPATH . "views/$view_name" . EXT, $data);
         } catch(Exception $e) {
             // Error! View missing!
-            app::exception_handler(new Exception("Error: Could not find view: $view_name"));
+            app::exception_handler(new Exception("Error: Could not find view: $view_name", 912));
         }
         // If buffering, return the buffer.
         // If not, just append it to the full buffer.
@@ -270,7 +243,7 @@ class layout {
         try {
             self::$temp_ob = self::load_template(APPPATH . "layouts/$layout" . EXT, $data);
         } catch (Exception $e) {
-            throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT);
+            throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT, 911, $e);
         }
         return self::$temp_ob;
     }
