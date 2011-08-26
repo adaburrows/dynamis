@@ -466,6 +466,36 @@ class app {
         }
     }
 
+
+    /**
+     * Returns the proper site url relative to the base url for the specified resource.
+     * Use in all views to retain portability across domains.
+     */
+    public static function site_url($url) {
+    global $config;
+      // Is this supposed to be a secure URL?
+      $secure_url = self::$is_secure_url;
+      if (is_array($url)) {
+        $secure_url = router::isSecureRoute($url);
+        $url = router::unmap($url);
+      }
+      $proto = $secure_url ? 'https://' : 'http://';
+      $base = $config['site_base'] != '/' ? $config['site_base'] : $_SERVER['SERVER_NAME'];
+      return("{$proto}{$base}/{$url}");
+    }
+
+    /**
+     * Return the proper http:// or https:// protocol
+     */
+    public static function http_s($url) {
+      // Is this supposed to be a secure URL?
+      $secure_url = self::$is_secure_url;
+      $proto = $secure_url ? 'https://' : 'http://';
+      return("{$proto}{$url}");
+    }
+
+
+
     /*
      * app::setReqType();
      * ------------------
