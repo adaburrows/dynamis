@@ -31,20 +31,19 @@ class util {
     $number = self::normalizePhoneNumber($number);
     return ('('.substr($number,0,3).') '.substr($number,3,3)."-".substr($number,6,4));
   }
-}
 
-/**
- * returns only digits of a phone number
- */
-function normalizePhoneNumber($number) {
-  $number = trim($number);
-  $number = preg_replace('/(\+| |-|\(|\))?/', '', $number);
-  if(strlen($number) == 11) {
-    $number = substr($number, 1);
+  /**
+   * returns only digits of a phone number
+   */
+  function normalizePhoneNumber($number) {
+    $number = trim($number);
+    $number = preg_replace('/(\+| |-|\(|\))?/', '', $number);
+    if(strlen($number) == 11) {
+      $number = substr($number, 1);
+    }
+    return $number;
   }
-  return $number;
 }
-
 /**
  * For outputting values that might not be defined.
  */
