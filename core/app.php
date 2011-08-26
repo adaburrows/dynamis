@@ -493,8 +493,6 @@ class app {
       return("{$proto}{$url}");
     }
 
-
-
     /*
      * app::setReqType();
      * ------------------

@@ -64,7 +64,7 @@ set_exception_handler( array('app', 'exception_handler') );
 register_shutdown_function( array('app', 'shutdown_handler') );
 
 // Core libraries to load
-if(config::get('core')) {
+if(!config::get('core')) {
     config::set('core', array('db', 'model'));
 }
 // Load core classes that all classes extend
@@ -81,9 +81,8 @@ require_once APPPATH.'routes'.EXT;
 
 // Connect to database
 if(config::get('use_database')) {
-    if(is_file(APPPATH.'models/schema/aspects'.EXT)) {
-        require_once APPPATH.'models/schema/aspects'.EXT;
-    }
+    require_once BASEPATH.'core/aspects'.EXT;
+    aspects::load();
     db::connect();
 }
 

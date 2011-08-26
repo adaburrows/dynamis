@@ -55,7 +55,6 @@ class model extends db {
    * Sets up the scene for the magic that follows.\/\/007!
    */
   public function __construct() {
-  global $aspects;
     $this->default_fields = array ( 'created', 'modified' );
 
     $this->insert_defaults = array (
@@ -70,7 +69,7 @@ class model extends db {
     $aspects_copy = $this->aspects;
     $this->primary_aspect = array_shift($aspects_copy);
     if($this->primary_aspect != null) {
-        $aspect_fields = $aspects[$this->primary_aspect];
+        $aspect_fields = aspects::get($this->primary_aspect);
     } else {
         $this->primary_aspect = '';
         $aspect_fields = array();
@@ -136,11 +135,11 @@ class model extends db {
    * inserts into specified aspect.
    */
   public function set($data, $aspect = NULL) {
-  global $aspects;
     if($aspect == NULL) {
         $primary_key = $this->primary_key;
     } else {
-        $primary_key = $aspects[$aspect][0];
+        $primary_key = aspects::get($aspect);
+        $primary_key = $primary_key[0];
     }
     if (isset($data[$primary_key]) && $this->get_by_(array("{$primary_key}" => $data[$primary_key]), $aspect)) {
       $query = $this->build_update($data, $aspect);
@@ -172,7 +171,6 @@ class model extends db {
    *   to be used in a SQL query.
    */
   protected function get_fields($data = array()) {
-  global $aspects;
       // Default: don't subset fields
       $subset_fields = false;
       // If we have a fields param and it's an array use it.
@@ -194,10 +192,10 @@ class model extends db {
       foreach ($current_aspects as $aspect) {
           // Add default fields to primary aspect
           if ($aspect == $primary_aspect) {
-              $iter_fields = array_merge($aspects[$aspect], $this->default_fields);
+              $iter_fields = array_merge(aspects::get($aspect), $this->default_fields);
           // Don't merge in the default fields if not a primary aspect
           } else {
-              $iter_fields = $aspects[$aspect];
+              $iter_fields = aspects::get($aspect);
           }
           // If we are subsetting the fields computer the intersection
           if($subset_fields) {
