@@ -39,33 +39,16 @@
  */
 
 // Require the application configuration file
-require_once APPPATH.'config'.EXT;
-if (empty($config['timezone'])) {
-    $config['timezone'] = 'America/Los_Angeles';
-}
-
-// Set up time
-date_default_timezone_set($config['timezone']);
-$start_time = microtime(true);
-
-if(empty($config['default_request_type'])){
-    $config['default_request_type'] = 'html';
-}
-if(empty($config['default_controller'])){
-    $config['default_controller'] = 'main';
-}
-if(empty($config['default_method'])){
-    $config['default_method'] = 'index';
-}
+require_once BASEPATH.'core/config'.EXT;
+$start_time = config::load();
+$config = config::getAll();
 
 // Include global utility functions
 require_once BASEPATH.'utilities'.EXT;
-
 // Setup extra init tasks if file exists
 if(file_exists(APPPATH.'init'.EXT)) {
     require_once APPPATH.'init'.EXT;
 }
-
 // Include router - dependancy of app.
 require_once BASEPATH.'core/router'.EXT;
 // Include layout - depandancy of app.
