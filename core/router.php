@@ -167,7 +167,6 @@ class router {
    * Is the array passed in a secure route?.
    */
   public static function isSecureRoute($url) {
-  global $config;
     $secure_route = false;
     // Make sure it's an array -- not full proof, but I'm not throwing exceptions yet.
     if(is_string($url)) {
@@ -177,8 +176,8 @@ class router {
     //  and assign the array elements to the desired variables
     list($controller, $method) = ($url+Array(null, null));
     // If null, assign default values
-    if($controller == null) $controller = $config['default_controller'];
-    if($method == null) $method = 'index';
+    if($controller == null) $controller = config::get('default_controller');
+    if($method == null) $method = config::get('default_method');
     // Check for controller in secure routes array
     if(array_key_exists($controller, self::$secure_routes)){
         // Found it, is it a string or array?
