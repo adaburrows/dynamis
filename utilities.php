@@ -1,17 +1,19 @@
 <?php
-/**
- * Takes a recognizable url and makes sure it has a http(s?):// prefix to ensure all urls are never relative
- */
-function normalize_url($url) {
-  $url_pattern = "@\b(https?://)?(([0-9a-zA-Z_!~*'().&=+$%-]+:)?[0-9a-zA-Z_!~*'().&=+$%-]+\@)?(([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-zA-Z_!~*'()-]+\.)*([0-9a-zA-Z][0-9a-zA-Z-]{0,61})?[0-9a-zA-Z]\.[a-zA-Z]{2,6})(:[0-9]{1,4})?((/[0-9a-zA-Z_!~*'().;?:\@&=+$,%#-]+)*/?)@";
-  if (preg_match($url_pattern, $url) > 0) {
-    if (preg_match('@\b(https?://)@', $url) == 0) {
-      $url = "http://$url";
+class util {
+  /**
+   * Takes a recognizable url and makes sure it has a http(s?):// prefix to ensure all urls are never relative
+   */
+  function normalize_url($url) {
+    $url_pattern = "@\b(https?://)?(([0-9a-zA-Z_!~*'().&=+$%-]+:)?[0-9a-zA-Z_!~*'().&=+$%-]+\@)?(([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-zA-Z_!~*'()-]+\.)*([0-9a-zA-Z][0-9a-zA-Z-]{0,61})?[0-9a-zA-Z]\.[a-zA-Z]{2,6})(:[0-9]{1,4})?((/[0-9a-zA-Z_!~*'().;?:\@&=+$,%#-]+)*/?)@";
+    if (preg_match($url_pattern, $url) > 0) {
+      if (preg_match('@\b(https?://)@', $url) == 0) {
+        $url = "http://$url";
+      }
+    } else {
+      $url = false;
     }
-  } else {
-    $url = false;
+    return $url;
   }
-  return $url;
 }
 
 /**
