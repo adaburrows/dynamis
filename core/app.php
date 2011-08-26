@@ -472,7 +472,6 @@ class app {
      * Use in all views to retain portability across domains.
      */
     public static function site_url($url) {
-    global $config;
       // Is this supposed to be a secure URL?
       $secure_url = self::$is_secure_url;
       if (is_array($url)) {
@@ -480,7 +479,7 @@ class app {
         $url = router::unmap($url);
       }
       $proto = $secure_url ? 'https://' : 'http://';
-      $base = $config['site_base'] != '/' ? $config['site_base'] : $_SERVER['SERVER_NAME'];
+      $base = self::$config['site_base'] != '/' ? self::$config['site_base'] : $_SERVER['SERVER_NAME'];
       return("{$proto}{$base}/{$url}");
     }
 

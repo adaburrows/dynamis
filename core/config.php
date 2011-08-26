@@ -71,7 +71,7 @@ class config {
     }
 
     public static function set($config_var, $value) {
-        self::$config[$config_var] = value;
+        self::$config[$config_var] = $value;
     }
 
     public static function get($config_var) {

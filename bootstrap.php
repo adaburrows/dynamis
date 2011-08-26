@@ -41,7 +41,6 @@
 // Require the application configuration file
 require_once BASEPATH.'core/config'.EXT;
 $start_time = config::load();
-$config = config::getAll();
 
 // Include global utility functions
 require_once BASEPATH.'utilities'.EXT;
@@ -55,7 +54,7 @@ require_once BASEPATH.'core/router'.EXT;
 require_once BASEPATH.'core/layout'.EXT;
 // Include app
 require_once BASEPATH.'core/app'.EXT;
-app::setConfig($config);
+app::setConfig(config::getAll());
 app::setStartTime($start_time);
 // Set the global error handler
 set_error_handler( array('app', 'error_handler') );
@@ -64,13 +63,12 @@ set_exception_handler( array('app', 'exception_handler') );
 // Set the global shutdown handler
 register_shutdown_function( array('app', 'shutdown_handler') );
 
-
 // Core libraries to load
-if(empty ($config['core'])) {
-    $config['core'] = array('db', 'model');
+if(config::get('core')) {
+    config::set('core', array('db', 'model'));
 }
 // Load core classes that all classes extend
-foreach($config['core'] as $class) {
+foreach(config::get('core') as $class) {
     if (file_exists(APPPATH."core/$class".EXT)) {
         require_once APPPATH."core/$class".EXT;
     } else if (file_exists(BASEPATH."core/$class".EXT)) {
@@ -82,7 +80,7 @@ foreach($config['core'] as $class) {
 require_once APPPATH.'routes'.EXT;
 
 // Connect to database
-if(isset($config['use_database']) && $config['use_database'] == true) {
+if(config::get('use_database')) {
     if(is_file(APPPATH.'models/schema/aspects'.EXT)) {
         require_once APPPATH.'models/schema/aspects'.EXT;
     }
