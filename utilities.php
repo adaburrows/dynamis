@@ -14,16 +14,16 @@ class util {
     }
     return $url;
   }
-}
 
-/**
- * checks to see if a number is in the right form to be phone number
- */
-function isPhoneNumber($number) {
-  $number = trim($number);
-  return (preg_match('/^((\+)?[0-9]( |-)?)?(\(?[0-9]{3}\)?|[0-9]{3})( |-)?([0-9]{3}( |-)?[0-9]{4})$/', $number));
-}
+  /**
+   * checks to see if a number is in the right form to be phone number
+   */
+  function isPhoneNumber($number) {
+    $number = trim($number);
+    return (preg_match('/^((\+)?[0-9]( |-)?)?(\(?[0-9]{3}\)?|[0-9]{3})( |-)?([0-9]{3}( |-)?[0-9]{4})$/', $number));
+  }
 
+}
 /**
  * Formats a number for display
  * TODO: check number of digits and format accordingly
