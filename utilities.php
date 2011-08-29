@@ -43,11 +43,11 @@ class util {
     }
     return $number;
   }
-}
 
-/**
- * For outputting values that might not be defined.
- */
-function _e($string) {
-  echo isset($string) ? $string : "";
+  /**
+   * For outputting values that might not be defined.
+   */
+  function e($string) {
+    echo isset($string) ? $string : "";
+  }
 }
