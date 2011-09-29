@@ -623,6 +623,15 @@ class app {
  * =============================================================================
  */
 
+   /*
+     * app::log();
+     * -----------
+     *  Logs error messages
+     */
+    public static function log($message) {
+        error_log($message,3,APPPATH.'error.log');
+    }
+
     /*
      * app::hasErrorMessages();
      * -------------------------
