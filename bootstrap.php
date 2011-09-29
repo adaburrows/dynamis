@@ -38,22 +38,34 @@
  * 
  */
 
+function load_files($files) {
+    // Load core classes that all classes extend
+    foreach($files as $class) {
+        if (file_exists(APPPATH."core/$class".EXT)) {
+            require_once APPPATH."core/$class".EXT;
+        } else if (file_exists(BASEPATH."core/$class".EXT)) {
+            require_once BASEPATH."core/$class".EXT;
+        }
+    }
+}
+
 // Require the application configuration file
 require_once BASEPATH.'core/config'.EXT;
 $start_time = config::load();
 
-// Include global utility functions
-require_once BASEPATH.'utilities'.EXT;
-// Setup extra init tasks if file exists
-if(file_exists(APPPATH.'init'.EXT)) {
-    require_once APPPATH.'init'.EXT;
+// Dependancies required to run
+if(!config::get('deps')) {
+    config::set('deps', array('util', 'router','layout','app'));
 }
-// Include router - dependancy of app.
-require_once BASEPATH.'core/router'.EXT;
-// Include layout - depandancy of app.
-require_once BASEPATH.'core/layout'.EXT;
-// Include app
-require_once BASEPATH.'core/app'.EXT;
+// Core libraries to load
+if(!config::get('core')) {
+    config::set('core', array('db', 'model'));
+}
+
+// Load all dependancies
+load_files(config::get('deps'));
+
+// Set up configuration and default runtime handlers
 app::setConfig(config::getAll());
 app::setStartTime($start_time);
 // Set the global error handler
@@ -63,18 +75,8 @@ set_exception_handler( array('app', 'exception_handler') );
 // Set the global shutdown handler
 register_shutdown_function( array('app', 'shutdown_handler') );
 
-// Core libraries to load
-if(!config::get('core')) {
-    config::set('core', array('db', 'model'));
-}
-// Load core classes that all classes extend
-foreach(config::get('core') as $class) {
-    if (file_exists(APPPATH."core/$class".EXT)) {
-        require_once APPPATH."core/$class".EXT;
-    } else if (file_exists(BASEPATH."core/$class".EXT)) {
-        require_once BASEPATH."core/$class".EXT;
-    }
-}
+// Load the core library files
+load_files(config::get('core'));
 
 // Setup routes for application 
 require_once APPPATH.'routes'.EXT;
@@ -86,5 +88,6 @@ if(config::get('use_database')) {
     db::connect();
 }
 
+// Start the app
 app::getCore('controller');
 app::go();
