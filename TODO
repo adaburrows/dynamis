@@ -1,0 +1,51 @@
+ TODO
+===============================================================================
+
+ Modules
+-------------------------------------------------------------------------------
+
+Dynamis needs to support loading modules which can include everything that
+exists in the application directory itself except modules (I do not like the
+thought of recursion into modules as far as the filesystem allows).
+
+The directory structure will most likely be:
+APPPATH/modules/
+ + module_name/     => Directory for the module
+    + libs/         => Libraries the module provides
+    + models/       => Data models
+    + controllers/  => Controllers
+    + views/        => Views
+    + plugins/      => Plugins - this directory only exists in modules
+    + config.php    => Configuration settings for the module
+    + routes.php    => Routes the module would like to use
+    + module.php    => File containing information about the module
+                       This is a shorcut to scanning the directory every init
+
+Plugins
+-------
+
+Plugins can register hooks before or after controllers and or specific
+controller methods. This functionality will be provided by the methods:
+ + app::registerHookBefore();
+ + app::registerHookAfter();
+ + app::unregisterHookBefore();
+ + app::unregisterHookAfter();
+
+Plugins should also be able to register functions that controllers, models, or
+views can call. The relevant functions are:
+ + app::registerFunction();
+ + app::unregisterFunction();
+ + app::call();
+
+Menu Management
+---------------
+Modules need a way of adding items to menus. By default, there will be two
+menus the admin and the main menu.
+
+The API is as follows:
+ + layout::addMenuSlot();
+ + layout::delMenuSlot();
+ + layout::addMenuItem();
+ + layout::delMenuItem();
+
+

@@ -214,7 +214,7 @@ class app {
                 $classes = self::getLibraries();
                 break;
             case 'core':
-                $clases = self::getCores();
+                $classes = self::getCores();
         }
         $classes_methods = array();
         foreach ($classes as $class) {
