@@ -72,8 +72,11 @@ app::setStartTime($start_time);
 set_error_handler( array('app', 'error_handler') );
 // Set the global exception handler
 set_exception_handler( array('app', 'exception_handler') );
-// Set the global shutdown handler
-register_shutdown_function( array('app', 'shutdown_handler') );
+// Only set the shutdown function if we are not running embedded
+if (!config::get('embedded')) {
+  // Set the global shutdown handler
+  register_shutdown_function( array('app', 'shutdown_handler') );
+}
 
 // Load the core library files
 load_files(config::get('core'));

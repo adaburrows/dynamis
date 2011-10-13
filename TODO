@@ -43,9 +43,9 @@ Modules need a way of adding items to menus. By default, there will be two
 menus the admin and the main menu.
 
 The API is as follows:
- + layout::addMenuSlot();
- + layout::delMenuSlot();
- + layout::addMenuItem();
- + layout::delMenuItem();
+ + menu::addSlot();
+ + menu::delSlot();
+ + menu::addItem();
+ + menu::delItem();
 
 

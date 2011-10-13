@@ -52,20 +52,15 @@ class config {
         date_default_timezone_set($config['timezone']);
         $start_time = microtime(true);
         // Set up defaults
-        if(empty($config['default_request_type'])){
-            $config['default_request_type'] = 'html';
-        }
-        if(empty($config['default_controller'])){
-            $config['default_controller'] = 'main';
-        }
-        if(empty($config['default_method'])){
-            $config['default_method'] = 'index';
-        }
-        // Core libraries to load
-        if(empty ($config['core'])) {
-            $config['core'] = array('db', 'model');
-        }
-        self::$config = $config;
+        $defaults = array(
+            'default_request_type' => 'html',
+            'default_controller' => 'main',
+            'default_method' => 'index',
+            'embedded' => false,
+            // Core libraries to load
+            'core' => array('db', 'model')
+        );
+        self::$config = array_merge($defaults, $config);
 
         return $start_time;
     }
