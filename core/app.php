@@ -379,16 +379,51 @@ class app {
      * Called from bootstrap.php
      */
     public static function go() {
-        $route = ""; // Used to store the route
+        // Used to store the route
+        $route = "";
+        // Used to set the type of the route
+        $extension = config::get('default_request_type');
 
-        // Check if there's an extension on the end of the route. Used for XML & AJAX requests.
-        $type = isset($_GET['ext']) ? $_GET['ext'] : self::$config['default_request_type'];
-        self::setReqType($type);
-
-        // Check if a route is set and get its parts
-        if (isset($_GET['route'])) {
+        // IF the server has the request uri set, use it
+        if(isset($_SERVER['REQUEST_URI'])) {
+          $full_route = $_SERVER['REQUEST_URI'];
+          $route_parts = explode('.', $full_route);
+          // Get the extension;
+          //   this could be problematic if the data just contains a dot; <_<
+          //   this should be run through a list of available types. later...
+          if(count($route_parts) > 1 ) {
+            $extenstion = array_pop($route_parts);
+            $route = substr($full_route, 0, -1*strlen($extension));
+          } else {
+            $route = $full_route;
+          }
+          // Remove leading slash from route,
+          // removed by rewrite rules in some cases
+          $lslash = strpos($route, '/');
+          if (($lslash !== false) && ($lslash == 0)) {
+            $route = substr($route, 1);
+            // If this is the default route false is not a valid key!
+            if(!$route) {$route = '';}
+          }
+        // IF there is no REQUEST_URI key,
+        //    get it from the GET vars from the rewrite rules.
+        } else {
+          if(isset($_GET['ext'])) {
+            $extension = $_GET['ext'];
+          }
+          // Check if a route is set and get its parts
+          if (isset($_GET['route'])) {
             $route = $_GET['route'];
+          }
         }
+        $pbase = config::get('site_base').'/';
+        $base_pos = strpos($route, $pbase);
+        if(($base_pos !== false) && ($base_pos == 0)) {
+          $route = substr($route, strlen($pbase));
+            // If this is the default route false is not a valid key!
+            if(!$route) {$route = '';}
+        }
+        self::setReqType($extension);
         self::$params = router::map($route);
         // Get the controller off the array
         $controller = array_shift(self::$params);
@@ -479,8 +514,9 @@ class app {
         $url = router::unmap($url);
       }
       $proto = $secure_url ? 'https://' : 'http://';
-      $base = self::$config['site_base'] != '/' ? self::$config['site_base'] : $_SERVER['SERVER_NAME'];
-      return("{$proto}{$base}/{$url}");
+      $host = self::$config['site_host'] != '' ? self::$config['site_host'] : $_SERVER['SERVER_NAME'];
+      $base = self::$config['site_base'] != '/' ? '/'.self::$config['site_base'] : '';
+      return("{$proto}{$host}{$base}/{$url}");
     }
 
     /**

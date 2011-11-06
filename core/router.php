@@ -50,6 +50,8 @@ class router {
     '/\/:opt/'  => '(((\/?)[-_a-zA-Z0-9=:]+(\/?))*)'
   );
 
+/* This is not used yet, commenting out.
+
   private static $status_codes = array(
     100     => 'Continue',
     101     => 'Switching Protocols',
@@ -96,6 +98,7 @@ class router {
     504     => 'Gateway Timeout',
     505     => 'HTTP Version Not Supported'
     );
+*/
 
   /*
    * router::setRoutes();
