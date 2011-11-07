@@ -44,6 +44,7 @@ class db {
   protected static $db_num_rows_affected = 0;
   protected static $db_insert_id = false;
   protected static $db_error = array();
+  protected static $db_error_code = '';
   protected static $db_query_results = array();
 
 /*
@@ -76,6 +77,7 @@ class db {
     try {
         //connect to mysql database server
         self::$connection = new PDO($dsn, $user, $pass);
+        self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     } catch (PDOException $e) {
         self::$connection = null;
         throw new Exception("Could not connect to database!\n".$e->getCode().': '.$e->getMessage());
@@ -98,8 +100,15 @@ class db {
       $statement->execute();
       self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
       self::$db_num_results = count(self::$db_query_results);
-    } catch (PDOException $e) {
+      self::$db_error_code = $statement->errorCode();
       self::$db_error = $statement->errorInfo();
+      if(config::get('debug')) {
+        $error_info_string = implode(' : ', self::$db_error);
+        app::log("\nQuery: {$query}\n");
+        app::log('Values: '.print_r($bind_values, true)."\n");
+        app::log('Database returned: '.self::$db_error_code.': '.$error_info_string."\n");
+      }
+    } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
       self::$db_query_results = array();
     }
@@ -124,8 +133,15 @@ class db {
       $statement->execute();
       self::$db_query_results = $statement->fetch(PDO::FETCH_ASSOC);
       self::$db_num_results = self::$db_query_results ? 1 : 0;
-    } catch (PDOException $e) {
+      self::$db_error_code = $statement->errorCode();
       self::$db_error = $statement->errorInfo();
+      if(config::get('debug')) {
+        $error_info_string = implode(' : ', self::$db_error);
+        app::log("\nQuery: {$query}\n");
+        app::log('Values: '.print_r($bind_values, true)."\n");
+        app::log('Database returned: '.self::$db_error_code.': '.$error_info_string."\n");
+      }
+    } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
       self::$db_query_results = array();
     }
@@ -148,8 +164,15 @@ class db {
       $statement->execute();
       self::$db_num_rows_affected = $statement->rowCount();
       self::$db_insert_id = self::$connection->lastInsertId();
-    } catch (PDOException $e) {
+      self::$db_error_code = $statement->errorCode();
       self::$db_error = $statement->errorInfo();
+      if(config::get('debug')) {
+        $error_info_string = implode(' : ', self::$db_error);
+        app::log("\nQuery: {$query}\n");
+        app::log('Values: '.print_r($bind_values, true)."\n");
+        app::log('Database returned: '.self::$db_error_code.': '.$error_info_string."\n");
+      }
+    } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
       self::$db_num_rows_affected = 0;
     }
@@ -203,6 +226,15 @@ class db {
    */
   public static function error(){
     return self::$db_error;
+  }
+
+  /*
+   * db::error_code();
+   * -----------------
+   * Returns the error from the last query.
+   */
+  public static function error_code(){
+    return self::$db_error_code;
   }
 
   /*

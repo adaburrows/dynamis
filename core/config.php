@@ -55,6 +55,7 @@ class config {
         $defaults = array(
             'site_host' => '',
             'site_base' => '/',
+            'debug' => true,
             'default_request_type' => 'html',
             'default_controller' => 'main',
             'default_method' => 'index',
