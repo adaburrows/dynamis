@@ -106,7 +106,7 @@ class db {
         $error_info_string = implode(' : ', self::$db_error);
         app::log("\nQuery: {$query}\n");
         app::log('Values: '.print_r($bind_values, true)."\n");
-        app::log('Database returned: '.self::$db_error_code.': '.$error_info_string."\n");
+        app::log("Database returned: {$error_info_string}\n");
       }
     } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
@@ -139,7 +139,7 @@ class db {
         $error_info_string = implode(' : ', self::$db_error);
         app::log("\nQuery: {$query}\n");
         app::log('Values: '.print_r($bind_values, true)."\n");
-        app::log('Database returned: '.self::$db_error_code.': '.$error_info_string."\n");
+        app::log("Database returned: {$error_info_string}\n");
       }
     } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
@@ -170,7 +170,7 @@ class db {
         $error_info_string = implode(' : ', self::$db_error);
         app::log("\nQuery: {$query}\n");
         app::log('Values: '.print_r($bind_values, true)."\n");
-        app::log('Database returned: '.self::$db_error_code.': '.$error_info_string."\n");
+        app::log("Database returned: {$error_info_string}\n");
       }
     } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
