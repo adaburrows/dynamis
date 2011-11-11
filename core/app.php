@@ -515,7 +515,7 @@ class app {
       }
       $proto = $secure_url ? 'https://' : 'http://';
       $host = self::$config['site_host'] != '' ? self::$config['site_host'] : $_SERVER['SERVER_NAME'];
-      $base = self::$config['site_base'] != '/' ? '/'.self::$config['site_base'] : '';
+      $base = self::$config['site_base'] != '' ? '/'.self::$config['site_base'] : '';
       return("{$proto}{$host}{$base}/{$url}");
     }
 
