@@ -429,9 +429,6 @@ class app {
         $controller = array_shift(self::$params);
         // Get the method off the array
         $method = array_shift(self::$params);
-        // If there is no specified $controller or $method use defaults
-        self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
-        self::$method = ($method !== NULL && $method !== "") ? $method : self::$config['default_method'];
 
         // If url should be secure and it's not, redirect to secure url.
         self::$is_secure_url = router::isSecureRoute(array($controller, $method)) || ($_SERVER['SERVER_PORT'] == '443');
@@ -444,7 +441,7 @@ class app {
         }
 
         // Load the $controller's $method, passing in $parts as the parameters.
-        self::dispatch();
+        self::dispatch($controller, $method);
     }
 
     /*
@@ -452,7 +449,11 @@ class app {
      * ----------------
      * This function handles finding the controller class, calling its methods, and passing arguments.
      */
-    public static function dispatch() {
+    public static function dispatch($controller, $method) {
+        // If there is no specified $controller or $method use defaults
+        self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
+        self::$method = ($method !== NULL && $method !== "") ? $method : self::$config['default_method'];
+
         // Start the session
         session_start();
         // try loading the specified controller
