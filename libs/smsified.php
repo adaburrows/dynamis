@@ -90,7 +90,7 @@ class smsified extends http_request {
      */
     public function sendMessage($message) {
         $status = false;
-        if(empty($message['sender']){
+        if(empty($message['sender'])){
             $senderAddress = app::$config['smsified_num'];
         } else {
             $senderAddress = $message['sender'];
