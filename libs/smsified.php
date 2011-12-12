@@ -64,23 +64,57 @@ class smsified extends http_request {
 
     /**
      *
-     * Send an outbound SMS message.
-     * @param string $senderAddress
-     * @param string $address
-     * @param string $message
-     * @param string $notifyURL
+     * Sends an error message to smsified if there is a server error.
      */
-    public function sendMessage($senderAddress, $address, $message, $notifyURL=NULL) {
-        $url = $this->version . "smsmessaging/outbound/$senderAddress/requests";
-        $params = array(
-            'address' => $address,
-            'message' => $message
-        );
-        if($notifyURL) {
-            $params['notifyURL'] = $notifyURL;
+    public function fileServiceReport($result) {
+      //TODO: Actually implement this. :-)
+    }
+
+    /**
+     *
+     * Send an outbound SMS message.
+     * $message has the following components
+     *   array(
+     *     'sender' => '',	// Number you are sending from (must belong to you).
+     *     'address' => '',	// Recipient phone number (with the 1) --
+     *				//   can also be an array of recipients.
+     *     'message' => '',	// Message to be sent.
+     *     'notifyURL' => ''	// OPTIONAL: URL to be notified of delivery.
+     *   );
+     *
+     *   To get the actual response, instead of true/false call:
+     *     $data = $smsified->get_data();
+     *   where $smsified is an instance of this object.
+     *
+     * @param array $message
+     */
+    public function sendMessage($message) {
+        $status = false;
+        if(empty($message['sender']){
+            $senderAddress = app::$config['smsified_num'];
+        } else {
+            $senderAddress = $message['sender'];
+            unset($message['sender']);
         }
-        $object = self::post($url, $params);
-        return self::processStatus();
+        $url = $this->version . "smsmessaging/outbound/$senderAddress/requests";
+        $result = self::post($url, $message);
+        try {
+            $status = self::processStatus();
+            app::log('Message sent: "'.$message['message'].'"'."\n");
+            app::log('Returned: "'.$result.'"'."\n");
+        } catch (SMSifiedServerError $e) {
+            app::log('Server Error -- Reporting to SMSified. Failed to send message: "'.$message['message'].'"'."\n");
+            app::log('Returned: "'.$result.'"'."\n");
+            self::fileServiceReport($result);
+            $status = false;
+        } catch (SMSifiedAuthError $e) {
+            app::log('Authentication Error: Failed to send message: "'.$message['message'].'"'."\n");
+            $status = false;
+        } catch (SMSifiedException $e) {
+            app::log('Failed to send message: "'.$message['message'].'"'."\n");
+            $status = false;
+        }
+        return $status;
     }
 
     /**
@@ -150,6 +184,10 @@ class smsified extends http_request {
         return json_decode(self::get($url), true);
     }
 
+/*=============================================================================\
+| The following methods are really unsupported by SMSified, but they work. ;-) |
+\=============================================================================*/
+
     /**
      *
      * Get all applications running on your account.
@@ -211,13 +249,3 @@ class smsified extends http_request {
 class SMSifiedException extends Exception {}
 class SMSifiedAuthError extends SMSifiedException {}
 class SMSifiedServerError extends SMSifiedException {}
-
-/**
- * 
- * Helper class with message direction.
- *
- */
-class MessageDirection {
-    public static $inbound = 'inbound';
-    public static $outbound = 'outbound';
-}
