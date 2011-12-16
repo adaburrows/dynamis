@@ -392,7 +392,7 @@ class app {
           //   this could be problematic if the data just contains a dot; <_<
           //   this should be run through a list of available types. later...
           if(count($route_parts) > 1 ) {
-            $extenstion = array_pop($route_parts);
+            $extension = array_pop($route_parts);
             $route = substr($full_route, 0, -1*strlen($extension));
           } else {
             $route = $full_route;
