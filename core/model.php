@@ -177,8 +177,6 @@ class model extends db {
       if(isset($data['fields']) && is_array($data['fields'])) {
           $subset_fields = $data['fields'];
       }
-      // Initialize variable to store resutant fields
-      $total_fields = array();
       // If there is a specified aspect, lets use it.
       if(isset($data['aspect'])) {
           $current_aspects = array($data['aspect']);
@@ -188,8 +186,10 @@ class model extends db {
           $current_aspects = $this->aspects;
           $primary_aspect = $this->primary_aspect;
       }
+      // Initialize variable to store resutant fields
+      $total_fields = array();
       // Iterate over all current aspects
-      foreach ($current_aspects as $aspect) {
+      foreach ($current_aspects as $i => $aspect) {
           // Add default fields to primary aspect
           if ($aspect == $primary_aspect) {
               $iter_fields = array_merge(aspects::get($aspect), $this->default_fields);
@@ -197,12 +197,12 @@ class model extends db {
           } else {
               $iter_fields = aspects::get($aspect);
           }
-          // If we are subsetting the fields computer the intersection
+          // If we are subsetting the fields, compute the intersection
           if($subset_fields) {
               $iter_fields = array_intersect($iter_fields, $subset_fields);
           }
           // Add each field into the total array, ready to be used in a query
-          foreach ($iter_fields as $field) {
+          foreach ($iter_fields as $j => $field) {
               $total_fields[$field] = "`{$aspect}`.`{$field}`";
           }
       }
@@ -353,7 +353,7 @@ class model extends db {
       $table = "$aspect";
     } else {
       // We have joins for multiple tables (all aspects)
-      $fields = array_values($this->get_fields(array('fields' => array_keys($data))));
+      $fields = $this->get_fields(array('fields' => array_keys($data)));
       // Store the tables we are using - mnemonic for ease of following the code
       $tables = $this->aspects;
       // Grab table to select from, and prevent it from being in the joins table
