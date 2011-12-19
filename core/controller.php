@@ -38,6 +38,6 @@
  * 
  */
 
-class controller {
+class controller extends app{
 
 }

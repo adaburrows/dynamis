@@ -379,32 +379,15 @@ class app {
      * Called from bootstrap.php
      */
     public static function go() {
-        // Used to store the route
-        $route = "";
-        // Used to set the type of the route
-        $extension = config::get('default_request_type');
+        $parsed = array();
+        $full_route = '';
 
+        /*
+         * Get the full route somehow
+         */
         // IF the server has the request uri set, use it
         if(isset($_SERVER['REQUEST_URI'])) {
           $full_route = $_SERVER['REQUEST_URI'];
-          $route_parts = explode('.', $full_route);
-          // Get the extension;
-          //   this could be problematic if the data just contains a dot; <_<
-          //   this should be run through a list of available types. later...
-          if(count($route_parts) > 1 ) {
-            $extension = array_pop($route_parts);
-            $route = substr($full_route, 0, -1 * (strlen($extension) + 1));
-          } else {
-            $route = $full_route;
-          }
-          // Remove leading slash from route,
-          // removed by rewrite rules in some cases
-          $lslash = strpos($route, '/');
-          if (($lslash !== false) && ($lslash == 0)) {
-            $route = substr($route, 1);
-            // If this is the default route false is not a valid key!
-            if(!$route) {$route = '';}
-          }
         // IF there is no REQUEST_URI key,
         //    get it from the GET vars from the rewrite rules.
         } else {
@@ -415,25 +398,19 @@ class app {
           if (isset($_GET['route'])) {
             $route = $_GET['route'];
           }
+          $full_route = $route.'.'.$extension;
         }
-        $pbase = config::get('site_base').'/';
-        $base_pos = strpos($route, $pbase);
-        if(($base_pos !== false) && ($base_pos == 0)) {
-          $route = substr($route, strlen($pbase));
-            // If this is the default route false is not a valid key!
-            if(!$route) {$route = '';}
-        }
-        self::setReqType($extension);
-        self::$params = router::map($route);
-        // Get the controller off the array
-        $controller = array_shift(self::$params);
-        // Get the method off the array
-        $method = array_shift(self::$params);
+        // Parse full route
+        $parsed = router::parse($full_route);
+        self::setReqType($parsed['extension']);
 
         // If url should be secure and it's not, redirect to secure url.
-        self::$is_secure_url = router::isSecureRoute(array($controller, $method)) || ($_SERVER['SERVER_PORT'] == '443');
+        self::$is_secure_url = router::isSecureRoute(
+          array( $parsed['controller'], $parsed['method'] )
+        ) || ($_SERVER['SERVER_PORT'] == '443');
+
         if(self::$is_secure_url && ($_SERVER['SERVER_PORT'] != '443')) {
-            $url = self::site_url($route);
+            $url = self::site_url($parsed['route']);
             if(self::$request_type != 'html')
                 $url .= ".".self::$request_type;
             header("Location: {$url}");
@@ -441,7 +418,7 @@ class app {
         }
 
         // Load the $controller's $method, passing in $parts as the parameters.
-        self::dispatch($controller, $method);
+        self::dispatch($parsed['controller'], $parsed['method'], $parsed['params'], $parsed['named_params']);
     }
 
     /*
@@ -449,10 +426,12 @@ class app {
      * ----------------
      * This function handles finding the controller class, calling its methods, and passing arguments.
      */
-    public static function dispatch($controller, $method) {
+    public static function dispatch($controller, $method, $params, $named_params) {
         // If there is no specified $controller or $method use defaults
         self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
         self::$method = ($method !== NULL && $method !== "") ? $method : self::$config['default_method'];
+        self::$params = $params;
+        self::$named_params = $named_params;
 
         // Start the session
         session_start();
@@ -473,13 +452,6 @@ class app {
                 /**
                  * TODO: any hooks for additional processing before calling the controller's method
                  */
-                // Parse all named parameters passed as arguments
-                foreach (self::$params as $arg) {
-                    $split = explode(':', $arg);
-                    if (count($split) == 2) {
-                        self::$named_params[$split[0]] = $split[1];
-                    }
-                }
                 ob_start(); // Buffer the controller output
                 // We have more than enough parameters for the method, dispatch.
                 self::setData(

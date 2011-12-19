@@ -198,6 +198,69 @@ class router {
     return $secure_route;
   }
 
+
+  /*
+   * router::parse();
+   * ----------------
+   * Return the parsed route and extension.
+   */
+  public static function parse($full_route) {
+    $route = '';
+    $extension = config::get('default_request_type');
+
+    $route_parts = explode('.', $full_route);
+    // Get the extension;
+    //   this could be problematic if the data just contains a dot; <_<
+    //   this should be run through a list of available types. later...
+    if(count($route_parts) > 1 ) {
+      $extension = array_pop($route_parts);
+      $route = substr($full_route, 0, -1 * (strlen($extension) + 1));
+    } else {
+      $route = $full_route;
+    }
+    // Remove leading slash from route,
+    // removed by rewrite rules in some cases
+    $lslash = strpos($route, '/');
+    if (($lslash !== false) && ($lslash == 0)) {
+      $route = substr($route, 1);
+      // If this is the default route false is not a valid key!
+      if(!$route) {$route = '';}
+    }
+    $pbase = config::get('site_base').'/';
+    $base_pos = strpos($route, $pbase);
+    if(($base_pos !== false) && ($base_pos == 0)) {
+      $route = substr($route, strlen($pbase));
+      // If this is the default route false is not a valid key!
+      if(!$route) {$route = '';}
+    }
+    $args = self::map($route);
+    // Get the controller off the array
+    $controller = array_shift($args);
+    // Get the method off the array
+    $method = array_shift($args);
+
+    $params = array();
+    $named_params = array();
+    // Parse all named parameters passed as arguments
+    foreach ($args as $arg) {
+      $split = explode(':', $arg);
+      if (count($split) == 2) {
+        $named_params[$split[0]] = $split[1];
+      } else {
+        $params[] = $arg;
+      }
+    }
+
+    return array(
+      'route'         => $route,
+      'extension'     => $extension,
+      'controller'    => $controller,
+      'method'        => $method,
+      'params'        => $params,
+      'named_params'  => $named_params
+    );
+  }
+
   /*
    * router::map();
    * ------------------
