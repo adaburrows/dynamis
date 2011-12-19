@@ -40,7 +40,6 @@
  */
 
 class app {
-    public static $config = array();
     public static $is_secure_url = false;
 
     protected static $request_type = "";
@@ -61,15 +60,8 @@ class app {
     private static $controller_output = "";
     private static $ob = "";
 
-
-    // private constructor, this is a purely static class
-    private function __construct() {
-
-    }
-
-    public static function setConfig($config) {
-        self::$config = $config;
-    }
+    // Do not allow contructing an object out of this static class
+    private function __constructor() {}
 
 /*
  * Methods for loading classes from libraries, controllers, and models.
@@ -102,15 +94,8 @@ class app {
             $lib = self::_load_class($lib_name, BASEPATH . 'libs', self::$libraries);
         } catch (Exception $e) {
             self::exception_handler($e);
-            $dynamic_class  = "class {$lib_name} {";
-            $dynamic_class .= '  public function __call($name, $args) {';
-            $dynamic_class .= '    $e = new Exception("Function {$name} not found in non-existant class '.$lib_name.'");';
-            $dynamic_class .= '    app::exception_handler($e);';
-            $dynamic_class .= '  }';
-            $dynamic_class .= '}';
-            $dynamic_class .= "return new {$lib_name};";
             try {
-                $lib = eval($dynamic_class);
+                $lib = self::_load_class('unknownLib', BASEPATH . 'libs', self::$libraries);
             } catch (Exception $e) {
                 self::exception_handler($e);
             }
@@ -129,16 +114,8 @@ class app {
             $controller = self::_load_class($controller_name, APPPATH . 'controllers', self::$controllers);
         } catch (Exception $e) {
             self::exception_handler($e);
-            $dynamic_class  = "class {$controller_name} extends controller {";
-            $dynamic_class .= '  public function __call($name, $args) {';
-            $dynamic_class .= '    $e = new Exception("Function {$name} not found in non-existant class '.$controller_name.'");';
-            $dynamic_class .= '    app::exception_handler($e);';
-            $dynamic_class .= '  }';
-            $dynamic_class .= '}';
-            $dynamic_class .= "return new {$controller_name};";
             try {
-                $controller = eval($dynamic_class);
-                $controller->initialize();
+                $controller = self::_load_class('unknownController', BASEPATH . 'controllers', self::$controllers);
             } catch (Exception $e) {
                 self::exception_handler($e);
             }
@@ -157,15 +134,8 @@ class app {
             $model = self::_load_class($model_name, APPPATH . 'models', self::$models);
         } catch (Exception $e) {
             self::exception_handler($e);
-            $dynamic_class  = "class {$model_name} {";
-            $dynamic_class .= '  public function __call($name, $args) {';
-            $dynamic_class .= '    $e = new Exception("Function {$name} not found in non-existant class '.$model_name.'");';
-            $dynamic_class .= '    app::exception_handler($e);';
-            $dynamic_class .= '  }';
-            $dynamic_class .= '}';
-            $dynamic_class .= "return new {$model_name};";
             try {
-                $model = eval($dynamic_class);
+                $model = self::_load_class('unknownModel', BASEPATH . 'models', self::$models);
             } catch (Exception $e) {
                 self::exception_handler($e);
             }
@@ -428,8 +398,8 @@ class app {
      */
     public static function dispatch($controller, $method, $params, $named_params) {
         // If there is no specified $controller or $method use defaults
-        self::$controller = ($controller !== NULL && $controller !== "") ? $controller : self::$config['default_controller'];
-        self::$method = ($method !== NULL && $method !== "") ? $method : self::$config['default_method'];
+        self::$controller = ($controller !== NULL && $controller !== "") ? $controller : config::get('default_controller');
+        self::$method = ($method !== NULL && $method !== "") ? $method : config::get('default_method');
         self::$params = $params;
         self::$named_params = $named_params;
 
@@ -487,8 +457,8 @@ class app {
         $url = router::unmap($url);
       }
       $proto = $secure_url ? 'https://' : 'http://';
-      $host = self::$config['site_host'] != '' ? self::$config['site_host'] : $_SERVER['SERVER_NAME'];
-      $base = self::$config['site_base'] != '' ? '/'.self::$config['site_base'] : '';
+      $host = config::get('site_host') != '' ? config::get('site_host') : $_SERVER['SERVER_NAME'];
+      $base = config::get('site_base') != '' ? '/'.config::get('site_base') : '';
       return("{$proto}{$host}{$base}/{$url}");
     }
 
@@ -608,7 +578,7 @@ class app {
                 }
                 self::$controller_data['css'] = layout::buildStyleTags();
                 self::$controller_data['scripts'] = layout::buildScriptTags();
-                $layout = layout::which() === NULL ? self::$config['default_layout'] : layout::which();
+                $layout = layout::which() === NULL ? config::get('default_layout') : layout::which();
                 try {
                     $temp_ob = layout::layout($layout, self::$controller_data);
                 } catch(Exception $e) {
@@ -670,7 +640,7 @@ class app {
 
         if (!(error_reporting() & $errno)) {
             // This error code is not included in error_reporting
-            return;
+            return true;
         }
 
         switch ($errno) {
@@ -736,10 +706,8 @@ ERROR;
         self::render();
         // Output stored view buffer
         echo self::getOutputBuffer();
-        // Output the random shit from the controller
-        // **Should probably just write this to a log **
-//    echo "\n<!--\n".self::$controller_output."\n-->";
-//    echo "\n<!-- Generated in ".self::getElapsedTime()." seconds. -->";
+        app::log("\n".self::$controller_output."\n");
+        app::log("Generated in ".self::getElapsedTime()." seconds.\n");
     }
 
 }

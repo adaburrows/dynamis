@@ -66,7 +66,6 @@ if(!config::get('core')) {
 load_files(config::get('deps'));
 
 // Set up configuration and default runtime handlers
-app::setConfig(config::getAll());
 app::setStartTime($start_time);
 // Set the global error handler
 set_error_handler( array('app', 'error_handler') );

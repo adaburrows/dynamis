@@ -58,18 +58,12 @@ class db {
    * Connects to the database.
    */
   public static function connect() {
-    $type = isset(app::$config['db_type']) ?
-      app::$config['db_type'] : 'unknown';
-    $host = isset(app::$config['db_host']) ?
-      app::$config['db_host'] : '127.0.0.1';
-    $port = isset(app::$config['db_port']) ?
-      'port='.app::$config['db_port'].';' : '';
-    $name = isset(app::$config['db_name']) ?
-      'dbname='.app::$config['db_name'].';' : '';
-    $user = isset(app::$config['db_user']) ?
-      app::$config['db_user'] : 'user';
-    $pass = isset(app::$config['db_pass']) ?
-      app::$config['db_pass'] : 'pass';
+    $type = config::get('db_type');
+    $host = config::get('db_host');
+    $port = config::get('db_port') ? 'port='.config::get('db_port').';' : '';
+    $name = config::get('db_name') ? 'dbname='.config::get('db_name').';' : '';
+    $user = config::get('db_user');
+    $pass = config::get('db_pass');
     
     $dsn = "{$type}:host={$host};{$port}{$name}";
 
