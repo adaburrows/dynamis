@@ -372,12 +372,11 @@ class app {
         }
         // Parse full route
         $parsed = router::parse($full_route);
-        self::setReqType($parsed['extension']);
+        self::setReqType($parsed['type']);
 
         // If url should be secure and it's not, redirect to secure url.
-        self::$is_secure_url = router::isSecureRoute(
-          array( $parsed['controller'], $parsed['method'] )
-        ) || ($_SERVER['SERVER_PORT'] == '443');
+        self::$is_secure_url = $parsed['secure']
+                                || ($_SERVER['SERVER_PORT'] == '443');
 
         if(self::$is_secure_url && ($_SERVER['SERVER_PORT'] != '443')) {
             $url = self::site_url($parsed['route']);

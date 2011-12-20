@@ -50,56 +50,6 @@ class router {
     '/\/:opt/'  => '(((\/?)[-_a-zA-Z0-9=:]+(\/?))*)'
   );
 
-/* This is not used yet, commenting out.
-
-  private static $status_codes = array(
-    100     => 'Continue',
-    101     => 'Switching Protocols',
-
-    200     => 'OK',
-    201     => 'Created',
-    202     => 'Accepted',
-    203     => 'Non-Authoritative Information',
-    204     => 'No Content',
-    205     => 'Reset Content',
-    206     => 'Partial Content',
-
-    300     => 'Multiple Choices',
-    301     => 'Moved Permanently',
-    302     => 'Found',
-    303     => 'See Other',
-    304     => 'Not Modified',
-    305     => 'Use Proxy',
-    307     => 'Temporary Redirect',
-
-    400     => 'Bad Request',
-    401     => 'Unauthorized',
-    402     => 'Payment Required',
-    403     => 'Forbidden',
-    404     => 'Not Found',
-    405     => 'Method Not Allowed',
-    406     => 'Not Acceptable',
-    407     => 'Proxy Authentication Required',
-    408     => 'Request Timeout',
-    409     => 'Conflict',
-    410     => 'Gone',
-    411     => 'Length Required',
-    412     => 'Precondition Failed',
-    413     => 'Request Entity Too Large',
-    414     => 'Request-URI Too Long',
-    415     => 'Unsupported Media Type',
-    416     => 'Requested Range Not Satisfiable',
-    417     => 'Expectation Failed',
-
-    500     => 'Internal Server Error',
-    501     => 'Not Implemented',
-    502     => 'Bad Gateway',
-    503     => 'Service Unavailable',
-    504     => 'Gateway Timeout',
-    505     => 'HTTP Version Not Supported'
-    );
-*/
-
   /*
    * router::setRoutes();
    * ------------------
@@ -206,14 +156,14 @@ class router {
    */
   public static function parse($full_route) {
     $route = '';
-    $extension = config::get('default_request_type');
+    $type = config::get('default_request_type');
 
     $route_parts = explode('.', $full_route);
     // Get the extension;
     //   this could be problematic if the data just contains a dot; <_<
     //   this should be run through a list of available types. later...
     if(count($route_parts) > 1 ) {
-      $extension = array_pop($route_parts);
+      $type = array_pop($route_parts);
       $route = substr($full_route, 0, -1 * (strlen($extension) + 1));
     } else {
       $route = $full_route;
@@ -251,11 +201,14 @@ class router {
       }
     }
 
+    $secure = self::isSecureRoute( array($controller, $method) );
+
     return array(
       'route'         => $route,
-      'extension'     => $extension,
+      'type'          => $type,
       'controller'    => $controller,
       'method'        => $method,
+      'secure'        => $secure,
       'params'        => $params,
       'named_params'  => $named_params
     );
