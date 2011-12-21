@@ -370,6 +370,11 @@ class app {
           }
           $full_route = $route.'.'.$extension;
         }
+
+        if(isset($_SERVER['REQUEST_METHOD'])) {
+          $http_verb = $_SERVER['REQUEST_METHOD'];
+        }
+
         // Parse full route
         $parsed = router::parse($full_route);
         self::setReqType($parsed['type']);
