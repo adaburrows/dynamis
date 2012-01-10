@@ -3,9 +3,6 @@
 /* Fb
  * An easy to use, basic implementation of Facebook's Graph API for PHP
  * ==============================================================================
- * -- Version alpha 0.1 --
- * The source code is fairly well documented, except for the base class it
- * derives from.
  * This code is being released under an MIT style license:
  *
  * Copyright (c) 2010 Jillian Ada Burrows
@@ -35,8 +32,6 @@
  * Facebook:        <http://www.facebook.com/jillian.burrows>
  * Twitter:         @jburrows
  * ------------------------------------------------------------------------------
- * Use at your own peril! J/K
- *
  */
 
 // make sure we can access the http_request class

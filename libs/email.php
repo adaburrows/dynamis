@@ -4,7 +4,6 @@
  * -----------------
  * This class sends email: attach files, send multipart messages. 
  * ============================================================================
- * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
  *
  * Copyright (c) 2010 Jillian Ada Burrows
@@ -26,16 +25,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *------------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------
  * Original Author: Jillian Ada Burrows
  * Email:           jill@adaburrows.com
  * Website:         <http://www.adaburrows.com>
  * Github:          <http://github.com/jburrows>
  * Facebook:        <http://www.facebook.com/jillian.burrows>
  * Twitter:         @jburrows
- *------------------------------------------------------------------------------
- * Use at your own peril! J/K
- * 
+ * -----------------------------------------------------------------------------
  */
 
 class Email {
@@ -64,9 +61,9 @@ class Email {
    * PHP5 style constructor
    */
   function __construct() {
-    $this->errors_to = "support@Ulynk.com";
-    $attachments =false;
-    $content_parts =false;
+    $this->errors_to = config::get('email_errors_to');
+    $attachments = false;
+    $content_parts = false;
   }
 
   /*
@@ -169,9 +166,9 @@ class Email {
 
     $html = $this->text2html($text, $template);
     
-    $this->setSender('support@ulynk.com');
-    $this->setReplyTo('support@ulynk.com');
-    $this->setRecipients('undisclosed-list@ulynk.com');
+    $this->setSender(config::get('email_sender'));
+    $this->setReplyTo(config::get('email_reply_to'));
+    $this->setRecipients(config::get('email_list_recipients'));
     $this->setBcc($recipients);
     $this->setSubject($subject);
     $this->addMessagePart($text);
@@ -204,7 +201,7 @@ class Email {
     $headers .= "Bcc: {$this->bcc}\n";
     $headers .= "Return-path: {$this->reply_to}\n";
     $headers .= "Errors-to: {$this->errors_to}\n";
-    $headers .= "X-Mailer: uLynk Platform\n";           
+    $headers .= "X-Mailer: {$this->mailer_name}\n";           
     $headers .= "Content-Type: multipart/alternative;\n\tboundary=$boundary\n";
 
     $this->headers = $headers;

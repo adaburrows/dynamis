@@ -3,12 +3,8 @@
 /* OAuth2
  * ------
  * Basic implementation of an OAuth2 base class
- *
  * An OAuth2 consumer wishing to store tokens must create it's own storage class.
  * ==============================================================================
- * -- Version alpha 0.1 --
- * The source code is fairly well documented, except for the base class it
- * derives from.
  * This code is being released under an MIT style license:
  *
  * Copyright (c) 2010 Jillian Ada Burrows
@@ -35,12 +31,10 @@
  * Email:           jill@adaburrows.com
  * Website:         <http://www.adaburrows.com>
  * Github:          <http://github.com/jburrows>
- * Geoloqi:        <http://www.Geoloqi.com/jillian.burrows>
  * Twitter:         @jburrows
  * ------------------------------------------------------------------------------
- * Use at your own peril! J/K
- *
  */
+
 
 // make sure we can access the http_request class
 app::getLib('http_request');

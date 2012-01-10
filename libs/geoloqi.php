@@ -1,11 +1,8 @@
 <?php
 
-/* OAuth2
- * Basic implementation of an OAuth2 base class
+/* Geoloqi
+ * Basic Implementation of everything needed to get Geoloqi API access
  * ==============================================================================
- * -- Version alpha 0.1 --
- * The source code is fairly well documented, except for the base class it
- * derives from.
  * This code is being released under an MIT style license:
  *
  * Copyright (c) 2010 Jillian Ada Burrows
@@ -35,8 +32,6 @@
  * Geoloqi:        <http://www.Geoloqi.com/jillian.burrows>
  * Twitter:         @jburrows
  * ------------------------------------------------------------------------------
- * Use at your own peril! J/K
- *
  */
 
 // make sure we can access the http_request class

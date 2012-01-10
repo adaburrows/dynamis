@@ -1,10 +1,40 @@
 <?php
-/**
- * 
+/* SMSified
+ * --------
  * A PHP class for interacting with the SMSified API.
  * Parts taken from the smsified github library
- * Serverely modified by yours truly, Ada Burrows
+ * Serverely modified (rewritten, basically) by yours truly, Ada Burrows
+ * ==============================================================================
+ * This code is being released under an MIT style license:
+ *
+ * Copyright (c) 2010 Jillian Ada Burrows
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ * ------------------------------------------------------------------------------
+ * Original Author: Jillian Ada Burrows
+ * Email:           jill@adaburrows.com
+ * Website:         <http://www.adaburrows.com>
+ * Github:          <http://github.com/jburrows>
+ * Twitter:         @jburrows
+ * ------------------------------------------------------------------------------
  */
+
 app::getLib('http_request');
 class smsified extends http_request {
 
