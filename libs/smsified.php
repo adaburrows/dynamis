@@ -25,8 +25,8 @@ class smsified extends http_request {
         $this->request_params['port'] = '443';
         $this->request_params['host'] = 'api.smsified.com';
 
-        $this->username = app::$config['smsified_user'];
-        $this->password = app::$config['smsified_pass'];
+        $this->username = config::get('smsified_user');
+        $this->password = config::get('smsified_pass');
 
         $this->add_basic_auth($this->username, $this->password);
     }
@@ -91,7 +91,7 @@ class smsified extends http_request {
     public function sendMessage($message) {
         $status = false;
         if(empty($message['sender'])){
-            $senderAddress = app::$config['smsified_num'];
+            $senderAddress = config::get('smsified_num');
         } else {
             $senderAddress = $message['sender'];
             unset($message['sender']);
