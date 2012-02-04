@@ -161,7 +161,7 @@ class http_request {
     protected function build_request() {
         $query = '';
         if(!empty ($this->request_params['query_params'])) {
-            $query = $this->build_query($this->request_params['query_params']);
+            $query = http_build_query($this->request_params['query_params']);
         }
         // Set the verb, path, protocol, and version.
         // if this is a GET append query parameters
@@ -196,7 +196,7 @@ class http_request {
                 // If the body is an array, then it should probably be serialized
                 // in url-encode fashion
                 if(is_array($this->request_params['body'])) {
-                    $this->request_params['body'] = $this->build_query($this->request_params['body']);
+                    $this->request_params['body'] = http_build_query($this->request_params['body']);
                 }
             } else {
                 $this->request_params['body'] = $query;
@@ -311,8 +311,6 @@ class http_request {
     public function do_request() {
         $resp = $this->tx_request();
         $status = $this->parse_response($resp);
-        //Reset method to 'GET' for next call
-        $this->request_params['method'] = 'GET';
         return $status;
     }
 
@@ -322,6 +320,7 @@ class http_request {
      * Returns returns raw text response.
      */
     public function get($object, $params = array()) {
+		$this->request_params['method'] = 'GET';
         $this->request_params['path'] = $object;
         $this->request_params['query_params'] = $params;
         $object = $this->do_request() ? $this->get_data() : null;

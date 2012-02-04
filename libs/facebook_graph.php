@@ -49,8 +49,8 @@ class facebook_graph extends OAuth2 {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
         $this->old_domain = 'api.facebook.com';
-        $this->token_endpoint = 'oauth/access_token';
-        $this->permissions_delim = ',';
+        $this->token_endpoint = '/oauth/access_token';
+        $this->permission_delim = ',';
         $this->request_params['host'] = $this->domain;
         $this->signed_request = null;
 
@@ -152,29 +152,12 @@ class facebook_graph extends OAuth2 {
         }
     }
 
-    /* old_get
-     * -------
-     * Does a GET to an old API method
-     */
-    public function old_get($method, $params = array()) {
-        $this->request_params['method'] = 'GET';
-        $this->request_params['host'] = $this->old_domain;
-        $this->request_params['path'] = "/method/{$method}";
-        $this->request_params['query_params'] = $this->_add_auth($params);
-        $result = $this->do_request() ? $this->get_data() : null;
-        $this->request_params['host'] = $this->domain;
-        return json_decode($result, true);
-    }
-
     /* fql
      * ---
      * Runs an fql query
      */
     public function fql($fql) {
-        $result = $this->old_get('fql.query', $this->_add_auth(array(
-            'query' => $fql,
-            'format' => 'JSON'
-        )));
+        $result = $this->get('/fql', array('q' => $fql));
         return $result;
     }
 
@@ -183,10 +166,7 @@ class facebook_graph extends OAuth2 {
      * Runs a multi.fql query
      */
     public function multi_fql($multi_fql_array) {
-        $result = $this->old_get('fql.multiquery', $this->_add_auth(array(
-            'query' => json_encode($multi_fql_array),
-            'format' => 'JSON'
-        )));
+        $result = null;
         return $result;
     }
 
@@ -197,12 +177,7 @@ class facebook_graph extends OAuth2 {
      *  + the $source user
      */
     public function mutual_friends($target, $source = null) {
-        $params = $this->_add_auth(array(
-            'target_uid' => $target,
-            'format' => 'JSON'
-        ));
-        if ($source != null) $params['source_uid'] = $source;
-        $result = $this->old_get('friends.getMutualFriends', $params);
+        $result = null;
         return $result;
     }
     /* get_connection_types
@@ -238,6 +213,17 @@ class facebook_graph extends OAuth2 {
         $object = $this->get("$object/$relation");
         return $this->_has_data($object);
     }
+
+	/* get_accounts
+	 * ------------
+	 * Requests all of your accounts, pretty much your pages.
+	 *
+	 * <http://developers.facebook.com/docs/api>
+	 */
+	public function get_accounts() {
+		$object = $this->get("me/accounts");
+		return $this->_has_data($object);
+	}
 
     /* post_feed
      * ---------

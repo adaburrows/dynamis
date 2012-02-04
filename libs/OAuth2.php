@@ -129,11 +129,15 @@ class OAuth2 extends http_request {
     public function auth_redirect($response_type = 'code', $permissions = null) {
         if (!isset($_GET['code'])) {
             $redirect_url = $this->user_auth;
-            $redirect_url .= "?response_type={$response_type}&client_id={$this->app_id}&redirect_uri={$this->redirect_uri}";
+            $query_parts = array(
+				'response_type'=> $response_type,
+				'client_id' => $this->app_id,
+				'redirect_uri' => $this->redirect_uri
+				);
             if($permissions != null) {
-                $redirect_url .=
-                  '&scope='.implode($this->permission_delim, $permissions);
+                $query_parts['scope'] = implode($this->permission_delim, $permissions);
             }
+			$redirect_url .= http_build_query($query_parts);
             header("Location: $redirect_url");
             exit(0);
         }
@@ -197,7 +201,7 @@ class OAuth2 extends http_request {
      * Returns returns raw text response.
      */
     public function get($object, $params = array()) {
-        return parent::get("{$this->api_version}{$object}", _add_auth($params));
+        return parent::get("{$this->api_version}{$object}", $this->_add_auth($params));
     }
 
     /* post()

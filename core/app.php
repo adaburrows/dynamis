@@ -60,7 +60,7 @@ class app {
     private static $controller_output = "";
     private static $ob = "";
 
-    // Do not allow contructing an object out of this static class
+    // Do not allow constructing an object out of this static class
     private function __constructor() {}
 
 /*
@@ -649,31 +649,19 @@ class app {
 
         switch ($errno) {
             case E_USER_ERROR:
-                $error = "
-<b>ERROR</b> [$errno] $errstr<br />\n
-Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+                $error = "<b>ERROR</b> [{$errno}] {$errstr}<br />: On line {$errline} in file {$errfile}e";
                 break;
 
             case E_USER_WARNING:
-                $error = "
-<b>WARNING</b> [$errno] $errstr<br />\n
-Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+                $error = "<b>WARNING</b> [{$errno}] {$errstr}<br />: On line {$errline} in file {$errfile}";
                 break;
 
             case E_USER_NOTICE:
-                $error = "
-<b>NOTICE</b> [$errno] $errstr<br />\n
-Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+                $error = "<b>NOTICE</b> [{$errno}] {$errstr}<br />: On line {$errline} in file {$errfile}";
                 break;
 
             default:
-                $error = "
-<b>ERROR</b> [$errno] $errstr<br />\n
-Fatal error on line $errline in file $errfile\n:
-\n  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+                $error = "<b>ERROR</b> [{$errno}] {$errstr}<br />: On line {$errline} in file {$errfile}";
                 break;
         }
 

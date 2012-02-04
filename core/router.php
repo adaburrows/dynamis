@@ -158,6 +158,23 @@ class router {
     $route = '';
     $type = config::get('default_request_type');
 
+	// Parse named anchors
+	$full_route_anchor = explode('#',$full_route);
+	if(count($full_route_anchor) > 1) {
+		// Currently, we're going to ignore this.
+	}
+	$full_route = array_shift($full_route_anchor);
+
+	// Parse the get variables
+	$route_and_params = explode('?', $full_route);
+	if(count($route_and_params) > 1) {
+		$get_vars = array();
+		parse_str(array_pop($route_and_params), $get_vars);
+		$_GET = array_merge($_GET,$get_vars);
+		app::log(print_r($_GET, TRUE));
+	}
+	$full_route = array_shift($route_and_params);
+
     $route_parts = explode('.', $full_route);
     // Get the extension;
     //   this could be problematic if the data just contains a dot; <_<
