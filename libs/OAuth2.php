@@ -210,7 +210,7 @@ class OAuth2 extends http_request {
      * Returns returns raw text response.
      */
     public function post($object, $data, $content_type = null) {
-        return parent::post("{$this->api_version}{$object}", $data, $content_type);
+        return parent::post("{$this->api_version}{$object}", $this->_add_auth($data), $content_type);
     }
 
     /* put()
@@ -219,7 +219,7 @@ class OAuth2 extends http_request {
      * Returns returns raw text response.
      */
     public function put($object, $data, $content_type = null) {
-        return parent::put("{$this->api_version}{$object}", $data, $content_type);
+        return parent::put("{$this->api_version}{$object}", $this->_add_auth($data), $content_type);
     }
 
     /* delete()
@@ -227,8 +227,8 @@ class OAuth2 extends http_request {
      * Deletes an object if you have permissions.
      * Returns returns raw text response.
      */
-    public function delete($object) {
-        return parent::delete("{$this->api_version}{$object}");
+    public function delete($object, $params = array()) {
+        return parent::delete("{$this->api_version}{$object}", $this->_add_auth($params));
     }
 
 }

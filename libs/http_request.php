@@ -166,7 +166,7 @@ class http_request {
         // Set the verb, path, protocol, and version.
         // if this is a GET append query parameters
         // if not don't append
-        if ($this->request_params['method'] == 'GET') {
+        if ($this->request_params['method'] == 'GET' || $this->request_params['method'] == 'DELETE') {
             $request = "{$this->request_params['method']} {$this->request_params['path']}?$query HTTP/1.1\r\n";
         } else {
             $request = "{$this->request_params['method']} {$this->request_params['path']} HTTP/1.1\r\n";
@@ -184,7 +184,7 @@ class http_request {
         // Set the connection type
         $request .= "Connection: Close\r\n";
         // If it's a post, process what we're sending
-        if ($this->request_params['method'] == 'POST') {
+        if ($this->request_params['method'] == 'POST' || $this->request_params['method'] == 'PUT') {
             // If the content-type has not been set, set it
             if (empty($this->request_params['content-type']) || $this->request_params['content-type'] == null) {
                 $content_type = 'application/x-www-form-urlencoded';
@@ -320,6 +320,7 @@ class http_request {
      * Returns returns raw text response.
      */
     public function get($object, $params = array()) {
+		$this->reset();
 		$this->request_params['method'] = 'GET';
         $this->request_params['path'] = $object;
         $this->request_params['query_params'] = $params;
@@ -333,9 +334,14 @@ class http_request {
      * Returns returns raw text response.
      */
     public function post($object, $data, $content_type = null) {
+		$this->reset();
         $this->request_params['method'] = 'POST';
         $this->request_params['path'] = $object;
-        $this->request_params['body'] = $data;
+		if (is_array($data)) {
+			$this->request_params['query_params'] = $data;
+		} else {
+			$this->request_params['body'] = $data;
+		}
         $this->request_params['content-type'] = $content_type;
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
@@ -347,9 +353,14 @@ class http_request {
      * Returns returns raw text response.
      */
     public function put($object, $data, $content_type = null) {
+		$this->reset();
         $this->request_params['method'] = 'PUT';
         $this->request_params['path'] = $object;
-        $this->request_params['body'] = $data;
+		if (is_array($data)) {
+			$this->request_params['query_params'] = $data;
+		} else {
+			$this->request_params['body'] = $data;
+		}
         $this->request_params['content-type'] = $content_type;
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
@@ -360,12 +371,22 @@ class http_request {
      * Deletes an object if you have permissions.
      * Returns returns raw text response.
      */
-    public function delete($object) {
+    public function delete($object, $params = array()) {
+		$this->reset();
         $this->request_params['method'] = 'DELETE';
         $this->request_params['path'] = $object;
+		$this->request_params['query_params'] = $params;
         $object = $this->do_request() ? $this->get_data() : null;
         return $object;
     }
+
+	public function reset() {
+		unset($this->request_params['method']);
+		unset($this->request_params['path']);
+		unset($this->request_params['body']);
+		unset($this->request_params['content-type']);
+		unset($this->request_params['query_params']);
+	}
 
     /* get_data
      * --------

@@ -146,7 +146,6 @@ class facebook_graph extends OAuth2 {
             $expiration = isset($values['expires']) ? $values['expires'] : null;
             $this->access_token = $access_token;
             $this->expiration = $expiration;
-            $this->request_params['header_params'] = array('Authorization: OAuth ' . $this->access_token);
         } else {
             throw new Exception("Error in retreiving token: {$data}");
         }
