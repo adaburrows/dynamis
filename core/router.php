@@ -171,7 +171,6 @@ class router {
 		$get_vars = array();
 		parse_str(array_pop($route_and_params), $get_vars);
 		$_GET = array_merge($_GET,$get_vars);
-		app::log(print_r($_GET, TRUE));
 	}
 	$full_route = array_shift($route_and_params);
 
