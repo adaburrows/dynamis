@@ -244,7 +244,7 @@ class http_request {
             }
         } else {
             for ($i = 0; $i < $this->count; $i++) {
-                $response .= fread($fp, $bs);
+                $response .= fread($fp, $this->bs);
             }
         }
         return($response);
