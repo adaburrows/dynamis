@@ -121,12 +121,10 @@ class facebook_graph extends OAuth2 {
 
     /* _has_meta
      * ---------
-     * Determines if the resulting object has meta data.
+     * Determines if the resulting object has meta data. Returns the meta data if it exists,
+     * returns null if it doesn't.
      */
     private function _has_meta($object) {
-        if ($object != null) {
-            $object = json_decode($object, true);
-        }
         return isset($object['metadata']) ? $object['metadata'] : null;
     }
 
