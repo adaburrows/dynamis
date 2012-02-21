@@ -173,6 +173,7 @@ class facebook_graph extends OAuth2 {
 			$query = str_replace(' ', '+', $query);
 			app::log(print_r($query, TRUE));
 			$result = $this->get('/fql', array('q' => $query));
+			app::log(print_r($result, TRUE));
 		}
 		$data = $this->_has_data($result);
         return $data;
