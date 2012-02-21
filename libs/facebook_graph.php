@@ -156,7 +156,8 @@ class facebook_graph extends OAuth2 {
      * If $fql is a string, this will run a single FQL query.
      * If $fql is an array, this will run a multi-FQL query.
      *
-     * For multi-FQL queries, each query must have a name which will correspond to the name of the result sets.
+     * For multi-FQL queries, each query must have a name which will correspond
+     * to the name of the result sets.
      * I.e.:
      *   array(
      *     'me'			=> 'SELECT name FROM user WHERE uid=me()',
@@ -164,6 +165,9 @@ class facebook_graph extends OAuth2 {
      *   );
      *
      * Returns arrays of matching result sets.
+     *
+     * See http://developers.facebook.com/docs/reference/fql/ for more specifics
+     * about writing queries.
      */
     public function fql($fql) {
 		$result = null;
