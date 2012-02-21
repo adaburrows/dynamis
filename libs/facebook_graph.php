@@ -200,8 +200,9 @@ class facebook_graph extends OAuth2 {
         $result = null;
         return $result;
     }
-    /* get_connection_types
-     * --------------------
+
+    /* get_relationships
+     * -----------------
      * Requests an object's connection types to the FB social graph. Returns
      * a hash of connection types as keys and links to the respective api
      * calls.
@@ -217,12 +218,43 @@ class facebook_graph extends OAuth2 {
         return $data;
     }
 
+	/* get_fields
+	 * ----------
+	 * Gets a list of the fields and their descriptions
+	 * <http://developers.facebook.com/docs/api>
+	 */
+	public function get_fields($object) {
+		$data = null;
+		$meta = $this->get_with_meta($object);
+		$meta = $this->_has_meta($meta);
+		if (($meta != null) && isset($meta['fields'])) {
+			$data = $meta['fields'];
+		}
+		return $data;
+	}
+
+	/* get_type
+	 * --------------------
+	 * Requests an object's connection types to the FB social graph. Returns
+	 * a hash of connection types as keys and links to the respective api
+	 * calls.
+	 * <http://developers.facebook.com/docs/api>
+	 */
+	public function get_type($object) {
+		$type = null;
+		$data = $this->get_with_meta($object);
+		if (($data != null) && isset($data['type'])) {
+			$type = $data['type'];
+		}
+		return $type;
+	}
+
     /* get_connections
      * ---------------
      * Requests an object's connections to other objects on the FB graph.
      * $relation can be: any of: (friends, home, feed (Wall), likes, 
      * movies, books, notes, photos, videos, events, groups).
-     * However, call get_connection_types to get a real list of connection
+     * However, call get_relationships() to get a real list of connections
      * an object supports.
      * <http://developers.facebook.com/docs/api>
      */
