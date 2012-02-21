@@ -154,20 +154,43 @@ class facebook_graph extends OAuth2 {
     /* fql
      * ---
      * Runs an fql query
+     *
+     * If $fql is a string, this will run a single FQL query.
+     * If $fql is an array, this will run a multi-FQL query.
+     *
+     * For multi-FQL queries, each query must have a name which will correspond to the name of the result sets.
+     * I.e.:
+     *   array(
+     *     'me'			=> 'SELECT name FROM user WHERE uid=me()',
+     *     'friends'	=> 'SELECT uid2 FROM friend WHERE uid1=me()'
+     *   );
      */
     public function fql($fql) {
-        $result = $this->get('/fql', array('q' => $fql));
-        return $result;
+		$result = null;
+		if (is_string($fql)) {
+			$result = $this->get('/fql', array('q' => $fql));
+		}
+        if (is_array($fql)) {
+			$query = json_encode($fql);
+			$query = str_replace(' ', '+', $query);
+			$result = $this->get('/fql', array('q' => $query));
+		}
+		$data = $this->_has_data($result);
+        return $data;
     }
 
-    /* multi_fql
-     * ---
-     * Runs a multi.fql query
-     */
-    public function multi_fql($multi_fql_array) {
-        $result = null;
-        return $result;
-    }
+	/* get_meta
+	 * --------
+	 * Returns the metadata about an object.
+	 */
+	public function get_with_meta($object) {
+		$result = null;
+		$result = $this->get($object, array(
+			'metadata' => 1
+		));
+		$data = json_decode($result);
+		return $data;
+	}
 
     /* mutual_friends
      * --------------
@@ -188,11 +211,8 @@ class facebook_graph extends OAuth2 {
      */
     public function get_relationships($object) {
         $data = null;
-        $this->get($object, array(
-            'metadata' => 1
-        ));
-        $data = $this->do_request() ? $this->get_data() : null;
-        $meta = $this->_has_meta($data);
+        $meta = $this->get_with_meta($object);
+		$meta = $this->_has_meta($meta);
         if (($meta != null) && isset($meta['connections'])) {
             $data = $meta['connections'];
         }
