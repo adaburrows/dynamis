@@ -186,7 +186,7 @@ class facebook_graph extends OAuth2 {
 		$result = $this->get($object, array(
 			'metadata' => 1
 		));
-		$data = json_decode($result);
+		$data = json_decode($result, true);
 		return $data;
 	}
 
