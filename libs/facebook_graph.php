@@ -162,17 +162,28 @@ class facebook_graph extends OAuth2 {
      *     'me'			=> 'SELECT name FROM user WHERE uid=me()',
      *     'friends'	=> 'SELECT uid2 FROM friend WHERE uid1=me()'
      *   );
+     *
+     * Returns arrays of matching result sets.
      */
     public function fql($fql) {
 		$result = null;
+		$multi = false;
 		if (is_string($fql)) {
 			$result = $this->get('/fql', array('q' => $fql));
 		}
         if (is_array($fql)) {
 			$query = json_encode($fql);
 			$result = $this->get('/fql', array('q' => $query));
+			$multi = true;
 		}
 		$data = $this->_has_data($result);
+		if ($multi) {
+			$fields = array();
+			foreach($data as $datum) {
+				$fields[$datum['name']] = $datum['fql_result_set'];
+			}
+			$data = $fields;
+		}
         return $data;
     }
 
