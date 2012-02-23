@@ -146,6 +146,22 @@ class facebook_graph extends OAuth2 {
             throw new Exception("Error in retreiving token: {$data}");
         }
     }
+	/* search()
+     * --------
+     * Performs a search on Facebook of the following types:
+	 *  + All public posts: https://graph.facebook.com/search?q=watermelon&type=post
+     *  + People: https://graph.facebook.com/search?q=mark&type=user
+     *  + Pages: https://graph.facebook.com/search?q=platform&type=page
+     *  + Events: https://graph.facebook.com/search?q=conference&type=event
+     *  + Groups: https://graph.facebook.com/search?q=programming&type=group
+     *  + Places: https://graph.facebook.com/search?q=coffee&type=place&center=37.76,122.427&distance=1000
+     *  + Checkins: https://graph.facebook.com/search?type=checkin
+     */
+	public function search($what, $params = array()) {
+		$params['q'] = $what;
+		$data = $this->no_auth_get($this->search_endpoint, $params);
+		return $data;
+	}
 
     /* fql
      * ---
