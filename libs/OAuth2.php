@@ -138,14 +138,14 @@ class OAuth2 extends http_request {
      * in $this->token.
      */
     public function get_user_token() {
-        $this->request_params['query_params'] = array(
+        $params = array(
             'grant_type' => 'authorization_code',
             'code' => $_GET['code'],
             'redirect_uri' => $this->redirect_uri,
             'client_id' => $this->app_id,
             'client_secret' => $this->app_secret
         );
-        $this->_update_token();
+        $this->_update_token($params);
         return $this->access_token != null;
     }
 
@@ -156,12 +156,12 @@ class OAuth2 extends http_request {
 	 * stored in $this->token.
      */
 	public function get_application_token() {
-		$this->request_params['query_params'] = array(
+		$params = array(
 			'grant_type' => 'client_credentials',
 			'client_id' => $this->app_id,
 			'client_secret' => $this->app_secret
 		);
-		$this->update_token();
+		$this->update_token($params);
 		return $this->access_token != null;
 	}
 
@@ -219,6 +219,15 @@ class OAuth2 extends http_request {
 			$data
 		);
 		return ($return);
+	}
+
+	/* no_auth_get()
+     * -------------
+     * Requests an object's basic info from the OAuth2 service.
+     * Returns returns raw text response.
+     */
+	public function no_auth_get($object, $params = array()) {
+		return parent::get($object, $params);
 	}
 
     /* get()

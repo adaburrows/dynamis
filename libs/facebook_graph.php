@@ -133,8 +133,8 @@ class facebook_graph extends OAuth2 {
      * ----------------
      * Executes the oauth token endpoint and sets the proper properties
      */
-    protected function _update_token() {
-        $data = $this->get($this->token_endpoint);
+    protected function _update_token($params) {
+        $data = $this->no_auth_get($this->token_endpoint, $params);
         if(json_decode($data) == null) {
             $values = array();
             parse_str($data, $values);
