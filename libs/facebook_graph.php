@@ -55,7 +55,7 @@ class facebook_graph extends OAuth2 {
         $this->signed_request = null;
 
         if(!empty($_REQUEST['signed_request'])){
-            $this->parse_signed_request($_REQUEST['signed_request']);
+            $this->_parse_signed_request($_REQUEST['signed_request']);
         }
     }
     /* parse_signed_request
@@ -65,7 +65,7 @@ class facebook_graph extends OAuth2 {
      * Thank you Facebook! I ripped this off your docs and modified it
      *   + now it's extensible if more signing algorithms become available.
      */
-    private function parse_signed_request($signed_request) {
+    private function _parse_signed_request($signed_request) {
         list($encoded_sig, $payload) = explode('.', $signed_request, 2);
 
         // decode the data
@@ -134,9 +134,7 @@ class facebook_graph extends OAuth2 {
      * Executes the oauth token endpoint and sets the proper properties
      */
     protected function _update_token() {
-        $this->request_params['method'] = 'GET';
-        $this->request_params['path'] = "{$this->token_endpoint}";
-        $data = $this->do_request() ? $this->get_data() : null;
+        $data = $this->get($this->token_endpoint);
         if(json_decode($data) == null) {
             $values = array();
             parse_str($data, $values);
@@ -191,11 +189,11 @@ class facebook_graph extends OAuth2 {
         return $data;
     }
 
-	/* get_meta
-	 * --------
+	/* get_with_metadata()
+	 * ------------------
 	 * Returns the metadata about an object.
 	 */
-	public function get_with_meta($object) {
+	public function get_with_metadata($object) {
 		$result = null;
 		$result = $this->get($object, array(
 			'metadata' => 1
@@ -224,7 +222,7 @@ class facebook_graph extends OAuth2 {
      */
     public function get_relationships($object) {
         $data = null;
-        $meta = $this->get_with_meta($object);
+        $meta = $this->get_with_metadata($object);
 		$meta = $this->_has_meta($meta);
         if (($meta != null) && isset($meta['connections'])) {
             $data = $meta['connections'];
@@ -239,7 +237,7 @@ class facebook_graph extends OAuth2 {
 	 */
 	public function get_fields($object) {
 		$data = null;
-		$meta = $this->get_with_meta($object);
+		$meta = $this->get_with_metadata($object);
 		$meta = $this->_has_meta($meta);
 		if (($meta != null) && isset($meta['fields'])) {
 			$data = $meta['fields'];
@@ -256,7 +254,7 @@ class facebook_graph extends OAuth2 {
 	 */
 	public function get_type($object) {
 		$type = null;
-		$data = $this->get_with_meta($object);
+		$data = $this->get_with_metadata($object);
 		if (($data != null) && isset($data['type'])) {
 			$type = $data['type'];
 		}

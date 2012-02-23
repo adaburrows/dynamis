@@ -99,18 +99,6 @@ class OAuth2 extends http_request {
         $this->redirect_uri = $params['redirect_uri'];
     }
 
-    /* _add_auth
-     * ---------
-     * Adds the access_token param to requests
-     */
-    protected function _add_auth($data) {
-        $return = array_merge(
-            array('access_token' => $this->access_token),
-            $data
-        );
-        return ($return);
-    }
-
     /* set_redirect_uri
      * ----------------
      * Sets which URI the user is redirected after authentication
@@ -143,13 +131,13 @@ class OAuth2 extends http_request {
         }
     }
 
-    /* get_token
-     * ---------
+    /* get_user_token
+     * ---------------
      * After authentication is requested this function will return true if 
      * the access token was retreived successfully. The access token is stored
      * in $this->token.
      */
-    public function token() {
+    public function get_user_token() {
         $this->request_params['query_params'] = array(
             'grant_type' => 'authorization_code',
             'code' => $_GET['code'],
@@ -161,13 +149,29 @@ class OAuth2 extends http_request {
         return $this->access_token != null;
     }
 
-    /* refresh_token
-     * -------------
+	/* get_application_token
+     * ---------------------
+     * After the application token is requested this function will return true
+	 * if the access token was retreived successfully. The access token is
+	 * stored in $this->token.
+     */
+	public function get_application_token() {
+		$this->request_params['query_params'] = array(
+			'grant_type' => 'client_credentials',
+			'client_id' => $this->app_id,
+			'client_secret' => $this->app_secret
+		);
+		$this->update_token();
+		return $this->access_token != null;
+	}
+
+    /* refresh_user_token
+     * ------------------
      * After authentication is requested this function will return true if 
      * the access token was retreived successfully. The access token is stored
      * in $this->token.
      */
-    public function refresh_token() {
+    public function refresh_user_token() {
         $this->request_params['query_params'] = array(
             'grant_type' => 'refresh_token',
             'client_id' => $this->app_id,
@@ -181,19 +185,41 @@ class OAuth2 extends http_request {
      * ----------------
      * Executes the oauth token endpoint and sets the proper properties
      *
-     * NOTE: Override this function in each implementation
+     * NOTE: Override this function in each implementation since each serivce
+     * may return its format of access tokens.
      */
     protected function _update_token() {
     }
 
-    /* restore_token()
-     * ------------------
+    /* set_token()
+     * -----------
      * Sets an access token to use
      * Used to restore access using a stored token
      */
-    public function restore_token($token) {
+    public function set_token($token) {
         $this->access_token = $token;
     }
+
+	/* set_token()
+     * -----------
+     * Sets an access token to use
+     * Used to restore access using a stored token
+     */
+	public function get_token() {
+		return $this->access_token;
+	}
+
+	/* _add_auth
+     * ---------
+     * Adds the access_token param to requests
+     */
+	protected function _add_auth($data) {
+		$return = array_merge(
+			array('access_token' => $this->access_token),
+			$data
+		);
+		return ($return);
+	}
 
     /* get()
      * -----
