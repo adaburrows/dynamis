@@ -172,12 +172,12 @@ class OAuth2 extends http_request {
      * in $this->token.
      */
     public function refresh_user_token() {
-        $this->request_params['query_params'] = array(
+        $params = array(
             'grant_type' => 'refresh_token',
             'client_id' => $this->app_id,
             'client_secret' => $this->app_secret,
         );
-        $this->_update_token();
+        $this->_update_token($params);
         return $this->access_token != null;
     }
 
