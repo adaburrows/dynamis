@@ -121,7 +121,7 @@ class facebook_graph extends OAuth2 {
         if(!isset($object['data'])) {
 			throw new Exception('Could not parse data, server returned: '.print_r($object, true));
 		}
-		return $object;
+		return $object['data'];
     }
 
     /* _has_meta
