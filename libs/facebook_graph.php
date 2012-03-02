@@ -103,9 +103,11 @@ class facebook_graph extends OAuth2 {
     private function _has_id($object) {
         if ($object != null) {
             $object = json_decode($object, true);
-            $object = $object['id'];
-        }
-        return $object;
+		}
+        if(!isset($object['id'])) {
+			throw new Exception('Could not fetch id, data: '.print_r($object, true));
+		}
+        return $object['id'];
     }
 
     /* _has_data
@@ -116,7 +118,10 @@ class facebook_graph extends OAuth2 {
         if ($object != null) {
             $object = json_decode($object, true);
         }
-        return isset($object['data']) ? $object['data'] : null;
+        if(!isset($object['data'])) {
+			throw new Exception('Could not parse data, server returned: '.print_r($object, true));
+		}
+		return $object;
     }
 
     /* _has_meta
@@ -125,7 +130,10 @@ class facebook_graph extends OAuth2 {
      * returns null if it doesn't.
      */
     private function _has_meta($object) {
-        return isset($object['metadata']) ? $object['metadata'] : null;
+        if(!isset($object['metadata'])) {
+			throw new Exception('Could not find meta-data, server returned: '.print_r($object, true));
+		}
+		return $object['metadata'];
     }
 
 
