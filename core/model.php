@@ -88,7 +88,7 @@ class model extends db {
    */
   public function get_all() {
     $select = $this->build_select().';';
-    return self::query_array($select);
+    return self::select($select);
   }
 
   /*
@@ -100,7 +100,7 @@ class model extends db {
     $data = array("{$this->primary_key}" => $id);
     $select = $this->build_select(NULL, NULL, $data);
     $data = array_intersect_key($data, $this->current_fields);
-    return self::query_item($select, $data);
+    return self::select($select, $data);
   }
 
   /*
@@ -111,7 +111,7 @@ class model extends db {
   public function get_by_($data, $aspect = NULL) {
     $select = $this->build_select($aspect, NULL, $data);
     $data = array_intersect_key($data, $this->current_fields);
-    return self::query_item($select, $data);
+    return self::select($select, $data);
   }
 
   /*
@@ -122,7 +122,7 @@ class model extends db {
   public function get_all_by_($data, $aspect = NULL) {
     $select = $this->build_select($aspect, NULL, $data);
     $data = array_intersect_key($data, $this->current_fields);
-    return self::query_array($select, $data);
+    return self::select($select, $data);
   }
 
   /*
@@ -147,7 +147,7 @@ class model extends db {
       $query = $this->build_insert($data, $aspect);
     }
     $data = array_intersect_key($data, $this->current_fields);
-    $result = self::query_ins($query, $data);
+    $result = self::insert($query, $data);
     return $result;
   }
 
@@ -160,7 +160,7 @@ class model extends db {
       $data = array("{$this->primary_key}" => $id);
       $query = $this->build_delete($data, $aspects);
       $data = array_intersect_key($data, $this->current_fields);
-      return self::query_ins($query, $data);
+      return self::insert($query, $data);
   }
 
   /*

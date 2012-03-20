@@ -79,75 +79,30 @@ class db {
   }
 
   /*
-   * db::query_array();
-   * -------------------
+   * db::select();
+   * ------------
    * This function retreives a number indexed array of rows (in associative array form) from a database query
    */
-  public static function query_array($query, $bind_values = NULL) {
-    $statement = self::$connection->prepare($query);
-    if($bind_values!=NULL && is_array($bind_values)) {
-      foreach ($bind_values as $name => $value) {
-        $statement->bindValue(":{$name}", $value);
-      }
-    }
-    try {
-      $statement->execute();
-      self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
-      self::$db_num_results = count(self::$db_query_results);
-      self::$db_error_code = $statement->errorCode();
-      self::$db_error = $statement->errorInfo();
-      if(config::get('debug')) {
-        $error_info_string = implode(' : ', self::$db_error);
-        app::log("\nQuery: {$query}\n");
-        app::log('Values: '.print_r($bind_values, true)."\n");
-        app::log("Database returned: {$error_info_string}\n");
-      }
-    } catch (PDOException $e) {
-      app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
-      self::$db_query_results = array();
-    }
+  public static function select($query, $bind_values = NULL) {
+    self::execute($query,$bind_values);
     return self::$db_query_results;
   }
 
   /*
-   * db::query_item();
-   * ------------------
-   * This function retreives one row from a database query as an associative array
-   * Assumption of name: your query will only return one record.
-   * If the query returns more than one record, only the first is returned by the function
-   */
-  public static function query_item($query, $bind_values = NULL) {
-    $statement = self::$connection->prepare($query);
-    if($bind_values!=NULL && is_array($bind_values)) {
-      foreach ($bind_values as $name => $value) {
-        $statement->bindValue(":{$name}", $value);
-      }
-    }
-    try {
-      $statement->execute();
-      self::$db_query_results = $statement->fetch(PDO::FETCH_ASSOC);
-      self::$db_num_results = self::$db_query_results ? 1 : 0;
-      self::$db_error_code = $statement->errorCode();
-      self::$db_error = $statement->errorInfo();
-      if(config::get('debug')) {
-        $error_info_string = implode(' : ', self::$db_error);
-        app::log("\nQuery: {$query}\n");
-        app::log('Values: '.print_r($bind_values, true)."\n");
-        app::log("Database returned: {$error_info_string}\n");
-      }
-    } catch (PDOException $e) {
-      app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
-      self::$db_query_results = array();
-    }
-    return self::$db_query_results;
-  }
-
-  /*
-   * db::query_ins();
-   * -----------------
+   * db::insert();
+   * -------------
    * Runs an insert query, returning the result.
    */
-  public static function query_ins($query, $bind_values = NULL) {
+  public static function insert($query, $bind_values = NULL) {
+    self::execute($query, $bind_values, 'insert');
+    if (self::$db_num_rows_affected > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public static function execute($query, $bind_values = NULL, $query_type = 'select') {
     $statement = self::$connection->prepare($query);
     if($bind_values!=NULL && is_array($bind_values)) {
       foreach ($bind_values as $name => $value) {
@@ -156,8 +111,13 @@ class db {
     }
     try {
       $statement->execute();
-      self::$db_num_rows_affected = $statement->rowCount();
-      self::$db_insert_id = self::$connection->lastInsertId();
+      if ($query_type == 'select') {
+        self::$db_query_results = $statement->fetchAll(PDO::FETCH_ASSOC);
+        self::$db_num_results = count(self::$db_query_results);
+      } else {
+        self::$db_num_rows_affected = $statement->rowCount();
+        self::$db_insert_id = self::$connection->lastInsertId();
+      }
       self::$db_error_code = $statement->errorCode();
       self::$db_error = $statement->errorInfo();
       if(config::get('debug')) {
@@ -168,12 +128,9 @@ class db {
       }
     } catch (PDOException $e) {
       app::exception_handler(new Exception(implode(' ,', self::$db_error)."\n{$query}"));
+      self::$db_query_results = array();
+      self::$db_num_results = 0;
       self::$db_num_rows_affected = 0;
-    }
-    if (self::$db_num_rows_affected > 0) {
-        return true;
-    } else {
-        return false;
     }
   }
 
