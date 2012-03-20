@@ -38,7 +38,6 @@
 app::getLib('OAuth2');
 
 class facebook_graph extends OAuth2 {
-    protected $old_domain;
     protected $signed_request;
 
     /* initialize
@@ -48,7 +47,6 @@ class facebook_graph extends OAuth2 {
     public function initialize() {
         $this->user_auth = 'https://www.facebook.com/dialog/oauth';
         $this->domain = 'graph.facebook.com';
-        $this->old_domain = 'api.facebook.com';
         $this->token_endpoint = '/oauth/access_token';
         $this->permission_delim = ',';
         $this->request_params['host'] = $this->domain;
