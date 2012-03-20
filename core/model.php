@@ -111,7 +111,7 @@ class model extends db {
   public function get_by_($data, $aspect = NULL) {
     $select = $this->build_select($aspect, NULL, $data);
     $data = array_intersect_key($data, $this->current_fields);
-    return self::select($select, $data);
+    return array_shift(self::select($select, $data));
   }
 
   /*
