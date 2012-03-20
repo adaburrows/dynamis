@@ -100,7 +100,7 @@ class model extends db {
     $data = array("{$this->primary_key}" => $id);
     $select = $this->build_select(NULL, NULL, $data);
     $data = array_intersect_key($data, $this->current_fields);
-    return self::select($select, $data);
+    return array_shift(self::select($select, $data));
   }
 
   /*
