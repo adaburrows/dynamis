@@ -183,7 +183,7 @@ class app {
         }
         if (!array_key_exists($class_name, $class_array)) {
             if(config::get('debug')) {
-                self::log("Loading class $class_name from $class_name_file.");
+                self::log("Loading class $class_name from $class_name_file:");
             }
             if (is_file("$class_dir/$class_name_file" . EXT)) {
                 include_once "$class_dir/$class_name_file" . EXT;
@@ -192,11 +192,14 @@ class app {
                 if (method_exists($class_array[$class_name], 'initialize')) {
                     $class_array[$class_name]->initialize();
                 }
+                if(config::get('debug')) {
+                    self::log("Done.\n");
+                }
             } else {
-                throw new Exception("Class $class_name not found in $class_dir.");
                 if(config::get('debug')) {
                     self::log("Class $class_name not found in $class_dir.");
                 }
+                throw new Exception("Class $class_name not found in $class_dir.");
             }
         }
         return $class_array[$class_name];
