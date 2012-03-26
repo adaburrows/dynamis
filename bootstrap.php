@@ -62,14 +62,14 @@ if(!config::get('core')) {
     config::set('core', array('aspects'));
 }
 
-// Models to load
-if(!config::get('models')) {
-  config::set('models', array('model', 'db_model'));
-}
-
 // Libraries to load
 if(!config::get('libs')) {
   config::set('libs', array('db/db'));
+}
+
+// Models to load
+if(!config::get('models')) {
+  config::set('models', array('model', 'db_model'));
 }
 
 // Controllers to load
@@ -95,11 +95,11 @@ if (!config::get('embedded')) {
 // Load the core library files
 app::getCore(config::get('core'));
 
-// Load the model files
-app::getModel(config::get('models'));
-
 // Load the libraries
 app::getLib(config::get('libs'));
+
+// Load the model files
+app::getModel(config::get('models'));
 
 // Load the controllers
 app::getController(config::get('controllers'));
