@@ -174,10 +174,16 @@ class app {
      * If a class instance doesn't already exist, it creates a new one.
      * Loads class from a file if necessary.
      */
-    private static function &_load_class($class_name, $class_dir, &$class_array) {
+    private static function &_load_class($class_name_file, $class_dir, &$class_array) {
+        $class_name_parts = explode($class_name_file, '/');
+        if(count($class_name_parts) > 1) {
+            $class_name = array_pop($class_name_parts);
+        } else {
+            $class_name = $class_name_file;
+        }
         if (!array_key_exists($class_name, $class_array)) {
-            if (is_file("$class_dir/$class_name" . EXT)) {
-                include_once "$class_dir/$class_name" . EXT;
+            if (is_file("$class_dir/$class_name_file" . EXT)) {
+                include_once "$class_dir/$class_name_file" . EXT;
                 $class_array[$class_name] = new $class_name;
                 // Call initialize() method if it's defined.
                 if (method_exists($class_array[$class_name], 'initialize')) {
@@ -185,6 +191,9 @@ class app {
                 }
             } else {
                 throw new Exception("Class $class_name not found in $class_dir.");
+                if(config::get('debug')) {
+                    self::log("Class $class_name not found in $class_dir.");
+                }
             }
         }
         return $class_array[$class_name];
