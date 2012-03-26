@@ -103,7 +103,7 @@ class app {
         } else {
           try {
             $lib_path = BASEPATH . 'libs';
-            if (is_file(APPPATH . 'libs' . $lib_name . EXT)) {
+            if (is_file(APPPATH . 'libs/' . $lib_name . EXT)) {
                 $model_path = APPPATH . 'libs';
             }
             $lib = self::_load_class($lib_name, $lib_path, self::$libraries);
@@ -133,7 +133,7 @@ class app {
         } else {
           try {
             $controller_path = BASEPATH . 'controllers';
-            if (is_file(APPPATH . 'controllers' . $controller_name . EXT)) {
+            if (is_file(APPPATH . 'controllers/' . $controller_name . EXT)) {
                $controller_path = APPPATH . 'controllers';
             }
             $controller = self::_load_class($controller_name, $controller_path, self::$controllers);
@@ -163,7 +163,7 @@ class app {
         } else {
           try {
             $model_path = BASEPATH . 'models';
-            if (is_file(APPPATH . 'models' . $model_name . EXT)) {
+            if (is_file(APPPATH . 'models/' . $model_name . EXT)) {
               $model_path = APPPATH . 'models';
             }
             $model = self::_load_class($model_name, $model_path, self::$models);
