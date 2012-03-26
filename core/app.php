@@ -132,7 +132,11 @@ class app {
           }
         } else {
           try {
-            $controller = self::_load_class($controller_name, APPPATH . 'controllers', self::$controllers);
+            $controller_path = BASEPATH . 'controllers';
+            if (is_file(APPPATH . 'controllers' . $controller_name . EXT)) {
+               $controller_path = APPPATH . 'controllers';
+            }
+            $controller = self::_load_class($controller_name, $controller_path, self::$controllers);
           } catch (Exception $e) {
             self::exception_handler($e);
             try {
