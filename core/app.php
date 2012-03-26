@@ -197,7 +197,7 @@ class app {
                 }
             } else {
                 if(config::get('debug')) {
-                    self::log("Class $class_name not found in $class_dir/$class_name_file.");
+                    self::log("Class $class_name not found.\n");
                 }
                 throw new Exception("Class $class_name not found in $class_dir/$class_name_file.");
             }
