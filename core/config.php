@@ -63,9 +63,7 @@ class config {
             'db_type' => 'unknown',
             'db_host' => '127.0.0.1',
             'db_user' => 'user',
-            'db_pass' => 'pass',
-            // Core libraries to load
-            'core' => array('db', 'model')
+            'db_pass' => 'pass'
         );
         self::$config = array_merge($defaults, $config);
 
