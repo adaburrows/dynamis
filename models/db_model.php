@@ -1,8 +1,9 @@
 <?php
-/* Model:
- * Derive all models from this class.
- * Provide the magic sauce for building parts of queries.
- *==============================================================================
+/* ============================================================================
+ * class unknownModel;
+ * -------------------
+ * Loaded in place of a non-existant class.
+ * ============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
  *
@@ -37,7 +38,7 @@
  * 
  */
 
-class model extends db {
+class db_model extends db {
   protected $aspects = array();
   protected $aliases = array();
   protected $join_on = array();
@@ -69,15 +70,15 @@ class model extends db {
     $aspects_copy = $this->aspects;
     $this->primary_aspect = array_shift($aspects_copy);
     if($this->primary_aspect != null) {
-        $aspect_fields = aspects::get($this->primary_aspect);
+      $aspect_fields = aspects::get($this->primary_aspect);
     } else {
-        $this->primary_aspect = '';
-        $aspect_fields = array();
+      $this->primary_aspect = '';
+      $aspect_fields = array();
     }
     //Get the primary field -- first item in ordered hash
     $this->primary_key = array_shift($aspect_fields);
     if($this->primary_key == null) {
-        $this->primary_key = '';
+      $this->primary_key = '';
     }
   }
 
@@ -136,10 +137,10 @@ class model extends db {
    */
   public function set($data, $aspect = NULL) {
     if($aspect == NULL) {
-        $primary_key = $this->primary_key;
+      $primary_key = $this->primary_key;
     } else {
-        $primary_key = aspects::get($aspect);
-        $primary_key = $primary_key[0];
+      $primary_key = aspects::get($aspect);
+      $primary_key = $primary_key[0];
     }
     if (isset($data[$primary_key]) && $this->get_by_(array("{$primary_key}" => $data[$primary_key]), $aspect)) {
       $query = $this->build_update($data, $aspect);
@@ -157,10 +158,10 @@ class model extends db {
    * deletes data from the primary table in the model
    */
   public function delete($id, $aspects = NULL) {
-      $data = array("{$this->primary_key}" => $id);
-      $query = $this->build_delete($data, $aspects);
-      $data = array_intersect_key($data, $this->current_fields);
-      return self::insert($query, $data);
+    $data = array("{$this->primary_key}" => $id);
+    $query = $this->build_delete($data, $aspects);
+    $data = array_intersect_key($data, $this->current_fields);
+    return self::insert($query, $data);
   }
 
   /*
@@ -171,44 +172,44 @@ class model extends db {
    *   to be used in a SQL query.
    */
   protected function get_fields($data = array()) {
-      // Default: don't subset fields
-      $subset_fields = false;
-      // If we have a fields param and it's an array use it.
-      if(isset($data['fields']) && is_array($data['fields'])) {
-          $subset_fields = $data['fields'];
-      }
-      // If there is a specified aspect, lets use it.
-      if(isset($data['aspect'])) {
-          $current_aspects = array($data['aspect']);
-          $primary_aspect = $data['aspect'];
+    // Default: don't subset fields
+    $subset_fields = false;
+    // If we have a fields param and it's an array use it.
+    if(isset($data['fields']) && is_array($data['fields'])) {
+      $subset_fields = $data['fields'];
+    }
+    // If there is a specified aspect, lets use it.
+    if(isset($data['aspect'])) {
+      $current_aspects = array($data['aspect']);
+      $primary_aspect = $data['aspect'];
       // Else, just use the models requested aspects and default primary aspect
+    } else {
+      $current_aspects = $this->aspects;
+      $primary_aspect = $this->primary_aspect;
+    }
+    // Initialize variable to store resutant fields
+    $total_fields = array();
+    // Iterate over all current aspects
+    foreach ($current_aspects as $i => $aspect) {
+      // Add default fields to primary aspect
+      if ($aspect == $primary_aspect) {
+        $iter_fields = array_merge(aspects::get($aspect), $this->default_fields);
+        // Don't merge in the default fields if not a primary aspect
       } else {
-          $current_aspects = $this->aspects;
-          $primary_aspect = $this->primary_aspect;
+        $iter_fields = aspects::get($aspect);
       }
-      // Initialize variable to store resutant fields
-      $total_fields = array();
-      // Iterate over all current aspects
-      foreach ($current_aspects as $i => $aspect) {
-          // Add default fields to primary aspect
-          if ($aspect == $primary_aspect) {
-              $iter_fields = array_merge(aspects::get($aspect), $this->default_fields);
-          // Don't merge in the default fields if not a primary aspect
-          } else {
-              $iter_fields = aspects::get($aspect);
-          }
-          // If we are subsetting the fields, compute the intersection
-          if($subset_fields) {
-              $iter_fields = array_intersect($iter_fields, $subset_fields);
-          }
-          // Add each field into the total array, ready to be used in a query
-          foreach ($iter_fields as $j => $field) {
-              $total_fields[$field] = "`{$aspect}`.`{$field}`";
-          }
+      // If we are subsetting the fields, compute the intersection
+      if($subset_fields) {
+        $iter_fields = array_intersect($iter_fields, $subset_fields);
       }
-      $this->current_fields = $total_fields;
-      // Send it back, all shiny and new...
-      return $total_fields;
+      // Add each field into the total array, ready to be used in a query
+      foreach ($iter_fields as $j => $field) {
+        $total_fields[$field] = "`{$aspect}`.`{$field}`";
+      }
+    }
+    $this->current_fields = $total_fields;
+    // Send it back, all shiny and new...
+    return $total_fields;
   }
 
   /*
@@ -220,18 +221,18 @@ class model extends db {
    * Returns a string containing a standard MySQL compatible join clause.
    */
   protected function build_joins($from, $tables) {
-      $joins = array();
+    $joins = array();
 
-      foreach($tables as $table) {
-          foreach($this->join_on as $join_def) {
-              if(array_key_exists($table, $join_def)) {
-                  $joining = array_keys($join_def);
-                  $fields  = array_values($join_def);
-                  $joins[] = "JOIN {$table} ON (`{$joining[0]}`.`{$fields[0]}` = `{$joining[1]}`.`{$fields[1]}`)";
-              }
-          }
+    foreach($tables as $table) {
+      foreach($this->join_on as $join_def) {
+        if(array_key_exists($table, $join_def)) {
+          $joining = array_keys($join_def);
+          $fields  = array_values($join_def);
+          $joins[] = "JOIN {$table} ON (`{$joining[0]}`.`{$fields[0]}` = `{$joining[1]}`.`{$fields[1]}`)";
+        }
       }
-      return $joins;
+    }
+    return $joins;
   }
 
   /*
@@ -242,20 +243,20 @@ class model extends db {
    * prepared statement with named bound values.
    */
   protected function build_where($data, $aspect = NULL) {
-      $query_parts = array();
-      $query_parts[] = 'WHERE';
-      $where_parts = array();
-      if($aspect == NULL) {
-        // We have joins for multiple tables (all aspects)
-        $fields = $this->get_fields(array('fields' => array_keys($data)));
-      } else {
-        $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data)));
-      }
-      foreach($fields as $field => $full_field) {
-          $where_parts[] = "{$full_field} = :{$field}";
-      }
-      $query_parts[] = implode(' AND ', $where_parts);
-      return implode(' ', $query_parts);
+    $query_parts = array();
+    $query_parts[] = 'WHERE';
+    $where_parts = array();
+    if($aspect == NULL) {
+      // We have joins for multiple tables (all aspects)
+      $fields = $this->get_fields(array('fields' => array_keys($data)));
+    } else {
+      $fields = $this->get_fields(array('aspect' => $aspect, 'fields' => array_keys($data)));
+    }
+    foreach($fields as $field => $full_field) {
+      $where_parts[] = "{$full_field} = :{$field}";
+    }
+    $query_parts[] = implode(' AND ', $where_parts);
+    return implode(' ', $query_parts);
   }
 
   /*
@@ -291,7 +292,7 @@ class model extends db {
     $query_parts[] = "FROM `$table`";
     $query_parts[] = implode(' ', $joins);
     if(is_array($where)) {
-        $query_parts[] = $this->build_where($where, $aspect);
+      $query_parts[] = $this->build_where($where, $aspect);
     }
     $query = implode(' ', $query_parts);
     return $query;
@@ -305,7 +306,7 @@ class model extends db {
    */
   protected function build_insert($data, $aspect = NULL) {
     if($aspect == NULL) {
-        $aspect = $this->primary_aspect;
+      $aspect = $this->primary_aspect;
     }
     $names = array();
     // Merge in the default values
@@ -410,7 +411,7 @@ class model extends db {
       // Build joins
       $joins = $this->build_joins($table, $tables);
     } else {
-        $table = $this->primary_aspect;
+      $table = $this->primary_aspect;
     }
 
     // finish building delete statement
@@ -420,7 +421,7 @@ class model extends db {
     $query_parts[] = implode(' ', $joins);
     // We have data to build a where clause
     if ($data != NULL && is_array($data)){
-        $query_parts[] = $this->build_where($data, $aspects);
+      $query_parts[] = $this->build_where($data, $aspects);
     }
     $query = implode(" ", $query_parts);
     return $query;

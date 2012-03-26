@@ -40,11 +40,11 @@
 
 function load_files($files) {
     // Load core classes that all classes extend
-    foreach($files as $class) {
-        if (file_exists(APPPATH."core/$class".EXT)) {
-            require_once APPPATH."core/$class".EXT;
-        } else if (file_exists(BASEPATH."core/$class".EXT)) {
-            require_once BASEPATH."core/$class".EXT;
+    foreach($files as $file) {
+        if (file_exists(APPPATH."$file".EXT)) {
+            require_once APPPATH."$file".EXT;
+        } else if (file_exists(BASEPATH."$file".EXT)) {
+            require_once BASEPATH."$file".EXT;
         }
     }
 }
@@ -55,11 +55,26 @@ $start_time = config::load();
 
 // Dependancies required to run
 if(!config::get('deps')) {
-    config::set('deps', array('util', 'router','layout','app'));
+    config::set('deps', array('core/util', 'core/router','core/layout','core/app'));
 }
-// Core libraries to load
+// Core classes to load
 if(!config::get('core')) {
-    config::set('core', array('db', 'model'));
+    config::set('core', array('aspects'));
+}
+
+// Models to load
+if(!config::get('models')) {
+  config::set('models', array('model', 'db_model'));
+}
+
+// Libraries to load
+if(!config::get('libs')) {
+  config::set('libs', array('db/db'));
+}
+
+// Controllers to load
+if(!config::get('controllers')) {
+  config::set('controllers', array('controller'));
 }
 
 // Load all dependancies
@@ -78,18 +93,25 @@ if (!config::get('embedded')) {
 }
 
 // Load the core library files
-load_files(config::get('core'));
+app::getCore(config::get('core'));
+
+// Load the model files
+app::getModel(config::get('models'));
+
+// Load the libraries
+app::getLib(config::get('libs'));
+
+// Load the controllers
+app::getController(config::get('controllers'));
 
 // Setup routes for application 
 require_once APPPATH.'routes'.EXT;
 
 // Connect to database
 if(config::get('use_database')) {
-    require_once BASEPATH.'core/aspects'.EXT;
     aspects::load();
     db::connect();
 }
 
 // Start the app
-app::getCore('controller');
 app::go();

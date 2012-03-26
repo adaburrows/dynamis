@@ -1,9 +1,8 @@
 <?php
-/* ============================================================================
- * class unknownModel;
- * -------------------
- * Loaded in place of a non-existant class.
- * ============================================================================
+/* Model:
+ * Derive all models from this class.
+ * Provide the magic sauce for building parts of queries.
+ *==============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
  *
@@ -38,19 +37,6 @@
  * 
  */
 
-class unknownModel extends model {
-    private $class_name;
+class model {
 
-    public function __constructor($name = false) {
-        $this->$class_name = $name;
-    }
-
-    public function __call($function_name, $args) {
-        if($this->class_name) {
-            $e = new Exception("Function {$function_name} not found in non-existant class {$this->class_name}");
-        } else {
-            $e = new Exception("Function {$function_name} not found.");
-        }
-        self::exception_handler($e);
-    }
 }

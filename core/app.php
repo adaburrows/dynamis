@@ -75,10 +75,16 @@ class app {
      */
     public static function &getCore($class_name) {
         $class = null;
-        try {
+        if (is_array($class_name)) {
+          foreach ($class_name as $cname) {
+            self::getCore($cname);
+          }
+        } else {
+          try {
             $class = self::_load_class($class_name, APPPATH . 'core', self::$core);
-        } catch (Exception $exc) {
+          } catch (Exception $exc) {
             $class = self::_load_class($class_name, BASEPATH . 'core', self::$core);
+          }
         }
         return $class;
     }
@@ -90,15 +96,21 @@ class app {
      */
     public static function &getLib($lib_name) {
         $lib = null;
-        try {
+        if (is_array($lib_name)) {
+          foreach ($lib_name as $cname) {
+            self::getLib($cname);
+          }
+        } else {
+          try {
             $lib = self::_load_class($lib_name, BASEPATH . 'libs', self::$libraries);
-        } catch (Exception $e) {
+          } catch (Exception $e) {
             self::exception_handler($e);
             try {
-                $lib = self::_load_class('unknownLib', BASEPATH . 'libs', self::$libraries);
+              $lib = self::_load_class('unknownLib', BASEPATH . 'libs', self::$libraries);
             } catch (Exception $e) {
-                self::exception_handler($e);
+              self::exception_handler($e);
             }
+          }
         }
         return $lib;
     }
@@ -110,15 +122,21 @@ class app {
      */
     public static function &getController($controller_name) {
         $controller = null;
-        try {
+        if (is_array($controller_name)) {
+          foreach ($controller_name as $cname) {
+            self::getController($cname);
+          }
+        } else {
+          try {
             $controller = self::_load_class($controller_name, APPPATH . 'controllers', self::$controllers);
-        } catch (Exception $e) {
+          } catch (Exception $e) {
             self::exception_handler($e);
             try {
-                $controller = self::_load_class('unknownController', BASEPATH . 'controllers', self::$controllers);
+              $controller = self::_load_class('unknownController', BASEPATH . 'controllers', self::$controllers);
             } catch (Exception $e) {
-                self::exception_handler($e);
+              self::exception_handler($e);
             }
+          }
         }
         return $controller;
     }
@@ -130,15 +148,21 @@ class app {
      */
     public static function &getModel($model_name) {
         $model = null;
-        try {
+        if(is_array($model_name)) {
+          foreach ($model_name as $modelname) {
+            self::getModel($modelname);
+          }
+        } else {
+          try {
             $model = self::_load_class($model_name, APPPATH . 'models', self::$models);
-        } catch (Exception $e) {
+          } catch (Exception $e) {
             self::exception_handler($e);
             try {
-                $model = self::_load_class('unknownModel', BASEPATH . 'models', self::$models);
+              $model = self::_load_class('unknownModel', BASEPATH . 'models', self::$models);
             } catch (Exception $e) {
-                self::exception_handler($e);
+              self::exception_handler($e);
             }
+          }
         }
         return $model;
     }
