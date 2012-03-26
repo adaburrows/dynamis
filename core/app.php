@@ -102,7 +102,11 @@ class app {
           }
         } else {
           try {
-            $lib = self::_load_class($lib_name, BASEPATH . 'libs', self::$libraries);
+            $lib_path = BASEPATH . 'libs';
+            if (is_file(APPPATH . 'libs' . $lib_name . EXT)) {
+                $model_path = APPPATH . 'libs';
+            }
+            $lib = self::_load_class($lib_name, $lib_path, self::$libraries);
           } catch (Exception $e) {
             self::exception_handler($e);
             try {
@@ -154,7 +158,11 @@ class app {
           }
         } else {
           try {
-            $model = self::_load_class($model_name, APPPATH . 'models', self::$models);
+            $model_path = BASEPATH . 'models';
+            if (is_file(APPPATH . 'models' . $model_name . EXT)) {
+              $model_path = APPPATH . 'models';
+            }
+            $model = self::_load_class($model_name, $model_path, self::$models);
           } catch (Exception $e) {
             self::exception_handler($e);
             try {
