@@ -183,7 +183,7 @@ class app {
      * Loads class from a file if necessary.
      */
     private static function &_load_class($class_name_file, $class_dir, &$class_array) {
-        $class_name_parts = explode($class_name_file, '/');
+        $class_name_parts = explode('/', $class_name_file);
         if(count($class_name_parts) > 1) {
             $class_name = array_pop($class_name_parts);
         } else {
