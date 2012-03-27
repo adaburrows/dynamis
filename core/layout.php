@@ -44,6 +44,7 @@ class layout {
     private static $layout = NULL;
     private static $css = array();
     private static $js = array();
+    private static $meta = array();
     private static $slots = array();
     private static $data = array();
     private static $text = "";
@@ -105,12 +106,47 @@ class layout {
     }
 
     /*
+     * layout::setData();
+     * -----------------
+     * Sets the data array.
+     */
+    public static function setData($data) {
+        self::$data = $data;
+    }
+
+    /*
      * layout::getData();
      * -----------------
      * Gets the data array.
      */
     public static function getData() {
         return self::$data;
+    }
+
+    /*
+     * layout::addMeta();
+     * ------------------
+     * Adds a meta tag
+     */
+    public static function addMeta($meta) {
+        self::$meta[] = $meta;
+    }
+
+
+    /*
+     * layout::buildMetaTags();
+     * ------------------------
+     * Builds the meta tags and reuturns a string representation
+     */
+    public static function buildMetaTags() {
+        $meta_tags = '';
+        foreach (self::$meta as $meta_datum) {
+            $meta_tags .= '<meta ';
+            foreach ($meta_datum as $attribute => $value) {
+                $meta_tags .= $attribute . '="' . $value .'" ';
+            }
+            $meta_tags .= '/>';
+        }
     }
 
     /*
@@ -256,7 +292,7 @@ class layout {
         if ($buffer) {
             return self::$temp_ob;
         } else {
-            $slots['content'] .= self::$temp_ob;
+            self::$slots['content'] .= self::$temp_ob;
         }
     }
 
@@ -319,8 +355,8 @@ class layout {
      * Loads a template file.
      */
     public static function load_template($file, $data = array()) {
-        extract($data);
         if (is_file($file)) {
+            extract($data);
             ob_start();
             include($file);
             self::$temp_ob = ob_get_contents();
@@ -329,6 +365,26 @@ class layout {
             throw new Exception("Could not load file: $file");
         }
         return self::$temp_ob;
+    }
+
+    /*
+     * layout::render();
+     * -----------------
+     * Renders the template and each of the views in it's slots.
+     */
+    public static function render() {
+        self::$data['meta'] = self::buildMetaTags();
+        self::$data['css'] = self::buildStyleTags();
+        self::$data['scripts'] = self::buildScriptTags();
+        foreach (self::$slots as $slot => $view) {
+            self::$data[$slot] = self::view($view, self::$data, true);
+        }
+        try {
+            $temp_ob = self::layout(self::$layout, self::$data);
+        } catch(Exception $e) {
+            $temp_ob = self::distribution_layout(self::$layout, self::$data);
+        }
+        return $temp_ob;
     }
 
 }

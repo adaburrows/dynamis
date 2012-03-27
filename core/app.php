@@ -623,23 +623,16 @@ class app {
                 break;
             // The default is the full layout and html
             default:
-                foreach (layout::getSlots() as $slot => $view) {
-                    self::$controller_data[$slot] = layout::view($view, self::$controller_data, true);
-                }
+                // If we haven't set a layout use the default
+                $layout = layout::which() === NULL ? config::get('default_layout') : layout::which();
+                layout::choose($layout);
                 // If any error messages have accumulated, show them.
                 if (self::hasErrorMessages()) {
                     // Set the data for the error messages
                     self::$controller_data['content'] = layout::error(self::getErrorMessages());
                 }
-                self::$controller_data['css'] = layout::buildStyleTags();
-                self::$controller_data['scripts'] = layout::buildScriptTags();
-                $layout = layout::which() === NULL ? config::get('default_layout') : layout::which();
-                try {
-                    $temp_ob = layout::layout($layout, self::$controller_data);
-                } catch(Exception $e) {
-                    $temp_ob = layout::distribution_layout($layout, self::$controller_data);
-                }
-                self::$ob = $temp_ob;
+                // Render it all!
+                self::$ob = layout::render();
         }
     }
 
