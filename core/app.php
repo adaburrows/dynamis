@@ -626,6 +626,8 @@ class app {
                 // If we haven't set a layout use the default
                 $layout = layout::which() === NULL ? config::get('default_layout') : layout::which();
                 layout::choose($layout);
+                // Set the data
+                layout::setData(self::$controller_data);
                 // If any error messages have accumulated, show them.
                 if (self::hasErrorMessages()) {
                     // Set the data for the error messages
