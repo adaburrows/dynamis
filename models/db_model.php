@@ -1,8 +1,8 @@
 <?php
 /* ============================================================================
- * class unknownModel;
- * -------------------
- * Loaded in place of a non-existant class.
+ * class db_model;
+ * ---------------
+ * This class is used for models which are backed by databases.
  * ============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:

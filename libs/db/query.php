@@ -1,23 +1,22 @@
 <?php
-/* Model
- * -----
- * Derive all models from this class.
+/* Query
+ * Query is meant to be a database class which is a semi-active record pattern.
  *==============================================================================
  * -- Version alpha 0.1 --
  * This code is being released under an MIT style license:
  *
  * Copyright (c) 2010 Jillian Ada Burrows
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,9 +33,8 @@
  * Twitter:         @jburrows
  *------------------------------------------------------------------------------
  * Use at your own peril! J/K
- * 
+ *
  */
-
-class model {
+class query extends db {
 
 }
