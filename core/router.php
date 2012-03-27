@@ -180,7 +180,7 @@ class router {
     //   this should be run through a list of available types. later...
     if(count($route_parts) > 1 ) {
       $type = array_pop($route_parts);
-      $route = substr($full_route, 0, -1 * (strlen($extension) + 1));
+      $route = substr($full_route, 0, -1 * (strlen($type) + 1));
     } else {
       $route = $full_route;
     }
