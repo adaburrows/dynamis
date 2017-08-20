@@ -283,7 +283,7 @@ class layout {
         // If the view exists load it into an output buffer.
         try {
             self::$temp_ob = self::load_template(APPPATH . "views/$view_name" . EXT, $data);
-        } catch(Exception $e) {
+        } catch(Throwable $e) {
             // Error! View missing!
             app::exception_handler(new Exception("Error: Could not find view: $view_name"));
         }
@@ -305,7 +305,7 @@ class layout {
     public static function layout($layout, $data = array()) {
         try {
             self::$temp_ob = self::load_template(APPPATH . "layouts/$layout" . EXT, $data);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             throw new Exception("Error: Could not find layout $layout in: " . APPPATH . "layouts/$layout" . EXT);
         }
         return self::$temp_ob;
@@ -322,13 +322,13 @@ class layout {
                     APPPATH . "views/errors/error" . EXT,
                     array('error_messages' => $errors)
             );
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             try {
                 self::$temp_ob = self::load_template(
                         BASEPATH . "default/views/errors/error" . EXT,
                         array('error_messages' => $errors)
                 );
-            } catch (Exception $f) {
+            } catch (Throwable $f) {
                 self::$temp_ob = "System Error! Could not find built-in error view. Please re-install Dynamis.";
             }
         }
@@ -343,7 +343,7 @@ class layout {
     public static function distribution_layout($data = array()) {
         try { 
             self::$temp_ob = self::load_template(BASEPATH . "default/layouts/default" . EXT, $data);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             self::$temp_ob = "System Error! Could not find built-in default layout. Please re-install Dynamis.";
         }
         return self::$temp_ob;
@@ -381,7 +381,7 @@ class layout {
         }
         try {
             $temp_ob = self::layout(self::$layout, self::$data);
-        } catch(Exception $e) {
+        } catch(Throwable $e) {
             $temp_ob = self::distribution_layout(self::$layout, self::$data);
         }
         return $temp_ob;

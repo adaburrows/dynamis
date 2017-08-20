@@ -82,7 +82,7 @@ class app {
         } else {
           try {
             $class = self::_load_class($class_name, APPPATH . 'core', self::$core);
-          } catch (Exception $exc) {
+          } catch (Throwable $exc) {
             $class = self::_load_class($class_name, BASEPATH . 'core', self::$core);
           }
         }
@@ -107,11 +107,11 @@ class app {
                 $model_path = APPPATH . 'libs';
             }
             $lib = self::_load_class($lib_name, $lib_path, self::$libraries);
-          } catch (Exception $e) {
+          } catch (Throwable $e) {
             self::exception_handler($e);
             try {
               $lib = self::_load_class('unknownLib', BASEPATH . 'libs', self::$libraries);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
               self::exception_handler($e);
             }
           }
@@ -137,11 +137,11 @@ class app {
                $controller_path = APPPATH . 'controllers';
             }
             $controller = self::_load_class($controller_name, $controller_path, self::$controllers);
-          } catch (Exception $e) {
+          } catch (Throwable $e) {
             self::exception_handler($e);
             try {
               $controller = self::_load_class('unknownController', BASEPATH . 'controllers', self::$controllers);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
               self::exception_handler($e);
             }
           }
@@ -167,11 +167,11 @@ class app {
               $model_path = APPPATH . 'models';
             }
             $model = self::_load_class($model_name, $model_path, self::$models);
-          } catch (Exception $e) {
+          } catch (Throwable $e) {
             self::exception_handler($e);
             try {
               $model = self::_load_class('unknownModel', BASEPATH . 'models', self::$models);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
               self::exception_handler($e);
             }
           }
@@ -323,7 +323,7 @@ class app {
         foreach ($classes as $classname) {
             try {
                 self::_load_class($classname, $directory, self::$classes);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 // Do nothing, classes were not added to the array passed into the above function.
             }
         }
@@ -723,7 +723,7 @@ class app {
      * -------------------------
      * Application wide exception handler
      */
-    public static function exception_handler(Exception $e) {
+    public static function exception_handler(Throwable $e) {
         $error = <<<ERROR
 <pre>
 <b>Uncaught Exception Code {$e->getCode()}:</b> {$e->getMessage()}\n
